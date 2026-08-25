@@ -7,9 +7,9 @@
  * `engine/purity` ESLint rules and by this package's tsconfig, not by
  * convention.
  *
- * Modules are added as they are written, so the module map in
- * docs/03-poker-engine.md is only partly present: `ranges` arrives in Phase 2,
- * `drills` arrives in Phase 3b.
+ * The module map from docs/03-poker-engine.md is complete as of Phase 3: rng,
+ * cards, evaluator, equity, ranges, game, strategy and drills. What remains for
+ * v2 — a bot opponent, postflop solving — is new surface, not gaps in this one.
  */
 
 export * from './rng';
@@ -19,3 +19,4 @@ export * from './equity';
 export * from './ranges';
 export * from './game';
 export * from './strategy';
+export * from './drills';

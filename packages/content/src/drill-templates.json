@@ -1,0 +1,144 @@
+[
+  {
+    "slug": "preflop-rfi",
+    "title": "Opening ranges",
+    "spot": "rfi",
+    "positions": [
+      "UTG",
+      "HJ",
+      "CO",
+      "BTN",
+      "SB"
+    ],
+    "sampling": {
+      "uniformShare": 0.3
+    },
+    "skillTags": [
+      "preflop.rfi.utg",
+      "preflop.rfi.hj",
+      "preflop.rfi.co",
+      "preflop.rfi.btn",
+      "preflop.rfi.sb"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-bb-defense",
+    "title": "Defending the big blind",
+    "spot": "vs_open",
+    "positions": [
+      "BB"
+    ],
+    "openers": [
+      "UTG",
+      "HJ",
+      "CO",
+      "BTN"
+    ],
+    "openSize": 2.5,
+    "sampling": {
+      "uniformShare": 0.3
+    },
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_utg",
+      "preflop.blind_defense.bb_vs_hj",
+      "preflop.blind_defense.bb_vs_co",
+      "preflop.blind_defense.bb_vs_btn"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-bb-defense-vs-sb",
+    "title": "Defending the big blind against the small blind",
+    "spot": "vs_open",
+    "positions": [
+      "BB"
+    ],
+    "openers": [
+      "SB"
+    ],
+    "openSize": 3,
+    "sampling": {
+      "uniformShare": 0.3
+    },
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_sb"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-rfi-utg",
+    "title": "Opening from under the gun",
+    "spot": "rfi",
+    "positions": [
+      "UTG"
+    ],
+    "sampling": {
+      "uniformShare": 0.2
+    },
+    "skillTags": [
+      "preflop.rfi.utg"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-rfi-hj",
+    "title": "Opening from the hijack",
+    "spot": "rfi",
+    "positions": [
+      "HJ"
+    ],
+    "sampling": {
+      "uniformShare": 0.2
+    },
+    "skillTags": [
+      "preflop.rfi.hj"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-rfi-co",
+    "title": "Opening from the cutoff",
+    "spot": "rfi",
+    "positions": [
+      "CO"
+    ],
+    "sampling": {
+      "uniformShare": 0.2
+    },
+    "skillTags": [
+      "preflop.rfi.co"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-rfi-btn",
+    "title": "Opening from the button",
+    "spot": "rfi",
+    "positions": [
+      "BTN"
+    ],
+    "sampling": {
+      "uniformShare": 0.2
+    },
+    "skillTags": [
+      "preflop.rfi.btn"
+    ],
+    "published": true
+  },
+  {
+    "slug": "preflop-rfi-sb",
+    "title": "Opening from the small blind",
+    "spot": "rfi",
+    "positions": [
+      "SB"
+    ],
+    "sampling": {
+      "uniformShare": 0.2
+    },
+    "skillTags": [
+      "preflop.rfi.sb"
+    ],
+    "published": true
+  }
+]

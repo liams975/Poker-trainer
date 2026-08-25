@@ -34,7 +34,7 @@ import type { ActionRecommendation, Strategy } from './strategy';
  * The chart format does not yet record the open size it assumes. When it does,
  * this constant should be replaced by that field rather than widened here.
  */
-const MAX_OPEN_BLINDS = 4;
+export const MAX_OPEN_BLINDS = 4;
 
 export interface ChartStrategyOptions {
   registry: ChartRegistry;
