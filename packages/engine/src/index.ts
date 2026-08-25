@@ -9,7 +9,7 @@
  *
  * Modules are added as they are written, so the module map in
  * docs/03-poker-engine.md is only partly present: `ranges` arrives in Phase 2,
- * `game`, `strategy` and `drills` in Phase 3.
+ * `drills` arrives in Phase 3b.
  */
 
 export * from './rng';
@@ -17,3 +17,5 @@ export * from './cards';
 export * from './evaluator';
 export * from './equity';
 export * from './ranges';
+export * from './game';
+export * from './strategy';

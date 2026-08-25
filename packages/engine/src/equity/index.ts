@@ -15,18 +15,12 @@
  */
 
 import type { Card, Combo, HandNotation } from '../cards';
-import { combosOf, formatCards } from '../cards';
+import { combosOf, formatCards, requireDistinctCards } from '../cards';
 import { evaluate } from '../evaluator';
 import type { Rng } from '../rng';
 
 import type { EquityResult } from './showdown';
-import {
-  createTally,
-  deckWithout,
-  recordShowdown,
-  requireDistinctCards,
-  toEquityResult,
-} from './showdown';
+import { createTally, deckWithout, recordShowdown, toEquityResult } from './showdown';
 
 export type { EquityResult } from './showdown';
 

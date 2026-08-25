@@ -116,3 +116,19 @@ export function parseCards(text: string): Card[] {
 export function formatCards(cards: readonly Card[]): string {
   return cards.map(formatCard).join(' ');
 }
+
+/**
+ * Rejects a duplicate card across a set of cards that must all be distinct — a
+ * hand plus a board, or hole cards across seats. A repeated card is always a
+ * caller bug, and accepting it corrupts every result computed from it.
+ */
+export function requireDistinctCards(cards: readonly Card[]): void {
+  const seen = new Set<number>();
+
+  for (const card of cards) {
+    if (seen.has(card)) {
+      throw new RangeError(`${formatCard(card)} appears twice — a card can only be in one place`);
+    }
+    seen.add(card);
+  }
+}

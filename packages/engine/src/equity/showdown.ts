@@ -7,7 +7,7 @@
  */
 
 import type { Card } from '../cards';
-import { FULL_DECK, formatCard } from '../cards';
+import { FULL_DECK } from '../cards';
 import type { HandValue } from '../evaluator';
 
 export interface EquityResult {
@@ -87,15 +87,4 @@ export function toEquityResult(tally: Tally, trials: number): EquityResult {
 export function deckWithout(dead: readonly Card[]): Card[] {
   const blocked = new Set<number>(dead);
   return FULL_DECK.filter((card) => !blocked.has(card));
-}
-
-export function requireDistinctCards(cards: readonly Card[]): void {
-  const seen = new Set<number>();
-
-  for (const card of cards) {
-    if (seen.has(card)) {
-      throw new RangeError(`${formatCard(card)} appears twice — a card can only be in one place`);
-    }
-    seen.add(card);
-  }
 }

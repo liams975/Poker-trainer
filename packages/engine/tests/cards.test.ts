@@ -7,6 +7,7 @@ import {
   SUIT_CHARS,
   formatCard,
   formatCards,
+  requireDistinctCards,
   makeCard,
   parseCard,
   parseCards,
@@ -140,5 +141,26 @@ describe('parseCards', () => {
     // caller, and silently accepting it corrupts every equity number downstream.
     expect(() => parseCards('AsAs')).toThrow();
     expect(() => parseCards('AsKh As')).toThrow();
+  });
+});
+
+describe('requireDistinctCards', () => {
+  // Moved here from equity/showdown.ts in Phase 3a: it is a cards concern, and
+  // game/ needed it without depending on equity to validate cards.
+  it('accepts distinct cards', () => {
+    expect(() => requireDistinctCards(parseCards('As Kh 7d 2c'))).not.toThrow();
+    expect(() => requireDistinctCards([])).not.toThrow();
+  });
+
+  it('rejects a repeat and names the card', () => {
+    const cards = [...parseCards('As Kh'), parseCard('As')];
+
+    expect(() => requireDistinctCards(cards)).toThrow(/As/);
+  });
+
+  it('catches a repeat anywhere in the sequence', () => {
+    const cards = [...parseCards('As Kh 7d 2c'), parseCard('7d')];
+
+    expect(() => requireDistinctCards(cards)).toThrow(RangeError);
   });
 });
