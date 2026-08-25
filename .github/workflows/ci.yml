@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · lint · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The engine's portability to a React Native runtime (docs/01-architecture.md)
+      # rests on it having no runtime dependencies at all. Assert it, don't assume it.
+      - name: engine has zero runtime dependencies
+        run: |
+          node -e "
+            const p = require('./packages/engine/package.json');
+            const deps = Object.keys(p.dependencies ?? {});
+            if (deps.length) {
+              console.error('packages/engine must have no runtime dependencies, found: ' + deps.join(', '));
+              process.exit(1);
+            }
+          "
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - run: pnpm test:e2e

@@ -1,0 +1,31 @@
+{
+  "name": "poker-trainer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.23.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@poker/web",
+    "build": "turbo run build",
+    "test": "vitest run",
+    "test:engine": "vitest --project engine",
+    "test:e2e": "playwright test",
+    "typecheck": "turbo run typecheck",
+    "lint": "eslint .",
+    "db:migrate": "supabase migration up",
+    "db:reset": "supabase db reset"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "26.2.0",
+    "eslint": "10.8.1",
+    "turbo": "2.10.11",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0",
+    "vitest": "4.1.11"
+  }
+}

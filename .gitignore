@@ -1,0 +1,29 @@
+node_modules/
+.pnpm-store/
+
+# Build output
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# Env — never commit real secrets. .env.example is the tracked template.
+.env
+.env.*
+!.env.example
+
+# Supabase local state
+supabase/.branches/
+supabase/.temp/
+
+.DS_Store
+*.log
