@@ -4,5 +4,10 @@
     "lib": ["ES2022"],
     "types": []
   },
-  "include": ["src/**/*.ts"]
+  // Tests are included here rather than split into a tsconfig.test.json the way
+  // packages/engine does it. The engine needs that split because its src must
+  // typecheck with `types: []` to prove it touches no Node globals; content has
+  // no such constraint, so one project covers both — and charts.test.ts, which
+  // carries the Phase 2 exit criteria, is actually typechecked.
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

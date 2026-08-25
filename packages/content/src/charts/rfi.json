@@ -1,0 +1,2790 @@
+[
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "UTG",
+    "actionSequence": "rfi",
+    "skillTags": [
+      "preflop.rfi.utg"
+    ],
+    "ranges": {
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "22": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "98s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "HJ",
+    "actionSequence": "rfi",
+    "skillTags": [
+      "preflop.rfi.hj"
+    ],
+    "ranges": {
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "KJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "22": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "CO",
+    "actionSequence": "rfi",
+    "skillTags": [
+      "preflop.rfi.co"
+    ],
+    "ranges": {
+      "A9o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JTo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KTo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "22": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "96s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "BTN",
+    "actionSequence": "rfi",
+    "skillTags": [
+      "preflop.rfi.btn"
+    ],
+    "ranges": {
+      "98o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A2o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A3o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A4o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A5o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A6o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A7o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A8o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A9o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J8o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J9o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JTo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K7o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K8o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K9o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KTo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q8o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q9o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QJo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T8o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "T9o": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "22": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "43s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "53s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "64s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "85s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "95s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "96s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q2s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q3s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "QTs": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T5s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "T6s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 2.5,
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "SB",
+    "actionSequence": "rfi",
+    "skillTags": [
+      "preflop.rfi.sb"
+    ],
+    "ranges": {
+      "A2o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A3o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A4o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A5o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A6o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A7o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A8o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A9o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "ATo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "J9o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "JTo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "K9o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "KJo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "KTo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "Q9o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "QJo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "T9o": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "22": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "96s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "97s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A6s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "J6s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "J7s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "K2s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K3s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K4s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K5s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "K6s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "Q2s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q3s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "QTs": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "T6s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "T7s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 3.0,
+          "freq": 1.0
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,3756 @@
+[
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "BB",
+    "actionSequence": "vs_utg_open",
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_utg"
+    ],
+    "ranges": {
+      "AJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.8
+        },
+        {
+          "action": "call",
+          "freq": 0.2
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "ATo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTo": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "KJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KTo": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "QJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "22": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.8
+        },
+        {
+          "action": "call",
+          "freq": 0.2
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.55
+        },
+        {
+          "action": "call",
+          "freq": 0.45
+        }
+      ],
+      "43s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "53s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "64s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.15
+        },
+        {
+          "action": "call",
+          "freq": 0.85
+        }
+      ],
+      "75s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.15
+        },
+        {
+          "action": "call",
+          "freq": 0.85
+        }
+      ],
+      "85s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.15
+        },
+        {
+          "action": "call",
+          "freq": 0.85
+        }
+      ],
+      "96s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "A6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.6
+        },
+        {
+          "action": "call",
+          "freq": 0.4
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "J7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "KTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "BB",
+    "actionSequence": "vs_hj_open",
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_hj"
+    ],
+    "ranges": {
+      "A9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "ATo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "JTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "KJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "QJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "22": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.65
+        },
+        {
+          "action": "call",
+          "freq": 0.35
+        }
+      ],
+      "32s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "43s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "53s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "63s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "64s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "74s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "84s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "85s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "95s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "96s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "A6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.7
+        },
+        {
+          "action": "call",
+          "freq": 0.3
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "J6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "KTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "QTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "BB",
+    "actionSequence": "vs_co_open",
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_co"
+    ],
+    "ranges": {
+      "98o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "A7o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.9
+        },
+        {
+          "action": "call",
+          "freq": 0.1
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.55
+        },
+        {
+          "action": "call",
+          "freq": 0.45
+        }
+      ],
+      "ATo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "K9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8o": [
+        {
+          "action": "call",
+          "freq": 0.5
+        },
+        {
+          "action": "fold",
+          "freq": 0.5
+        }
+      ],
+      "Q9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "22": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.9
+        },
+        {
+          "action": "call",
+          "freq": 0.1
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "32s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "42s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "43s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "52s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "53s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "63s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "64s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "73s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "74s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "84s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "85s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "94s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "95s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "96s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.95
+        },
+        {
+          "action": "call",
+          "freq": 0.05
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.95
+        },
+        {
+          "action": "call",
+          "freq": 0.05
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.95
+        },
+        {
+          "action": "call",
+          "freq": 0.05
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.95
+        },
+        {
+          "action": "call",
+          "freq": 0.05
+        }
+      ],
+      "A6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.6
+        },
+        {
+          "action": "call",
+          "freq": 0.4
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "J4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "K2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "K3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "K4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "K5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "K6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.55
+        },
+        {
+          "action": "call",
+          "freq": 0.45
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "Q2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "QTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "BB",
+    "actionSequence": "vs_btn_open",
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_btn"
+    ],
+    "ranges": {
+      "87o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A3o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A4o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A5o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A6o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.55
+        },
+        {
+          "action": "call",
+          "freq": 0.45
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.9
+        },
+        {
+          "action": "call",
+          "freq": 0.1
+        }
+      ],
+      "ATo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "J8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "KTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "22": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.2
+        },
+        {
+          "action": "call",
+          "freq": 0.8
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.6
+        },
+        {
+          "action": "call",
+          "freq": 0.4
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.8
+        },
+        {
+          "action": "call",
+          "freq": 0.2
+        }
+      ],
+      "32s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "42s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "43s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "52s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "53s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "62s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "63s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "64s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "72s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "73s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "74s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "83s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "84s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "85s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "93s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "94s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "95s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "96s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "A6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "J2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "K2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "K3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "K4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "K5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.4
+        },
+        {
+          "action": "call",
+          "freq": 0.6
+        }
+      ],
+      "K6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.65
+        },
+        {
+          "action": "call",
+          "freq": 0.35
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "Q2s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "Q3s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.35
+        },
+        {
+          "action": "call",
+          "freq": 0.65
+        }
+      ],
+      "QTs": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 11,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ]
+    }
+  },
+  {
+    "tableSize": 6,
+    "stackDepth": 100,
+    "heroPosition": "BB",
+    "actionSequence": "vs_sb_open",
+    "skillTags": [
+      "preflop.blind_defense.bb_vs_sb"
+    ],
+    "ranges": {
+      "76o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "87o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A3o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A4o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A5o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A6o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "AJo": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.65
+        },
+        {
+          "action": "call",
+          "freq": 0.35
+        }
+      ],
+      "AKo": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "AQo": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.95
+        },
+        {
+          "action": "call",
+          "freq": 0.05
+        }
+      ],
+      "ATo": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "J8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K5o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K6o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJo": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.25
+        },
+        {
+          "action": "call",
+          "freq": 0.75
+        }
+      ],
+      "KQo": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "KTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q7o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QTo": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9o": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "22": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "33": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "44": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "55": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "66": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "77": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "88": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "99": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.7
+        },
+        {
+          "action": "call",
+          "freq": 0.3
+        }
+      ],
+      "AA": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "JJ": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "KK": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "QQ": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "TT": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.85
+        },
+        {
+          "action": "call",
+          "freq": 0.15
+        }
+      ],
+      "32s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "42s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "43s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "52s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "53s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "54s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "62s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "63s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "64s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "65s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "72s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "73s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "74s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "75s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "76s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "82s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "83s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "84s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "85s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "86s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "87s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "92s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "93s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "94s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "95s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "96s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "97s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "98s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A2s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "A3s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "A4s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "A5s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "A6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "A9s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "AJs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "AKs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "AQs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 1.0
+        }
+      ],
+      "ATs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.6
+        },
+        {
+          "action": "call",
+          "freq": 0.4
+        }
+      ],
+      "J2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "J9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "JTs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "K2s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "K3s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "K4s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "K5s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.5
+        },
+        {
+          "action": "call",
+          "freq": 0.5
+        }
+      ],
+      "K6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "K9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "KJs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.6
+        },
+        {
+          "action": "call",
+          "freq": 0.4
+        }
+      ],
+      "KQs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.75
+        },
+        {
+          "action": "call",
+          "freq": 0.25
+        }
+      ],
+      "KTs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "Q2s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "Q3s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "Q4s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "Q5s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "Q6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "Q9s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "QJs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.45
+        },
+        {
+          "action": "call",
+          "freq": 0.55
+        }
+      ],
+      "QTs": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ],
+      "T2s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T3s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T4s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T5s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T6s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T7s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T8s": [
+        {
+          "action": "call",
+          "freq": 1.0
+        }
+      ],
+      "T9s": [
+        {
+          "action": "raise",
+          "size": 10,
+          "freq": 0.3
+        },
+        {
+          "action": "call",
+          "freq": 0.7
+        }
+      ]
+    }
+  }
+]

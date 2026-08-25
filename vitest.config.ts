@@ -19,7 +19,9 @@ export default defineConfig({
           root: './packages/content',
           include: ['tests/**/*.test.ts'],
           environment: 'node',
-          passWithNoTests: true,
+          // Deliberately NOT passWithNoTests, for the same reason the engine
+          // project omits it: charts.test.ts carries the Phase 2 exit criteria,
+          // and deleting it must fail the suite rather than silently pass it.
         },
       },
     ],
