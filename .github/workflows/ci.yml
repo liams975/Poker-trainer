@@ -40,6 +40,13 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+
+      # docs/02-roadmap.md Phase 1 exit criterion: "Fast and naive evaluators
+      # agree on 1M random 7-card hands." `pnpm test` runs a smaller sample so
+      # the local loop stays fast; the full million runs here, on every push.
+      - name: evaluator oracle, full sample
+        run: pnpm test:engine:exhaustive
+
       - run: pnpm build
 
   e2e:

@@ -12,6 +12,7 @@
     "build": "turbo run build",
     "test": "vitest run",
     "test:engine": "vitest --project engine",
+    "test:engine:exhaustive": "ENGINE_ORACLE_HANDS=1000000 vitest run --project engine evaluator.oracle",
     "test:e2e": "playwright test",
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
