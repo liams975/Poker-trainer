@@ -9,3 +9,11 @@ export { DRILL_SPOTS, parseDrillTemplates, validateDrillTemplates } from './temp
 
 export type { DrillScenario, DrillSpot, GenerateOptions } from './generate';
 export { generateSpot, generateSpots, rebuildSpot } from './generate';
+
+export type {
+  AttemptResult,
+  GenerateSessionOptions,
+  SessionSpot,
+  SessionSummary,
+} from './session';
+export { generateSession, raiseSizeOptions, skillTagsFor, summariseSession } from './session';

@@ -23,7 +23,7 @@ export function orderedMix(frequencies: readonly ActionFreq[]): readonly ActionF
   });
 }
 
-function percent(freq: number): string {
+export function percent(freq: number): string {
   // A 0.4% raise is strategically different from never raising, so it renders
   // as "<1%" rather than rounding to "0%" and reading as never.
   const value = freq * 100;

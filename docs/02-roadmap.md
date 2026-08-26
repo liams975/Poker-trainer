@@ -139,6 +139,15 @@ The core loop.
 keyboard. Attempts persist with `chart_version`. Mixed-strategy spots display
 the full distribution, not a single "right answer".
 
+**Settled during the phase.** Length options are 10/25/50/endless, and the
+Drill Mode timer is a separate switch that counts up rather than down. The
+⌘K palette moved to Phase 10 — with four destinations it has little to jump
+between until lessons exist. `xp_events` and `skill_stats` stay empty: both are
+derivable from `drill_attempts`, so Phase 9 builds them without a backfill.
+Writes go through `/api/drill/*` Route Handlers rather than Server Actions,
+because Next's action queue drops concurrent dispatches and was losing about
+half of every session — see `docs/05-ui-ux.md`.
+
 ---
 
 ## Phase 8 — Lessons and progression

@@ -341,3 +341,77 @@ A simulator check verifies today's palette; this verifies every future one.
   `2xl` they stack vertically, which works but loses the at-a-glance diff.
 - **No URL state.** Reloading returns to `BTN open`; a chart cannot be linked
   to or shared. Worth adding when there is something to share it *with*.
+
+---
+
+## What Phase 7 decided
+
+The drill runner is live, and it is the first thing in the app that writes.
+
+### The browser grades for speed; the server grades for the record
+
+Both run the same engine over the same charts. The browser's pass exists so the
+tier lands without a spinner, as the feedback moment above requires. The row in
+`drill_attempts` comes from the server's pass, which rebuilds the spot from its
+scenario and grades it again from its own chart registry.
+
+The two are not redundant. `docs/04-data-model.md` makes `skill_stats`,
+`review_queue` and every future progress figure derive from `drill_attempts`, so
+a client that can post its own grades can manufacture a history all of those
+then faithfully reproduce. A mismatch between the two is logged and never acted
+on — in every environment, because a dev-only rejection would mean the e2e suite
+exercises a path production never takes.
+
+This is the opposite call to XP, which `docs/04` deliberately leaves
+honour-system. XP is cosmetic; this is the record everything is recomputed from.
+
+### Attempts go through a Route Handler, not a Server Action
+
+Next serialises Server Actions through the router's queue, and a second dispatch
+while one is in flight is dropped. A drill answers faster than a round trip
+completes, so the queue silently swallowed **roughly half of every session's
+attempts** — 6 of 10 in the e2e run that caught it, with no error client-side or
+server-side. Plain `fetch` to `/api/drill/*` has no such queue.
+
+Server Actions are the right tool for a form submit. They are not an RPC channel
+for rapid independent writes.
+
+### Grade tiers reuse the action palette, and the copy never says "wrong"
+
+Per the colour rule above: `optimal` reads as the confident green, `blunder` as
+the alarming vermilion, with `acceptable` and `inaccurate` between. No red/green
+pass-fail axis, because two of the four tiers are defensible answers.
+
+`apps/web/tests/grade-tiers.test.ts` enforces both halves — every tier hue must
+come from `ACTION_STYLES`, so a pass-fail colour cannot be introduced here
+without first passing the colourblind test; and no tier's copy may contain a
+verdict word. Every message states a frequency, because the mix is the lesson.
+
+### Sizing options come from the chart *family*, never hero's own chart
+
+Each seeded chart raises to exactly one size, so buttons built from hero's chart
+would hand over the answer before the user chose — and would make the size term
+in `gradeAnswer` unreachable. The options are the union of what the family uses:
+{2.5, 3} to open, {10, 11} to 3-bet. Identical whichever seat hero is in, and
+the correct size is always among them by construction.
+
+### Study Mode is recorded, but under its own mode
+
+The table above says Study Mode scoring is "not recorded". It is written —
+`drill_attempts` is the analytics goldmine and a study session is real history —
+but the session carries `mode = 'study'`, which is how Phase 9 keeps it out of
+accuracy stats without discarding it.
+
+### Still open
+
+- **No countdown timer.** The Drill Mode timer counts *up*. A countdown would
+  add a fail state the engine does not model, and the tone here is a coach
+  nodding, not a slot machine.
+- **⌘K is not built.** Deferred to Phase 10 with the rest of the polish pass;
+  with four destinations it has little to jump between until lessons land.
+- **Endless sessions can repeat a spot across batches.** Within a batch of 25
+  they cannot. Worth revisiting when spaced repetition arrives in v2.
+- **An attempt may name a session it does not own.** Harmless today — every read
+  of `drill_attempts` is scoped to the reader by RLS, so a forged `session_id`
+  cannot put rows into anyone else's history. Worth a constraint if session
+  aggregates ever get computed server-side.

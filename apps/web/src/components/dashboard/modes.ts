@@ -32,14 +32,15 @@ export const MODES: readonly Mode[] = [
     title: 'Quick Drill',
     description: '20 mixed spots from unlocked material. Low friction.',
     href: '/drill/quick',
-    availableIn: 7,
+    // Live from Phase 7.
+    availableIn: null,
   },
   {
     slug: 'focused-drill',
     title: 'Focused Drill',
     description: 'Filter by position or scenario. Deliberate practice.',
     href: '/drill/focused',
-    availableIn: 7,
+    availableIn: null,
   },
   {
     slug: 'weak-spots',

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 
 import { actionLabel, actionStyle } from './action-colors';
+import { RationaleChips } from './rationale-chips';
 
 /**
  * The detail panel: exact frequencies, combo count, structured rationale.
@@ -14,24 +15,6 @@ import { actionLabel, actionStyle } from './action-colors';
  * `AJo` "is a fold" when it opens 40% of the time actively makes someone a
  * worse player.
  */
-
-/** Turns a rationale factor's structured detail into a chip's text. */
-function factorText(detail: Readonly<Record<string, string | number>>): string {
-  return Object.entries(detail)
-    .map(([key, value]) => `${key.replace(/([A-Z])/g, ' $1').toLowerCase()} ${value}`)
-    .join(' · ');
-}
-
-const FACTOR_TITLES: Readonly<Record<string, string>> = {
-  position: 'Position',
-  hand_class: 'Hand',
-  action_sequence: 'Action',
-  range_shape: 'Range shape',
-  mix: 'Mixed strategy',
-  pot_odds: 'Pot odds',
-  board_texture: 'Board',
-  spr: 'SPR',
-};
 
 export interface HandDetailProps {
   hand: HandNotation | null;
@@ -135,21 +118,10 @@ export function HandDetail({
             <h4 id="why-heading" className="text-xs uppercase tracking-wider text-ink-muted">
               Why
             </h4>
-            {/* Factor chips, not prose. The engine states facts as structured
-                data and the UI writes the presentation — which is what lets
-                Study Mode render these verbosely in Phase 7 without the engine
-                changing. */}
-            <ul className="flex flex-wrap gap-1.5">
-              {rationale.factors.map((item) => (
-                <li
-                  key={`${item.kind}-${JSON.stringify(item.detail)}`}
-                  className="rounded-[var(--radius)] border border-line bg-surface-raised px-2 py-1 text-xs"
-                >
-                  <span className="text-ink">{FACTOR_TITLES[item.kind] ?? item.kind}</span>{' '}
-                  <span className="text-ink-muted">{factorText(item.detail)}</span>
-                </li>
-              ))}
-            </ul>
+            {/* Factor chips, not prose. Shared with the drill's feedback panel
+                so the explorer and the trainer describe a factor identically —
+                Phase 7 renders the same data concisely in Drill Mode. */}
+            <RationaleChips rationale={rationale} />
           </section>
         ) : null}
       </CardContent>
