@@ -1,0 +1,169 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/**
+ * Design tokens — docs/05-ui-ux.md.
+ *
+ * The governing rule of the whole system:
+ *
+ *   Saturated colour is reserved exclusively for strategy data. Chrome, nav,
+ *   cards and text are monochrome. The only thing glowing on the screen is
+ *   information.
+ *
+ * Which is why the surface ramp below is six shades of near-black and the only
+ * saturated values are the five action colours and one accent. If you are
+ * reaching for `--color-action-*` to style a button, stop: that colour means
+ * "raise" everywhere else in the product, and spending it on chrome is what
+ * makes the range grid stop reading as data.
+ *
+ * Dark only. docs/05 specifies one palette and there is no light variant to
+ * design, so there is no theme toggle and no `prefers-color-scheme` block.
+ */
+@theme {
+  /**
+   * Chrome. Monochrome by rule.
+   *
+   * `canvas`, not `base`, even though docs/05 calls this colour "Base".
+   * A `--color-base` token makes Tailwind generate a *colour* utility named
+   * `text-base`, which collides head-on with the built-in `text-base` font-size
+   * utility — and the collision is silent. Every element carrying `text-base`
+   * (shadcn's CardTitle, for one) rendered at #0b0f14: background-coloured text
+   * on the background. Caught by looking at the page, not by any test, which is
+   * why there is now a regression test for it in e2e/smoke.spec.ts.
+   *
+   * Before adding a token here, check the name against Tailwind's built-in
+   * scales. `text-*` is the dangerous namespace: it is both colour and size.
+   */
+  --color-canvas: #0b0f14;
+  --color-surface: #141a21;
+  --color-surface-raised: #1c242d;
+  --color-line: #2a3540;
+  --color-ink: #e6edf3;
+  --color-ink-muted: #8b9aa8;
+
+  /**
+   * Action colours are the Okabe–Ito palette, chosen because it stays
+   * distinguishable under all common forms of colour vision deficiency.
+   * With a male-skewed poker audience — roughly 1 in 12 with some CVD — this
+   * is a functional requirement, not a nicety.
+   *
+   * Never used alone: CLAUDE.md requires every action to carry a glyph or
+   * label as well. Phase 6 enforces that in the grid; the tokens exist here
+   * so the two phases cannot drift apart.
+   */
+  --color-action-raise: #d55e00; /* vermilion */
+  --color-action-call: #0072b2; /* blue */
+  --color-action-check: #009e73; /* bluish green */
+  --color-action-allin: #cc79a7; /* reddish purple */
+  --color-action-fold: #55606b; /* grey — folding is the absence of action */
+
+  /* Streak and XP rail ONLY. Never appears in a range grid. */
+  --color-accent: #e8b04b;
+
+  /**
+   * The 13×13 matrix is the organising geometry of the product, so the
+   * spacing scale is derived from a grid cell rather than picked freehand and
+   * the dashboard columns are multiples of it. Phase 6 builds the grid itself
+   * and owns any tuning of this number.
+   */
+  --size-cell: 2.75rem; /* 44px */
+  --size-grid: calc(13 * var(--size-cell) + 12 * 2px);
+
+  --font-display: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --radius: 0.375rem;
+}
+
+/**
+ * shadcn/ui components are copied in and reference their own variable names.
+ * Aliasing them onto the tokens above means a component pasted from the
+ * registry inherits this palette instead of shipping its default zinc, and
+ * there is exactly one place to change a colour.
+ */
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    --background: var(--color-canvas);
+    --foreground: var(--color-ink);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-ink);
+    --popover: var(--color-surface-raised);
+    --popover-foreground: var(--color-ink);
+    --primary: var(--color-ink);
+    --primary-foreground: var(--color-canvas);
+    --secondary: var(--color-surface-raised);
+    --secondary-foreground: var(--color-ink);
+    --muted: var(--color-surface-raised);
+    --muted-foreground: var(--color-ink-muted);
+    --accent: var(--color-surface-raised);
+    --accent-foreground: var(--color-ink);
+    --destructive: var(--color-action-raise);
+    --destructive-foreground: var(--color-ink);
+    --border: var(--color-line);
+    --input: var(--color-line);
+    --ring: var(--color-accent);
+  }
+
+  * {
+    border-color: var(--color-line);
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+
+    /**
+     * Tabular numerals globally. docs/05: "non-negotiable" — frequency columns
+     * must align vertically or the grid becomes unreadable. A functional
+     * typographic constraint, not a stylistic one, so it lives on body rather
+     * than being opted into per component and forgotten somewhere.
+     */
+    font-feature-settings: 'tnum' 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /**
+   * Visible keyboard focus on every interactive element — docs/05 lists it
+   * first in the quality floor and the roadmap makes it a Phase 5 exit
+   * criterion.
+   *
+   * :focus-visible rather than :focus, so a mouse click does not leave a ring
+   * behind, and applied globally rather than per component so a new control
+   * cannot be added without one. The accent colour is legible against every
+   * surface in the ramp above.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Never remove the ring without replacing it. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/**
+ * Reduced motion. The other Phase 5 exit criterion.
+ *
+ * Done in CSS rather than by threading a hook through every component: this
+ * cannot be forgotten by a future component, and it covers CSS animation,
+ * transitions and smooth scrolling in one place. `0.01ms` rather than `0`
+ * because a zero-duration animation never fires its `animationend` event, and
+ * code that waits for one would hang.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

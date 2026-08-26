@@ -16,6 +16,11 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "e2e/**/*.ts",
+    // Unit tests live here too. A test file outside every tsconfig is a test
+    // file nobody typechecks — the defect found in packages/content in Phase 2
+    // and in the DB suite in Phase 4. Verify with `tsc --listFiles`.
+    "tests/**/*.ts",
+    "postcss.config.mjs",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]

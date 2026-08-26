@@ -225,3 +225,65 @@ Visible keyboard focus on every interactive element. Full keyboard navigation
 including the grid. `prefers-reduced-motion` respected. Contrast checked
 against WCAG AA. Verify the grid against a CVD simulator before Phase 6
 closes — it is an exit criterion, not a polish item.
+---
+
+## What Phase 5 decided
+
+The shell exists. Tokens, auth, providers and the study-desk dashboard in its
+empty state. Phases 6–9 drop into this frame rather than redesigning it.
+
+### Dark only, and no theme toggle
+
+This document specifies exactly one palette, so there is no light variant to
+design and nothing to toggle between. `color-scheme: dark` is set once and
+`globals.css` carries no `prefers-color-scheme` block. If a light theme is ever
+wanted it is a real design exercise, not a CSS inversion — the whole system
+rests on saturated data reading against a near-black ground.
+
+### Tailwind v4, so the tokens live in CSS
+
+v4 is CSS-first: there is no `tailwind.config.js`. The `@theme` block in
+`apps/web/src/app/globals.css` *is* the theme, and shadcn/ui's own variable
+names are aliased onto our tokens there so a component copied in from the
+registry inherits this palette instead of shipping neutral zinc.
+
+### The quality floor is enforced, not asserted
+
+Focus rings are applied globally via `:focus-visible` rather than per
+component, so a control cannot ship without one. Reduced motion is a single
+global media block rather than a hook threaded through components, so it cannot
+be forgotten. Both are covered by `apps/web/e2e/shell.spec.ts` — including the
+complement case that animation is *not* flattened by default, because a
+stylesheet that killed all motion unconditionally would otherwise look
+identical to one that respects the preference.
+
+`eslint-plugin-jsx-a11y` covers the structural half on every lint run.
+
+### Auth is three layers, and only the third is trusted
+
+```
+proxy.ts    session refresh + optimistic redirect. UX. Assumed bypassable.
+requireUser()   getUser() against the auth server. Every protected route.
+RLS         Phase 4. Holds even if both layers above are defeated.
+```
+
+Next 16 renamed `middleware.ts` to `proxy.ts`, and its own auth guide is
+explicit that the proxy layer "should not be your only line of defense".
+
+The `e2e` suite tests the middle layer *in isolation* by deleting an account
+server-side while its cookie is still live: the token stays well-formed and
+unexpired, so anything that merely inspects the token lets it through, while
+`getUser()` is told the user is gone. Without that case, every auth test passes
+with `requireUser()` deleted entirely — confirmed by deliberately breaking it.
+
+### Still open
+
+- **Google OAuth and the email-confirm route are unverified.** Both are written
+  and reviewed but cannot be exercised locally: there are no Google credentials
+  on a dev machine, and `enable_confirmations` is off locally so the RLS suite
+  can sign users up. Phase 10 should exercise both against a deployed URL.
+- **No command palette yet.** `⌘K` is specified in this document as a desktop
+  advantage; it needs destinations to jump to, so it belongs with Phase 7.
+- **`framer-motion` is not installed.** Nothing animates yet beyond a skeleton
+  pulse, and `prefers-reduced-motion` is handled in CSS. The feedback moment in
+  Phase 7 is what justifies the dependency.

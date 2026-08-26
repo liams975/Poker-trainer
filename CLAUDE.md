@@ -59,7 +59,16 @@ pnpm content:sync   # packages/content -> Supabase
 ```
 
 `pnpm test` is hermetic and never needs Docker. Everything under `db:` does.
+`pnpm test:e2e` needs both Docker and a seeded database.
 Get credentials with `supabase status -o env` after `pnpm db:start`.
+
+Env lives in **one** `.env.local` at the repo root. `apps/web/next.config.ts`
+loads it explicitly, because Next only looks inside the app directory.
+
+If auth starts returning `502 An invalid response was received from the
+upstream server`, Kong is holding a stale IP for the auth container — it does
+not restart when `db:reset` restarts the others. `docker restart
+supabase_kong_<project>` fixes it. Nothing to do with your code.
 
 ## Always
 
@@ -76,6 +85,16 @@ Get credentials with `supabase status -o env` after `pnpm db:start`.
 ## Never
 
 - Never put poker logic in a React component. It belongs in `packages/engine`.
+- Never write `middleware.ts` in `apps/web`. Next 16 deprecated and renamed it
+  to `proxy.ts` (exporting `proxy()`, Node runtime, `runtime` config throws).
+  Every Supabase SSR guide still says `middleware.ts`, and a file by that name
+  here silently never runs — no session refresh, silent logout on token expiry.
+- Never call `auth.getSession()` on the server. It decodes the cookie without
+  verifying the signature, so a forged cookie yields a "session". Use
+  `requireUser()` / `getCurrentUser()` from `@/lib/auth/dal`, which call
+  `getUser()`. Lint enforces this; the browser client is the only exemption.
+- Never treat `proxy.ts` as the security boundary. It is UX only. Every
+  protected route calls `requireUser()` itself, and RLS is the real backstop.
 - Never import React, `next/*`, `window`, or `process.env` inside
   `packages/engine`. It must run in a React Native JS runtime unchanged in v2.
 - Never create a table without an RLS policy. Default deny. **And grant it

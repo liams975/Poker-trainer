@@ -15,6 +15,19 @@ export default defineConfig({
       },
       {
         test: {
+          // Pure helpers only — anything in apps/web that can be tested
+          // without a browser or a database. The shell itself is covered by
+          // Playwright, which exercises it the way a user does; this project
+          // exists so that logic like the open-redirect sanitiser is checked
+          // on every save rather than only in the e2e job.
+          name: 'web',
+          root: './apps/web',
+          include: ['tests/**/*.test.ts'],
+          environment: 'node',
+        },
+      },
+      {
+        test: {
           name: 'content',
           root: './packages/content',
           include: ['tests/**/*.test.ts'],

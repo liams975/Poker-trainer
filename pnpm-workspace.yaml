@@ -10,3 +10,7 @@ packages:
 # true: this list is the review surface for arbitrary code at install time.
 allowBuilds:
   esbuild: true
+
+minimumReleaseAgeExclude:
+  - '@tanstack/query-core@5.102.5'
+  - '@tanstack/react-query@5.102.5'

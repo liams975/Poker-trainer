@@ -1,4 +1,6 @@
 import js from '@eslint/js';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 /**
@@ -86,6 +88,84 @@ export default tseslint.config(
         ...RESTRICTED_GLOBALS.map((name) => ({ name, message: ENGINE_PURITY_MESSAGE })),
       ],
     },
+  },
+
+  /**
+   * The web app's two security invariants, enforced rather than documented.
+   *
+   * Both of these are the kind of mistake that produces working, plausible,
+   * reviewable code that is nonetheless an authentication bypass or a leaked
+   * credential. A comment saying "don't" is not a control.
+   */
+  {
+    name: 'web/auth-invariants',
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    ignores: ['apps/web/src/lib/supabase/client.ts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'process',
+          property: 'env',
+          // Not a blanket ban: lib/supabase/env.ts reads the two NEXT_PUBLIC_
+          // values and is where the exception is argued. Everything else in
+          // the app goes through it, which is what keeps the service role key
+          // — and any future server secret — out of a client bundle.
+          message:
+            'Read Supabase config through @/lib/supabase/env. SUPABASE_SERVICE_ROLE_KEY bypasses RLS and must never be reachable from apps/web.',
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          // getSession() decodes the auth cookie without verifying its
+          // signature, so a forged cookie yields a "session". Safe in the
+          // browser (where the user can only lie to themselves), an auth
+          // bypass anywhere on the server. Hence the file-level exemption
+          // above for the browser client rather than a blanket allowance.
+          selector: "CallExpression > MemberExpression[property.name='getSession']",
+          message:
+            'getSession() does not verify the JWT. Use getCurrentUser()/requireUser() from @/lib/auth/dal, which calls getUser().',
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'web/react',
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks, 'jsx-a11y': jsxA11y },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      // docs/05's quality floor is an exit criterion, not a polish item:
+      // "Visible keyboard focus on every interactive element. Full keyboard
+      // navigation." These rules catch the structural half of that.
+      ...jsxA11y.flatConfigs.recommended.rules,
+    },
+  },
+
+  {
+    /**
+     * shadcn/ui primitives pass children through `{...props}` rather than
+     * naming them, and `heading-has-content` is a syntactic check that cannot
+     * see through the spread — so `<CardTitle>Dashboard</CardTitle>` reads as
+     * an empty `<h3>` to it.
+     *
+     * Narrowed to the primitives directory on purpose: an actually-empty
+     * heading in a page or feature component is a real accessibility bug and
+     * still fails there.
+     */
+    name: 'web/ui-primitives',
+    files: ['apps/web/src/components/ui/**/*.tsx'],
+    rules: { 'jsx-a11y/heading-has-content': 'off' },
+  },
+
+  {
+    // The env.ts exemption. Isolating the read into one file is the whole
+    // mechanism by which the rule above is enforceable at all.
+    name: 'web/env-reader',
+    files: ['apps/web/src/lib/supabase/env.ts'],
+    rules: { 'no-restricted-properties': 'off' },
   },
 
   {
