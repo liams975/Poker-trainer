@@ -1,0 +1,22 @@
+{
+  "name": "@poker/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "tsx --env-file-if-exists=../.env.local sync-content.ts",
+    "test:db": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@poker/content": "workspace:*",
+    "@poker/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "2.112.4",
+    "@types/node": "26.2.0",
+    "tsx": "4.20.6",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

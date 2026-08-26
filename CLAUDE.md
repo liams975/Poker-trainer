@@ -36,6 +36,8 @@ apps/
   web/        Next.js app. All UI.
 supabase/
   migrations/ Ordered SQL. Never edit an applied migration — add a new one.
+  tests/      pgTAP policy suite. Run with `pnpm db:test`.
+scripts/      Workspace tooling. Owns the content sync and the DB test suite.
 docs/         Specs. Read the relevant one before starting a phase.
 ```
 
@@ -47,9 +49,17 @@ pnpm test           # vitest, all packages
 pnpm test:engine    # engine only, watch mode
 pnpm typecheck      # tsc --noEmit across workspace
 pnpm lint
+pnpm db:start       # local Supabase stack (needs Docker)
+pnpm db:stop
 pnpm db:migrate     # apply migrations locally
-pnpm db:reset       # wipe + remigrate + seed
+pnpm db:reset       # wipe + remigrate + sync content from packages/content
+pnpm db:test        # pgTAP policy suite (supabase/tests/database)
+pnpm test:db        # RLS through supabase-js, as two real signed-up users
+pnpm content:sync   # packages/content -> Supabase
 ```
+
+`pnpm test` is hermetic and never needs Docker. Everything under `db:` does.
+Get credentials with `supabase status -o env` after `pnpm db:start`.
 
 ## Always
 
@@ -68,7 +78,14 @@ pnpm db:reset       # wipe + remigrate + seed
 - Never put poker logic in a React component. It belongs in `packages/engine`.
 - Never import React, `next/*`, `window`, or `process.env` inside
   `packages/engine`. It must run in a React Native JS runtime unchanged in v2.
-- Never create a table without an RLS policy. Default deny.
+- Never create a table without an RLS policy. Default deny. **And grant it
+  explicitly** — grants and RLS are independent layers, and this CLI no longer
+  auto-exposes new tables to the Data API roles. `0002` also revoked the
+  default privilege that handed `anon` and `authenticated` `Dxtm` (TRUNCATE,
+  REFERENCES, TRIGGER, MAINTAIN) on every new table — TRUNCATE is not filtered
+  by RLS. So a new table now starts with nothing for those two roles, and
+  `service_role` still needs its DML granted explicitly. Do it in the migration
+  that creates the table.
 - Never let the client decide entitlement. Server-written rows only.
 - Never grade a drill as binary right/wrong — ranges are mixed strategies.
   See the grading tiers in `docs/03-poker-engine.md`.
@@ -105,3 +122,9 @@ than expanding scope mid-phase.
 - Every user-data table: users read and write **their own rows only**.
 - Content tables: authenticated read, service-role write.
 - Validate all user input at the DB boundary with constraints, not just in TS.
+- Every `security definer` function pins `set search_path = ''` and
+  schema-qualifies its references. An unpinned one is a privilege-escalation
+  vector, not a style nit.
+- Skill tags are a closed vocabulary enforced by the database: a foreign key
+  on scalar columns, a trigger on `text[]` columns. Add tags in
+  `packages/content/src/skill-tags.ts` and re-run `pnpm content:sync`.

@@ -1,3 +1,12 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+  - 'scripts'
+
+# pnpm blocks install-time scripts unless a package is allowed here. esbuild's
+# is what puts its platform-specific binary in place, and without it `tsx`
+# cannot run at all — which means the content sync script cannot run.
+# Nothing else in the tree needs a build script, and that is worth keeping
+# true: this list is the review surface for arbitrary code at install time.
+allowBuilds:
+  esbuild: true

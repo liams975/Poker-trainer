@@ -67,3 +67,55 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
 
       - run: pnpm test:e2e
+
+  database:
+    name: migrations · RLS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Pinned, not `latest`. An upstream CLI release turning this job red with
+      # no change in the repo is a bad way to find out about a breaking change
+      # in `supabase start` or `db reset`.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.1
+
+      # docs/01-architecture.md ranks RLS gaps as the #1 attack surface and
+      # asks that policies be tested "as part of the suite, not by eyeballing
+      # them". This job is what makes that true on every push rather than once
+      # on somebody's laptop.
+      - name: start local stack
+        run: supabase start
+
+      # `supabase status -o env` emits API_URL / ANON_KEY / SERVICE_ROLE_KEY,
+      # so the names are mapped explicitly rather than blanket-prefixed. These
+      # are throwaway keys for a container that dies with the job.
+      - name: export stack credentials
+        run: |
+          eval "$(supabase status -o env)"
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+
+      # Proves migrations apply from nothing, then seeds content through the
+      # same script a human would run.
+      - name: reset and seed
+        run: pnpm db:reset
+
+      - name: pgTAP policy suite
+        run: pnpm db:test
+
+      - name: RLS through the client library
+        run: pnpm test:db

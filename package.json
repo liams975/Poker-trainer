@@ -14,10 +14,15 @@
     "test:engine": "vitest --project engine",
     "test:engine:exhaustive": "ENGINE_ORACLE_HANDS=1000000 vitest run --project engine evaluator.oracle",
     "test:e2e": "playwright test",
+    "test:db": "pnpm --filter @poker/scripts run test:db",
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
-    "db:migrate": "supabase migration up",
-    "db:reset": "supabase db reset"
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:migrate": "supabase migration up --local",
+    "db:reset": "supabase db reset --local && pnpm content:sync",
+    "db:test": "supabase test db supabase/tests/database",
+    "content:sync": "pnpm --filter @poker/scripts run sync"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

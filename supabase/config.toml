@@ -1,0 +1,83 @@
+# Local Supabase stack.
+#
+# Deliberately minimal: only the keys this project actually decides are set,
+# and every one of them carries the reason. The CLI supplies defaults for
+# everything else, and a 400-line file of commented-out defaults hides the
+# handful of settings that matter. Run `supabase init` in a scratch directory
+# if you need the full reference.
+
+project_id = "poker-trainer"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+# NOT set: auto_expose_new_tables. The CLI default (and the current cloud
+# default) is to leave new tables unreachable through the Data API until
+# something grants access explicitly, and migration 0002 does exactly that.
+# Turning it on would silently expose every future table the moment it is
+# created, which is the opposite of the default-deny posture in
+# docs/01-architecture.md.
+
+[db]
+port = 54322
+shadow_port = 54320
+# Must match the remote. Supabase's current cloud default.
+major_version = 17
+
+[db.migrations]
+enabled = true
+
+[db.seed]
+# No seed.sql. Content is seeded by `pnpm content:sync`, which validates the
+# charts and templates in TypeScript before writing a row — a SQL seed file
+# would be a second, drifting copy of packages/content with no validator.
+enabled = false
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+# The Next.js dev server. Phase 5 builds the actual sign-in UI against this.
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://127.0.0.1:3000", "http://localhost:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_sign_ins = false
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = true
+# Local only. The RLS test suite signs up real users and needs a session back
+# immediately; with confirmations on, signUp returns no session and every
+# policy test would be testing the anon role by accident. Production keeps
+# confirmations ON.
+enable_confirmations = false
+secure_password_change = false
+
+[auth.rate_limit]
+# The default of 30 per 5 minutes per IP is comfortably exceeded by running
+# the RLS suite a few times in a row, which signs up fresh users each run.
+# This is a local-development ceiling and has no bearing on production.
+sign_in_sign_ups = 200
+
+# Google, per the Phase 4 decision: the widest-reach provider for a
+# consumer-facing training app.
+#
+# CANNOT BE TESTED END TO END LOCALLY without real client credentials. Set
+# SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID and _SECRET in .env to exercise it;
+# with them unset the provider is configured but every attempt fails at
+# Google. Email/password is the path the test suite covers.
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+# Required for local sign-in with Google, per the CLI's own reference config.
+skip_nonce_check = true
