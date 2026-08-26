@@ -287,3 +287,57 @@ with `requireUser()` deleted entirely — confirmed by deliberately breaking it.
 - **`framer-motion` is not installed.** Nothing animates yet beyond a skeleton
   pulse, and `prefers-reduced-motion` is handled in CSS. The feedback moment in
   Phase 7 is what justifies the dependency.
+
+---
+
+## What Phase 6 decided
+
+The Range Explorer is live: the first vertical slice, and the first place the
+frequency cell exists.
+
+### The cell encodes the mix three ways, and the label is the fourth
+
+Hue (Okabe–Ito), **proportion**, and a **fixed left-to-right segment order**
+(passive → aggressive, identical in every cell and every chart), plus an
+`aria-label` spelling the mix out in words. So the grid is readable in
+greyscale, under any CVD, and by a screen reader.
+
+This is the interpretation of CLAUDE.md's "every action also carries a glyph or
+label": a per-segment glyph is not legible at a 44px cell, so the naming lives
+in the legend, the hand-detail panel, and the accessible name. The **order** is
+what carries the redundancy inside the cell itself.
+
+### Compare mode fades what is the same, rather than painting what changed
+
+The first version washed every changed cell in the accent amber. That looked
+fine and broke a locked rule — this document reserves amber for the streak and
+XP rail and says it must *never appear in a range grid*. With 73 of 169 hands
+differing between BTN and UTG opens, the result was a sixth colour covering
+half the matrix, competing with the five that mean something.
+
+Now the unchanged cells drop to 30% opacity and the changed ones stay at full
+strength. No new hue enters the grid at all, and the eye still goes straight to
+the difference.
+
+`e2e/range-explorer.spec.ts` enforces this: it scans every node inside every
+grid for the accent colour, in single and compare mode. The **keyboard focus
+ring is the one deliberate exception** — it is transient, app-wide, and follows
+the caret rather than encoding anything about a hand — so the check parks focus
+outside the grid first.
+
+### Colourblind safety is a test, not a one-off check
+
+`apps/web/tests/action-colors.test.ts` applies protanopia, deuteranopia and
+tritanopia transforms to the palette and asserts a minimum pairwise distance
+under each. Verified by mutation: moving `call` to a nearby green fails under
+both protanopia and deuteranopia.
+
+A simulator check verifies today's palette; this verifies every future one.
+
+### Still open
+
+- **The grid caps at 13 columns of ~44px.** Comfortable on a laptop, and
+  compare mode needs a wide window to sit two matrices side by side. Below
+  `2xl` they stack vertically, which works but loses the at-a-glance diff.
+- **No URL state.** Reloading returns to `BTN open`; a chart cannot be linked
+  to or shared. Worth adding when there is something to share it *with*.

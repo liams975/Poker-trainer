@@ -12,5 +12,8 @@ export type { ActionRecommendation, Strategy, StrategySource } from './strategy'
 export type { ChartStrategyOptions } from './chart-strategy';
 export { MAX_OPEN_BLINDS, createChartStrategy, deriveActionSequence } from './chart-strategy';
 
+export type { ExplainChartHandOptions } from './explain';
+export { explainChartHand } from './explain';
+
 export type { BoardTexture, PotOdds } from './heuristics';
 export { classifyBoard, potOdds, spr } from './heuristics';

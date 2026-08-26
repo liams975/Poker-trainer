@@ -53,7 +53,8 @@ export const MODES: readonly Mode[] = [
     title: 'Range Explorer',
     description: 'Free-form chart study and comparison. No grading.',
     href: '/range-explorer',
-    availableIn: 6,
+    // The first mode to go live, Phase 6.
+    availableIn: null,
   },
   {
     slug: 'session-review',

@@ -4,3 +4,4 @@ export * from './weights';
 export * from './chart';
 export { validateChartSet, parseChartSet } from './validate';
 export type { ChartError, ChartValidation } from './validate';
+export * from './diff';
