@@ -46,7 +46,7 @@ insert into drill_templates (slug, title, config, published)
 values ('live-template', 'Live', '{"spot":"rfi"}'::jsonb, true);
 
 insert into drill_sessions (user_id, mode) values ('dddddddd-0000-4000-8000-000000000004', 'quick');
-insert into xp_events (user_id, amount, reason) values ('dddddddd-0000-4000-8000-000000000004', 10, 'drill');
+insert into xp_events (user_id, amount, reason) values ('dddddddd-0000-4000-8000-000000000004', 10, 'drill_session');
 insert into skill_stats (user_id, skill_tag) values ('dddddddd-0000-4000-8000-000000000004', 'preflop.rfi.utg');
 insert into drill_attempts (user_id, seed, chart_version, scenario, user_action,
                             primary_action, frequencies, grade, skill_tags)

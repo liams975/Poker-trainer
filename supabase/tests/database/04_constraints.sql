@@ -202,6 +202,101 @@ select lives_ok(
   'a placement session can be recorded'
 );
 
+-- ------------------------------------------------------------
+-- Phase 9: the progress ledger has to add up
+-- ------------------------------------------------------------
+
+-- The load-bearing one. XP is awarded when a session closes, through a PATCH a
+-- browser can retry — and because every total is derived by summing this
+-- table, a duplicated award would be reported faithfully by every screen with
+-- nothing left to notice it by.
+select lives_ok(
+  $$ insert into xp_events (user_id, amount, reason, ref_id)
+     values (auth.uid(), 120, 'drill_session',
+             '11111111-0000-4000-8000-000000000001') $$,
+  'a session can be paid for once'
+);
+
+select throws_ok(
+  $$ insert into xp_events (user_id, amount, reason, ref_id)
+     values (auth.uid(), 120, 'drill_session',
+             '11111111-0000-4000-8000-000000000001') $$,
+  '23505', NULL::text,
+  'the same session cannot be paid for twice'
+);
+
+-- Same session id, different reason: a lesson drill that also completed a
+-- lesson is two awards, not a duplicate.
+select lives_ok(
+  $$ insert into xp_events (user_id, amount, reason, ref_id)
+     values (auth.uid(), 50, 'lesson_complete',
+             '11111111-0000-4000-8000-000000000001') $$,
+  'the index keys on the reason as well as the reference'
+);
+
+-- The index is partial, so the one award with nothing to key on — the daily
+-- goal — is not accidentally limited to one per user for all time.
+select lives_ok(
+  $$ insert into xp_events (user_id, amount, reason) values (auth.uid(), 25, 'daily_goal'),
+                                                            (auth.uid(), 25, 'daily_goal') $$,
+  'an award with no reference is not constrained to one row'
+);
+
+-- A typo in a reason ships a second, parallel ledger nobody is summing.
+select throws_ok(
+  $$ insert into xp_events (user_id, amount, reason)
+     values (auth.uid(), 10, 'drill_sesion') $$,
+  '23514', NULL::text,
+  'the xp reason vocabulary is closed'
+);
+
+-- An achievement whose criteria the engine cannot evaluate never unlocks for
+-- anybody, with no error and nothing on any page to notice.
+--
+-- Written as the service role, because `achievements` is a content table and
+-- `authenticated` holds select on it and nothing else — this is the constraint
+-- under test, not the grant, and the grant is 02_rls_content.sql's job.
+set local role service_role;
+
+select throws_ok(
+  $$ insert into achievements (id, title, description, criteria)
+     values ('ghost', 'Ghost', 'Never unlocks.',
+             '{"kind":"hands_played","count":10}'::jsonb) $$,
+  '23514', NULL::text,
+  'an achievement criteria kind the evaluator does not implement is rejected'
+);
+
+select throws_ok(
+  $$ insert into achievements (id, title, description, criteria)
+     values ('ghost', 'Ghost', 'Never unlocks.', '"spots"'::jsonb) $$,
+  '23514', NULL::text,
+  'criteria must be an object'
+);
+
+select lives_ok(
+  $$ insert into achievements (id, title, description, criteria)
+     values ('real', 'Real', 'Unlocks.', '{"kind":"spots","count":10}'::jsonb) $$,
+  'a criteria the evaluator understands is accepted'
+);
+
+set local role authenticated;
+
+-- skill_stats is rewritten from drill_attempts on every session close, so the
+-- rollup is only as trustworthy as the bounds on what can be written into it.
+select throws_ok(
+  $$ insert into skill_stats (user_id, skill_tag, attempts, correct, ewma_accuracy)
+     values (auth.uid(), 'preflop.rfi.utg', 5, 5, 1.5) $$,
+  '23514', NULL::text,
+  'ewma accuracy is a rate, not a percentage'
+);
+
+select throws_ok(
+  $$ insert into skill_stats (user_id, skill_tag, attempts, correct)
+     values (auth.uid(), 'preflop.rfi.utg', 3, 9) $$,
+  '23514', NULL::text,
+  'a rollup cannot claim more correct answers than attempts'
+);
+
 select * from finish();
 
 rollback;

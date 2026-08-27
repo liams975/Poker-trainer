@@ -15,6 +15,11 @@
  * the chart and drill-template schemas here: content *schemas* live in the
  * engine so they can be validated anywhere, while the content itself lives in
  * `packages/content`. Purity is unaffected.
+ *
+ * Phase 9 adds a tenth, `progress`. Same principle, one addition: it holds no
+ * clock. What a streak is, what makes a skill weak and what an achievement
+ * requires are rules, and rules that read `Date.now()` cannot be tested across
+ * a DST boundary. Time is injected — see `progress/day.ts`.
  */
 
 export * from './rng';
@@ -26,3 +31,4 @@ export * from './game';
 export * from './strategy';
 export * from './drills';
 export * from './curriculum';
+export * from './progress';

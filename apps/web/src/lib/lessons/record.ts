@@ -2,6 +2,7 @@ import type { LessonStatus, PlacementAttempt, TagEvidence } from '@poker/engine'
 import { LESSON_STATUSES, lessonStates, placeFrom, placementOrder } from '@poker/engine';
 
 import { fetchDrillTemplates } from '@/lib/drills/queries';
+import { awardLessonCompletion } from '@/lib/progress/record';
 import { createClient } from '@/lib/supabase/server';
 
 import { fetchReaderState, fetchTrack } from './queries';
@@ -36,6 +37,8 @@ export interface SetLessonStatusInput {
 export interface RecordedProgress {
   lessonSlug: string;
   status: LessonStatus;
+  /** XP written by this call. Zero unless a lesson was finished for the first time. */
+  xpAwarded: number;
 }
 
 export async function setLessonStatus(
@@ -85,7 +88,20 @@ export async function setLessonStatus(
 
   if (error) fail(`could not save progress: ${error.message}`);
 
-  return { lessonSlug: input.lessonSlug, status: input.status };
+  /**
+   * Paid after the progress row lands, and only for a completion.
+   *
+   * `xp_events_once_per_ref` keys on the lesson id, so re-reading a lesson you
+   * already finished writes the progress row again — which is right, it is an
+   * upsert — and pays nothing. The amount comes from the schedule in
+   * `@poker/engine`, never from the request.
+   */
+  const xpAwarded =
+    input.status === 'completed'
+      ? (await awardLessonCompletion(userId, lessonId)).xpAwarded
+      : 0;
+
+  return { lessonSlug: input.lessonSlug, status: input.status, xpAwarded };
 }
 
 export interface PlacementOutcome {

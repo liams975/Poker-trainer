@@ -28,6 +28,8 @@ import { Button } from '@/components/ui/button';
 import { chartLabel } from '@/lib/charts/map';
 import { finishSession, recordAttempt, startSession } from '@/lib/drills/client';
 
+import type { SessionRewards } from '@/lib/progress/types';
+
 import { buildChoices, DecisionControls, type Choice } from './decision-controls';
 import { FeedbackPanel } from './feedback-panel';
 import { SessionConfigForm, type SessionConfig } from './session-config';
@@ -90,11 +92,13 @@ interface Reveal {
 
 type Phase = 'configuring' | 'running' | 'finished';
 
-export type RunnerMode = 'quick' | 'focused' | 'lesson' | 'placement' | 'study';
+export type RunnerMode = 'quick' | 'focused' | 'weak_spots' | 'lesson' | 'placement' | 'study';
 
 export interface FinishedSession {
   sessionId: string | null;
   summary: Summary;
+  /** Null when the session earned nothing — study mode, or no answers at all. */
+  rewards: SessionRewards | null;
 }
 
 export interface DrillRunnerProps {
@@ -161,6 +165,15 @@ export function DrillRunner({
   const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /**
+   * What the session earned, as computed by the server when it closed.
+   *
+   * Never computed here. The client has the tiers and could add them up, but
+   * the total that gets *shown* has to be the total that got *written* — two
+   * arithmetics over the same schedule is how a summary ends up congratulating
+   * someone on XP the ledger never received.
+   */
+  const [rewards, setRewards] = useState<SessionRewards | null>(null);
+  /**
    * When the current spot was put on screen. Drives both the optional timer and
    * `response_ms`, so the number shown and the number stored cannot disagree.
    * State rather than a ref because `Date.now()` during render is impure — the
@@ -225,6 +238,7 @@ export function DrillRunner({
           seed,
           count: chosen.length ?? BATCH,
           registry,
+          ...(chosen.focusTags === undefined ? {} : { focusTags: chosen.focusTags }),
         });
 
         const { sessionId: id } = await startSession({
@@ -349,11 +363,17 @@ export function DrillRunner({
     tokenRef.current += 1;
     setFinishing(true);
 
+    // Captured here so `onFinished` below reports what the server actually
+    // wrote, rather than whatever state has settled by the time it renders.
+    let earned: SessionRewards | null = null;
+
     const settle = async () => {
       await Promise.allSettled(pending.current);
       if (sessionId === null) return;
       try {
-        await finishSession(sessionId);
+        const closed = await finishSession(sessionId);
+        earned = closed.rewards;
+        setRewards(closed.rewards);
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : 'could not close the session');
       }
@@ -373,7 +393,7 @@ export function DrillRunner({
     // Called here rather than from an effect on `phase`: this is the event that
     // ends the session, so the callback belongs on the same path as the state
     // change instead of chasing it a render later.
-    onFinished?.({ sessionId, summary: summariseSession(results) });
+    onFinished?.({ sessionId, summary: summariseSession(results), rewards: earned });
   }, [onFinished, results, sessionId]);
 
   const advance = useCallback(() => {
@@ -398,6 +418,7 @@ export function DrillRunner({
           seed: batchSeed(sessionSeed, next),
           count: BATCH,
           registry,
+          ...(config.focusTags === undefined ? {} : { focusTags: config.focusTags }),
         }),
       );
       setBatch(next);
@@ -517,9 +538,23 @@ export function DrillRunner({
       <SessionSummary
         summary={summariseSession(results)}
         studyMode={config?.studyMode ?? false}
+        rewards={rewards}
         onRestart={() => {
-          setPhase('configuring');
           setError(null);
+          setRewards(null);
+
+          /**
+           * A preset session has no config screen to go back to, and the
+           * auto-start effect has already fired once — sending it to
+           * `configuring` would leave it on "Setting up your spots…" forever.
+           * Starting again directly is what "drill again" means here.
+           */
+          if (preset !== undefined) {
+            void start(preset);
+            return;
+          }
+
+          setPhase('configuring');
         }}
       />
     );

@@ -23,17 +23,34 @@ describe('dashboard modes', () => {
    * mode left marked "coming in Phase 7" would hide a shipped feature.
    */
   it('has the shipped modes live', () => {
-    for (const slug of ['quick-drill', 'focused-drill', 'range-explorer', 'continue-learning']) {
+    for (const slug of [
+      'quick-drill',
+      'focused-drill',
+      'range-explorer',
+      'continue-learning',
+      // Phase 9.
+      'weak-spots',
+    ]) {
       const mode = MODES.find((m) => m.slug === slug);
-      expect(mode?.availableIn).toBeNull();
+      expect(mode?.availableIn, slug).toBeNull();
     }
   });
 
   it('still gates the modes that are not built', () => {
-    for (const slug of ['weak-spots', 'session-review']) {
+    for (const slug of ['session-review']) {
       const mode = MODES.find((m) => m.slug === slug);
-      expect(mode?.availableIn).not.toBeNull();
+      expect(mode?.availableIn, slug).not.toBeNull();
     }
+  });
+
+  /**
+   * Session Review was marked 9 while docs/02-roadmap.md put session history,
+   * the mistake log and accuracy-over-time in Phase 10. Pinning it here rather
+   * than leaving "not null" to cover both readings, because a card that says
+   * the wrong phase is the same kind of lie as one that says the wrong feature.
+   */
+  it('dates Session Review to the phase the roadmap gives it', () => {
+    expect(MODES.find((m) => m.slug === 'session-review')?.availableIn).toBe(10);
   });
 
   it('points every unavailable mode at a real roadmap phase', () => {

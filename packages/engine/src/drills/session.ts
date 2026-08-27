@@ -37,6 +37,16 @@ export interface GenerateSessionOptions {
   seed: number;
   count: number;
   registry: ChartRegistry;
+  /**
+   * Restricts the session to spots exercising these skill tags. Empty or
+   * absent draws from everything, which is the ordinary case.
+   *
+   * This is how Phase 9 drills a weak spot, and it cannot be done by choosing
+   * templates: a template is a *family*, and the opening template covers UTG,
+   * CO and BTN alike. Someone whose leak is the button would be handed UTG
+   * spots most of the time while the feature looked like it was working.
+   */
+  focusTags?: readonly string[];
 }
 
 /** Same identity `generateSpots` uses, so the no-repeat rule matches. */
@@ -46,6 +56,7 @@ function spotKey(scenario: DrillScenario): string {
 
 export function generateSession(options: GenerateSessionOptions): readonly SessionSpot[] {
   const { templates, seed, count, registry } = options;
+  const focus = new Set(options.focusTags ?? []);
 
   if (!Number.isInteger(count) || count < 1) {
     throw new RangeError(`count must be a positive integer, got ${count}`);
@@ -54,15 +65,35 @@ export function generateSession(options: GenerateSessionOptions): readonly Sessi
   // RLS already returns only published templates, but the registry is data and
   // a draft reaching here would silently drill unreleased content. Filtering is
   // one line; discovering it in production is not.
-  const usable = templates.filter((template) => template.published);
-  if (usable.length === 0) {
+  const published = templates.filter((template) => template.published);
+  if (published.length === 0) {
     throw new RangeError('a session needs at least one published template');
+  }
+
+  /**
+   * Narrowing the draw pool as well as rejecting spots. A template's
+   * `skillTags` is its whole family, so this is only a first pass — the real
+   * filter is per-spot below — but without it a one-tag session would reject
+   * most of what it drew and run out of attempts long before it ran out of
+   * spots.
+   */
+  const usable =
+    focus.size === 0
+      ? published
+      : published.filter((template) => template.skillTags.some((tag) => focus.has(tag)));
+
+  if (usable.length === 0) {
+    throw new RangeError(
+      `no published template covers ${[...focus].join(', ')}, so the session would be empty`,
+    );
   }
 
   const master = mulberry32(seed);
   const session: SessionSpot[] = [];
   const seen = new Set<string>();
-  const maxAttempts = count * 20;
+  // Focused sessions reject spots as well as duplicates, so they need a longer
+  // budget to fill from the same pool.
+  const maxAttempts = count * (focus.size === 0 ? 20 : 60);
 
   for (let attempt = 0; session.length < count && attempt < maxAttempts; attempt++) {
     // Template first, then the spot's seed, so both are drawn from the one
@@ -70,6 +101,13 @@ export function generateSession(options: GenerateSessionOptions): readonly Sessi
     const template = usable[master.nextInt(usable.length)]!;
     const spotSeed = master.nextUint32();
     const spot = generateSpot({ template, seed: spotSeed, registry });
+
+    // The tag this spot actually exercises — the chart's own, never the
+    // template's list. Checked after generation because which seat hero lands
+    // in is what the seed decides.
+    if (focus.size > 0 && !skillTagsFor(spot.scenario, registry).some((tag) => focus.has(tag))) {
+      continue;
+    }
 
     const key = spotKey(spot.scenario);
     if (seen.has(key)) continue;
@@ -79,9 +117,14 @@ export function generateSession(options: GenerateSessionOptions): readonly Sessi
   }
 
   if (session.length < count) {
+    const scope =
+      focus.size === 0
+        ? `templates ${usable.map((t) => `"${t.slug}"`).join(', ')}`
+        : `templates ${usable.map((t) => `"${t.slug}"`).join(', ')} focused on ${[...focus].join(', ')}`;
+
     throw new RangeError(
-      `templates ${usable.map((t) => `"${t.slug}"`).join(', ')} yielded only ` +
-        `${session.length} distinct spots in ${maxAttempts} draws, short of the ${count} asked for`,
+      `${scope} yielded only ${session.length} distinct spots in ${maxAttempts} draws, ` +
+        `short of the ${count} asked for`,
     );
   }
 

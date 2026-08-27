@@ -48,7 +48,8 @@ export const MODES: readonly Mode[] = [
     title: 'Weak Spots',
     description: 'Adaptive sampling from your lowest-accuracy skills.',
     href: '/drill/weak-spots',
-    availableIn: 9,
+    // Live from Phase 9.
+    availableIn: null,
   },
   {
     slug: 'range-explorer',
@@ -63,6 +64,9 @@ export const MODES: readonly Mode[] = [
     title: 'Session Review',
     description: 'History, mistake log, accuracy over time.',
     href: '/review',
-    availableIn: 9,
+    // Was marked 9, which contradicted docs/02-roadmap.md — history, the
+    // mistake log and accuracy-over-time are one Phase 10 surface, and
+    // splitting them would ship three partial versions of the same page.
+    availableIn: 10,
   },
 ];

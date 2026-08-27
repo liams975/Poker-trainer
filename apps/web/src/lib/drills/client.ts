@@ -1,5 +1,7 @@
 import type { Action, DrillScenario, Grade, GradeTier, Rationale } from '@poker/engine';
 
+import type { SessionRewards } from '@/lib/progress/record';
+
 /**
  * The browser half of the drill write path.
  *
@@ -67,6 +69,13 @@ export function recordAttempt(input: RecordAttemptRequest): Promise<RecordedAtte
   return post('/api/drill/attempts', input);
 }
 
-export function finishSession(sessionId: string): Promise<{ ok: true }> {
+/**
+ * Closes the session and returns what it earned.
+ *
+ * `rewards` is null when there was nothing to pay for — a session already
+ * closed, or one that recorded no answers. The summary treats that as "no
+ * rewards to show" rather than as an error, because both cases are ordinary.
+ */
+export function finishSession(sessionId: string): Promise<{ ok: true; rewards: SessionRewards | null }> {
   return post('/api/drill/sessions', { sessionId }, 'PATCH');
 }

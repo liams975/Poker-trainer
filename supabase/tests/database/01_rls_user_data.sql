@@ -71,7 +71,7 @@ values ('bbbbbbbb-0000-4000-8000-000000000002', 42, 'v1',
         array['preflop.rfi.utg']);
 
 insert into drill_sessions (user_id, mode) values ('bbbbbbbb-0000-4000-8000-000000000002', 'quick');
-insert into xp_events (user_id, amount, reason) values ('bbbbbbbb-0000-4000-8000-000000000002', 10, 'drill');
+insert into xp_events (user_id, amount, reason) values ('bbbbbbbb-0000-4000-8000-000000000002', 10, 'drill_session');
 insert into skill_stats (user_id, skill_tag) values ('bbbbbbbb-0000-4000-8000-000000000002', 'preflop.rfi.utg');
 insert into lesson_progress (user_id, lesson_id, status)
 values ('bbbbbbbb-0000-4000-8000-000000000002',
@@ -171,9 +171,12 @@ select throws_ok(
   'case 2: A cannot INSERT a drill_attempt with user_id = B'
 );
 
+-- A real reason, deliberately: the point of this assertion is that the RLS
+-- policy stops it, and a reason the 0004 CHECK rejects would fail for the wrong
+-- cause while still looking green.
 select throws_ok(
   $$ insert into xp_events (user_id, amount, reason)
-     values ('bbbbbbbb-0000-4000-8000-000000000002', 999, 'gift') $$,
+     values ('bbbbbbbb-0000-4000-8000-000000000002', 999, 'drill_session') $$,
   '42501', NULL::text,
   'A cannot INSERT xp for B'
 );
@@ -247,7 +250,7 @@ select lives_ok(
 );
 
 select lives_ok(
-  $$ insert into xp_events (user_id, amount, reason) values (auth.uid(), 25, 'drill') $$,
+  $$ insert into xp_events (user_id, amount, reason) values (auth.uid(), 25, 'drill_session') $$,
   'A can append to their own xp ledger'
 );
 

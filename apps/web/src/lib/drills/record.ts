@@ -249,15 +249,13 @@ export async function recordAttempt(
   };
 }
 
-export async function finishSession(sessionId: string): Promise<void> {
-  const supabase = await createClient();
-
-  // No user_id filter: RLS scopes the update to the caller's own rows, and
-  // adding one here would suggest the policy were optional.
-  const { error } = await supabase
-    .from('drill_sessions')
-    .update({ completed_at: new Date().toISOString() })
-    .eq('id', uuid(sessionId, 'sessionId'));
-
-  if (error) fail(`could not close the session: ${error.message}`);
-}
+/**
+ * Closing a session lives in `lib/progress/record.ts` as of Phase 9, not here.
+ *
+ * There used to be a `finishSession` in this file that only stamped
+ * `completed_at`. Closing is now also what pays out XP, the streak and the
+ * skill rollup, and the guard that makes that safe — updating only where
+ * `completed_at is null`, so a retried request cannot pay twice — has to be
+ * part of the same statement. Two ways to close a session would be two sets of
+ * guarantees, and the weaker one would eventually be the one that got called.
+ */

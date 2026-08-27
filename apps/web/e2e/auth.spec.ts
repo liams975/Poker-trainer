@@ -69,7 +69,10 @@ test.describe('the exit criterion', () => {
 
     // It is the *empty* dashboard: six modes, all inert, and honest zeroes.
     await expect(page.getByRole('listitem')).toHaveCount(6);
-    await expect(page.getByText('No weak spots yet — drill 20 hands and check back.')).toBeVisible();
+    // The number in this copy is derived from WEAK_SPOT_MIN_ATTEMPTS rather
+    // than typed, since Phase 9: twenty mixed hands spread across ten skills
+    // produce no weak spot at all, so the old invitation was a false one.
+    await expect(page.getByText(/No weak spots yet/)).toBeVisible();
     await expect(page.getByText('0 days')).toBeVisible();
 
     // The signed-in chrome knows who it is.
@@ -175,8 +178,21 @@ test.describe('open redirect', () => {
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
 
-    await expect(page).toHaveURL(/\/dashboard$/);
-    expect(new URL(page.url()).host).not.toContain('evil.example');
+    /**
+     * Either landing is correct, and which one you see is a race.
+     *
+     * This account has never been through onboarding, so `/dashboard` bounces
+     * it to `/onboarding` server-side — the browser may or may not be observed
+     * on `/dashboard` in between, depending on how long the dashboard's queries
+     * take. Pinning `/dashboard$` passed by luck and broke the moment that page
+     * got more to do.
+     *
+     * What the test is actually for is the line below it: the attacker's `next`
+     * did not survive. That is what `safeNext` guarantees, and it holds
+     * wherever inside the app the user ends up.
+     */
+    await expect(page).toHaveURL(/\/(dashboard|onboarding)$/);
+    expect(new URL(page.url()).host).toBe('localhost:3000');
   });
 });
 

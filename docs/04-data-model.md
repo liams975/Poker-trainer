@@ -197,14 +197,118 @@ path a real person hits.
 
 ### Still open
 
-- **Grace-period policy for streaks is not decided.** The warning above still
-  stands, and Phase 9 must settle it before writing streak logic.
 - **Google OAuth is configured but untested.** It cannot be exercised without
   real client credentials; email/password is what the suites cover.
-- **`streaks_longest_is_longest` forbids the intermediate state** where
-  `current_streak` is bumped before `longest_streak`. Phase 9 must write both
-  columns in one statement, not two.
 - **`profiles_timezone_valid` depends on the contents of `pg_timezone_names`.**
   The catalog always exists, so the restore-ordering hazard that rules out
   lookup-table CHECKs does not apply — but a zone dropped in a future tzdata
   release would fail CHECK revalidation on restore for rows already holding it.
+
+---
+
+## What Phase 9 decided
+
+Migration: `supabase/migrations/0004_gamification_integrity.sql`. No new
+tables — `xp_events`, `streaks`, `skill_stats`, `achievements` and
+`user_achievements` have existed since `0001`. What `0004` adds is the
+integrity the code that finally writes them depends on.
+
+### The streak grace policy: strict
+
+The warning above left this open. It is settled as **strict**:
+`last_active_date` must be exactly yesterday, or the count restarts at one —
+at one, never at zero, because today was active.
+
+The alternative that needs no extra state, accepting a one-day gap, lets
+somebody play every other day and hold a "thirty-day streak" indefinitely. A
+number that survives half the days it claims is a decoration, not a fact. The
+alternative that does need state — a weekly freeze — was considered and
+rejected as a column and a rule to explain for a v1 with no settings screen.
+
+docs/04 also called strict resets the commonest support complaint in this
+category, and that stands. **The mitigation is not a grace period, it is
+telling people first**: `streakStatus` returns `at_risk` when yesterday counted
+and today has not, and the TODAY strip says "Play today to keep your 4-day
+streak" while there is still something to be done about it.
+
+Two consequences worth stating:
+
+- A local date that moves **backwards** — a user who flew west across the date
+  line — leaves the streak untouched. It is neither a new day nor a lost one.
+- `current_streak` is only true as of `last_active_date`. Somebody who last
+  drilled a week ago still has a 7 in that column, so every read goes through
+  `effectiveStreak`, which returns 0 once the streak is broken. Showing the
+  stored number would be a lie told at the moment they came back.
+
+### Time is injected, never read
+
+`packages/engine/src/progress` holds no clock. Streak logic operates on
+`YYYY-MM-DD` strings and calendar arithmetic; `Math.floor(ms / 86_400_000)` is
+*the* DST bug and the only way to be sure it is absent is for the rule to have
+no access to a timestamp.
+
+Which calendar day it is where the user is standing is resolved in exactly one
+place, `apps/web/src/lib/progress/timezone.ts`, using `Intl` with the `en-CA`
+locale — the locale whose short date format is `YYYY-MM-DD`. That is at the web
+boundary and not in the engine because the engine must run unchanged in a React
+Native runtime in v2, and Hermes has shipped without full ICU.
+
+### An award happens once
+
+`xp_events_once_per_ref` is a partial unique index on
+`(user_id, reason, ref_id)`. XP is paid when a session closes, through a PATCH
+a browser can retry — and because every total is `sum(amount)` with no counter
+anywhere, a doubled award would be reported faithfully by every screen with
+nothing left to notice it by.
+
+`ref_id` carries the session id, or the lesson id for a completion. The daily
+goal has no uuid to key on and is guarded instead by a read scoped to the
+user's local day; the achievement bonus is guarded by `user_achievements`'
+composite primary key, since only one call can be the one that inserts a row.
+**Those two are the awards the database does not enforce**, and they are the
+ones to look at first if a total ever disagrees with the ledger.
+
+`reason` is now a closed vocabulary enforced by a CHECK, mirroring `XP_REASONS`
+in the engine. A typo previously shipped a second, parallel ledger nobody was
+summing.
+
+### `skill_stats` is a cache, recomputed rather than incremented
+
+It is rewritten from `drill_attempts` every time a scored session closes. Three
+reasons, in order of how much they matter:
+
+1. CLAUDE.md derives totals from event tables. A rollup you can only reach by
+   replaying every increment ever applied is not derivable, it is just old.
+2. Phase 7 made attempts genuinely concurrent. A read-modify-write of an
+   exponential average from two requests in flight silently drops one; a single
+   pass at the end of a session has no such race.
+3. It is idempotent, so a retry corrects rather than compounds.
+
+The cost is that an abandoned session leaves the rollup stale until the next
+one closes. That is accepted.
+
+The EWMA seeds from the **first observation, not from zero**. Seeding at zero
+averages a skill's opening answers against an imaginary run of failures, so
+every newly practised skill reads as a weakness — weak-spot detection would
+point at whatever was drilled most recently rather than most badly, and would
+look entirely plausible doing it.
+
+### Achievement criteria are validated three times
+
+At content load, at sync, and by a CHECK on `achievements.criteria`. The
+failure being excluded is a quiet one: an achievement whose `kind` the
+evaluator does not implement syncs cleanly, sits in the table, and never
+unlocks for anybody, with no error and nothing on any page to notice.
+
+No criteria kind names a skill tag, deliberately — Postgres has no foreign key
+into a jsonb field, and "90% on any one skill" is the more useful achievement
+anyway.
+
+### XP is still honour-system, and that is still accepted
+
+`authenticated` holds `insert` on `xp_events` and a determined user can still
+award themselves XP. Nothing in Phase 9 changes that; the section above still
+governs. What Phase 9 does is make sure **the app's own write path never
+depends on the client for a number**. `skill_stats` matters most here: it
+decides which spots somebody is sent back to practise, and a user who can write
+it can quietly send themselves to drill the wrong thing for a month.

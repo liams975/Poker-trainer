@@ -483,3 +483,82 @@ that mean actions, so tone is carried by a glyph and a label instead.
   chart or template carries one, so they cannot be practised or placed into.
 - **No lesson-to-explorer links.** A `range` block renders the grid inline but
   does not offer "open this in the explorer".
+
+---
+
+## What Phase 9 decided
+
+The TODAY strip and the rail are real. Every figure is derived — XP from the
+ledger, the streak from its stored pair plus today's date in the reader's own
+zone, accuracy and weak spots from the `skill_stats` rollup. Nothing on the
+dashboard reads a counter and nothing writes one.
+
+### The strip warns before a streak breaks, rather than after
+
+The grace policy is strict (`docs/04-data-model.md`), which docs/04 also
+identifies as the commonest source of "why did my streak break?" complaints.
+The answer here is copy, not a rule change: when yesterday counted and today
+has not, the strip reads *"Play today to keep your 4-day streak."* A number
+about to vanish silently is the version people write in about.
+
+A broken streak reads **0 days**, with "Your best is 9 days" beneath it — never
+the stale stored 9. And the accuracy figure stays an em dash until there is
+something to average, because "no data" and "0%" are different claims.
+
+### The empty state's number is derived, not typed
+
+The rail used to say *"No weak spots yet — drill 20 hands and check back."*
+Twenty mixed hands spread across ten skill tags produce no weak spot at all, so
+the invitation was false: somebody who took it would come back to the same
+empty box. The copy now names `WEAK_SPOT_MIN_ATTEMPTS` and moves when the
+constant does.
+
+The same reasoning sets the threshold itself. A skill judged on four answers
+sends people to drill noise, and they have no way to know that is what
+happened — the mirror of the sample-size argument placement makes from the
+other side.
+
+### The accent colour is still allowed in exactly two places
+
+The TODAY strip and the rail, per the rule this document set in Phase 6. The
+daily goal ring uses it, and so does the single ★ on an unlocked achievement.
+The ring is an SVG rather than a conic gradient so it can carry a label for a
+screen reader, and the fraction is written inside it — colour is never the only
+encoding.
+
+### The reward moment is a line of text
+
+docs/05's tone is "a coach nodding, not a slot machine paying out", and no
+confetti. So the session summary gains four quiet lines: XP banked, the streak,
+the daily goal, and any achievement unlocked. **Every number in it came back
+from the server that wrote it** — the browser has the tiers and could add them
+up, but two arithmetics over one schedule is how a summary ends up
+congratulating somebody on XP the ledger never received.
+
+Study mode's note is now more specific, because Phase 9 gave it something to
+say: kept out of XP, accuracy and weak spots, but it still counts towards the
+streak. Showing up is showing up.
+
+### Weak Spots reuses the runner, and Session Review waits
+
+`/drill/weak-spots` is the ordinary drill runner started on a preset — one
+grading path, one write path, no parallel mini-runner to drift. What it drills
+is decided by `skill_stats`, and a `?tag=` in the URL is honoured only if it is
+genuinely one of that reader's weak spots; an arbitrary tag would turn the page
+into an undocumented focused drill.
+
+`modes.ts` had Session Review at Phase 9 while `docs/02-roadmap.md` had it at
+Phase 10. The roadmap wins: history, the mistake log and accuracy-over-time are
+one surface, and shipping a third of it now means shipping it three times.
+
+### Still open
+
+- **No achievement gallery.** Unlocked badges appear on the summary that
+  unlocked them and nowhere else. A page listing locked and unlocked ones is
+  Phase 10's, alongside Session Review.
+- **The daily goal is fixed at 20 and cannot be changed.** There is no settings
+  surface in v1; promoting it to a `profiles` column is a one-line migration
+  whenever Phase 10 adds one.
+- **An abandoned session leaves `skill_stats` stale** until the next session
+  closes. The attempts are stored, so nothing is lost — the rollup is simply
+  behind until something recomputes it.

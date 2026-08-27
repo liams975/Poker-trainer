@@ -20,6 +20,12 @@ export interface SessionConfig {
   /** Drill Mode only, and elapsed rather than a countdown. See docs/05. */
   timed: boolean;
   templateSlugs: readonly string[];
+  /**
+   * Restricts the draw to spots exercising these skill tags. Weak-spot drilling
+   * only, and never set from this form — a template is a family covering
+   * several tags, so picking templates cannot target one of them.
+   */
+  focusTags?: readonly string[];
 }
 
 const LENGTHS: readonly (number | null)[] = [10, 25, 50, null];

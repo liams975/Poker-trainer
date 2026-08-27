@@ -27,7 +27,8 @@
  * Usage:
  *   pnpm content:sync
  *   pnpm content:sync --confirm-remote     # against a deployed project
- *   pnpm content:sync --drop-progress      # allow retiring a lesson people started
+ *   pnpm content:sync --drop-progress      # allow retiring a lesson people started,
+ *                                          # or an achievement people earned
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -36,6 +37,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   CHART_SET_VERSION,
   SKILL_TAGS,
+  loadAchievements,
   loadChartSet,
   loadDrillTemplates,
   loadTracks,
@@ -126,6 +128,7 @@ async function main(): Promise<void> {
   const chartSet = loadChartSet();
   const templates = loadDrillTemplates();
   const tracks = loadTracks();
+  const achievements = loadAchievements();
 
   const db = createClient(url, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -341,6 +344,63 @@ async function main(): Promise<void> {
   await verifyCount(db, 'tracks', tracks.length);
   await verifyCount(db, 'modules', moduleTotal);
   await verifyCount(db, 'lessons', lessonTotal);
+
+  // 6. Achievements. Flat, unlike the track, but with the same pruning hazard.
+  const { error: achievementError } = await db.from('achievements').upsert(
+    achievements.map((achievement) => ({
+      id: achievement.id,
+      title: achievement.title,
+      description: achievement.description,
+      criteria: achievement.criteria,
+    })),
+    { onConflict: 'id' },
+  );
+  if (achievementError) throw new Error(`achievements: ${achievementError.message}`);
+
+  /**
+   * `user_achievements.achievement_id` is `on delete cascade`, so retiring an
+   * achievement destroys the record that somebody earned it — the same hazard
+   * `lesson_progress` has, and worse in one respect: progress can be re-earned
+   * by reading the lesson again, and an unlock that has been deleted simply
+   * never happened. Counted first, and refused unless asked for explicitly.
+   */
+  const keptAchievementIds = achievements.map((achievement) => achievement.id);
+
+  const { data: doomedAchievements, error: doomedAchievementError } = await db
+    .from('achievements')
+    .select('id')
+    .not('id', 'in', inList(keptAchievementIds));
+  if (doomedAchievementError) {
+    throw new Error(`achievements (finding retired): ${doomedAchievementError.message}`);
+  }
+
+  const doomedAchievementIds = (doomedAchievements ?? []).map((row) => String(row.id));
+
+  if (doomedAchievementIds.length > 0) {
+    const { count, error: unlockedError } = await db
+      .from('user_achievements')
+      .select('*', { count: 'exact', head: true })
+      .in('achievement_id', doomedAchievementIds);
+    if (unlockedError) throw new Error(`user_achievements: ${unlockedError.message}`);
+
+    if ((count ?? 0) > 0 && !dropProgress) {
+      throw new Error(
+        `retiring ${doomedAchievementIds.length} achievement(s) would cascade-delete ${count} ` +
+          'user_achievements row(s) — unlocks people actually earned. Re-run with ' +
+          '--drop-progress if that is genuinely intended.',
+      );
+    }
+
+    const { error: achievementPruneError } = await db
+      .from('achievements')
+      .delete()
+      .in('id', doomedAchievementIds);
+    if (achievementPruneError) {
+      throw new Error(`achievements (pruning): ${achievementPruneError.message}`);
+    }
+  }
+
+  await verifyCount(db, 'achievements', achievements.length);
 
   console.log(`done — chart set ${CHART_SET_VERSION}`);
 }

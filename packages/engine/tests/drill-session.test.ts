@@ -221,6 +221,97 @@ describe('generateSession', () => {
   });
 });
 
+/**
+ * Phase 9's weak-spot drilling.
+ *
+ * A template is a *family*: the opening template covers UTG, CO and BTN alike.
+ * So "drill your weak spots" cannot work by picking templates — a user whose
+ * leak is the button would be handed UTG spots two thirds of the time, and the
+ * feature would look like it was working while doing nothing. The tag a spot
+ * actually exercises is the chart's own, which `skillTagsFor` already resolves.
+ */
+describe('generateSession with focusTags', () => {
+  it('draws only spots that exercise the requested tags', () => {
+    const session = generateSession({
+      templates: TEMPLATES,
+      seed: 12,
+      count: 10,
+      registry,
+      focusTags: ['preflop.rfi.btn'],
+    });
+
+    expect(session).toHaveLength(10);
+    for (const entry of session) {
+      expect(skillTagsFor(entry.spot.scenario, registry)).toContain('preflop.rfi.btn');
+    }
+  });
+
+  it('spans several tags when several are asked for', () => {
+    const session = generateSession({
+      templates: TEMPLATES,
+      seed: 3,
+      count: 20,
+      registry,
+      focusTags: ['preflop.rfi.utg', 'preflop.blind_defense.bb_vs_btn'],
+    });
+
+    const seen = new Set(
+      session.flatMap((entry) => [...skillTagsFor(entry.spot.scenario, registry)]),
+    );
+
+    expect(seen).toEqual(new Set(['preflop.rfi.utg', 'preflop.blind_defense.bb_vs_btn']));
+  });
+
+  it('is still reproducible from its seed', () => {
+    const options = {
+      templates: TEMPLATES,
+      seed: 99,
+      count: 8,
+      registry,
+      focusTags: ['preflop.rfi.co'],
+    };
+
+    expect(generateSession(options).map(spotKey)).toEqual(generateSession(options).map(spotKey));
+  });
+
+  it('behaves exactly as before when the focus list is empty', () => {
+    const plain = generateSession({ templates: TEMPLATES, seed: 5, count: 10, registry });
+    const empty = generateSession({
+      templates: TEMPLATES,
+      seed: 5,
+      count: 10,
+      registry,
+      focusTags: [],
+    });
+
+    expect(empty.map(spotKey)).toEqual(plain.map(spotKey));
+  });
+
+  it('refuses a tag no template can produce, rather than quietly widening', () => {
+    expect(() =>
+      generateSession({
+        templates: TEMPLATES,
+        seed: 1,
+        count: 5,
+        registry,
+        focusTags: ['preflop.rfi.hj'],
+      }),
+    ).toThrow(/preflop\.rfi\.hj/);
+  });
+
+  it('names the tags when the focus is too narrow to fill the session', () => {
+    expect(() =>
+      generateSession({
+        templates: TEMPLATES,
+        seed: 1,
+        count: 400,
+        registry,
+        focusTags: ['preflop.rfi.btn'],
+      }),
+    ).toThrow(/distinct spots/);
+  });
+});
+
 describe('skillTagsFor', () => {
   it('returns the tag for the spot, not the template', () => {
     const session = generateSession({ templates: [RFI], seed: 8, count: 6, registry });

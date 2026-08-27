@@ -186,6 +186,17 @@ tracking. **No leagues, no hearts/lives, no leaderboards in v1.**
 Weak spots reflect actual recent performance. XP totals reconcile with the
 ledger.
 
+**Settled during the phase.** The streak grace policy — open since Phase 4 — is
+**strict**: one missed day resets it, and the mitigation is warning people
+while they can still act, not a grace period. A tenth engine module,
+`progress`, holds the rules and deliberately holds no clock; the timezone is
+applied in one function at the web boundary. `skill_stats` is a cache
+recomputed from `drill_attempts` at session close rather than a counter, and
+XP is written by the server when a session closes, keyed so a retried request
+cannot pay twice. Migration `0004` adds that key, closes the `xp_events.reason`
+vocabulary, and constrains achievement criteria. Session Review was marked
+Phase 9 in `modes.ts` against this document and is corrected to Phase 10.
+
 ---
 
 ## Phase 10 — Review, polish, ship

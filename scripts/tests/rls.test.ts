@@ -16,6 +16,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   SKILL_TAGS,
+  loadAchievements,
   loadChartSet,
   loadDrillTemplates,
   loadTracks,
@@ -139,7 +140,15 @@ describe('a user sees only their own rows', () => {
     expect(data).toEqual([]);
   });
 
-  it.each(['profiles', 'drill_sessions', 'xp_events', 'skill_stats', 'streaks', 'entitlements'])(
+  it.each([
+    'profiles',
+    'drill_sessions',
+    'xp_events',
+    'skill_stats',
+    'streaks',
+    'user_achievements',
+    'entitlements',
+  ])(
     'Bob gets zero rows from %s',
     async (table) => {
       const column = table === 'profiles' ? 'id' : 'user_id';
@@ -203,6 +212,115 @@ describe('a user cannot write rows they do not own', () => {
 
     const { data } = await alice.db.from('drill_attempts').select('id');
     expect(data).toHaveLength(1);
+  });
+});
+
+/**
+ * Phase 9's ledger, through the same path the app writes it.
+ *
+ * docs/04-data-model.md is candid that XP is honour-system in v1 — a
+ * determined user can insert their own `xp_events` and nothing here pretends
+ * otherwise. What these assert is the layer that *is* enforced: an award
+ * cannot land twice, and an append-only ledger cannot be rewritten after the
+ * fact to hide it.
+ */
+describe('the progress ledger', () => {
+  const sessionRef = '99999999-0000-4000-8000-000000000009';
+
+  it('accepts an award once and refuses the same one again', async () => {
+    const row = {
+      user_id: alice.id,
+      amount: 120,
+      reason: 'drill_session',
+      ref_id: sessionRef,
+    };
+
+    const first = await alice.db.from('xp_events').insert(row);
+    expect(first.error).toBeNull();
+
+    // The retried PATCH. Without the partial unique index this is a second row,
+    // and every total afterwards reports the inflated number faithfully.
+    const second = await alice.db.from('xp_events').insert(row);
+    expect(second.error?.code).toBe('23505');
+
+    const { count } = await alice.db
+      .from('xp_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('ref_id', sessionRef);
+
+    expect(count).toBe(1);
+  });
+
+  it('rejects a reason outside the vocabulary', async () => {
+    const { error } = await alice.db
+      .from('xp_events')
+      .insert({ user_id: alice.id, amount: 10, reason: 'drill' });
+
+    expect(error?.code).toBe('23514');
+  });
+
+  it('cannot be rewritten or deleted by its own author', async () => {
+    const updated = await alice.db.from('xp_events').update({ amount: 99_999 }).eq('ref_id', sessionRef);
+    expect(updated.error?.code).toBe('42501');
+
+    const deleted = await alice.db.from('xp_events').delete().eq('ref_id', sessionRef);
+    expect(deleted.error?.code).toBe('42501');
+  });
+
+  it('keeps Bob out of Alice\u2019s ledger entirely', async () => {
+    const { data } = await bob.db.from('xp_events').select('*').eq('ref_id', sessionRef);
+    expect(data).toEqual([]);
+
+    const { error } = await bob.db
+      .from('xp_events')
+      .insert({ user_id: alice.id, amount: 500, reason: 'drill_session' });
+
+    expect(error?.code).toBe('42501');
+  });
+
+  it('holds the skill rollup to bounds a real rollup satisfies', async () => {
+    // skill_stats is a cache of drill_attempts, and weak-spot detection reads
+    // it. A row claiming more correct answers than attempts would send someone
+    // to drill the wrong thing, quietly, for as long as it sat there.
+    const impossible = await alice.db
+      .from('skill_stats')
+      .insert({ user_id: alice.id, skill_tag: 'preflop.rfi.utg', attempts: 3, correct: 9 });
+
+    expect(impossible.error?.code).toBe('23514');
+
+    // Just past the CHECK but inside numeric(5,4): 23514, the constraint.
+    const aboveOne = await alice.db.from('skill_stats').insert({
+      user_id: alice.id,
+      skill_tag: 'preflop.rfi.utg',
+      attempts: 5,
+      correct: 5,
+      ewma_accuracy: 1.5,
+    });
+
+    expect(aboveOne.error?.code).toBe('23514');
+
+    // A percentage written where a rate belongs does not even reach the CHECK —
+    // numeric(5,4) tops out at 9.9999, so the column type rejects it first with
+    // 22003. Asserted because it is the likelier mistake of the two.
+    const asPercentage = await alice.db.from('skill_stats').insert({
+      user_id: alice.id,
+      skill_tag: 'preflop.rfi.utg',
+      attempts: 5,
+      correct: 5,
+      ewma_accuracy: 90,
+    });
+
+    expect(asPercentage.error?.code).toBe('22003');
+  });
+
+  it('refuses a skill tag outside the closed vocabulary', async () => {
+    const { error } = await alice.db
+      .from('skill_stats')
+      .insert({ user_id: alice.id, skill_tag: 'preflop.rfi.mp', attempts: 1, correct: 1 });
+
+    // 6-max has no MP. The foreign key is what stops weak-spot detection
+    // fragmenting across tags nothing teaches.
+    expect(error?.code).toBe('23503');
   });
 });
 
@@ -281,6 +399,7 @@ describe('content is readable and seeded', () => {
     ['drill_templates', loadDrillTemplates().length],
     ['tracks', loadTracks().length],
     ['lessons', loadTracks().reduce((n, t) => n + orderedLessons(t).length, 0)],
+    ['achievements', loadAchievements().length],
   ])('%s has %i rows after a sync', async (table, expected) => {
     const { count, error } = await alice.db
       .from(table as string)

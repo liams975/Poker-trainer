@@ -1,0 +1,62 @@
+[
+  {
+    "id": "first-hundred",
+    "title": "First hundred",
+    "description": "Answer 100 drill spots. Enough reps that the common ones start to feel familiar.",
+    "criteria": { "kind": "spots", "count": 100 }
+  },
+  {
+    "id": "five-hundred",
+    "title": "Five hundred deep",
+    "description": "Answer 500 drill spots.",
+    "criteria": { "kind": "spots", "count": 500 }
+  },
+  {
+    "id": "two-thousand",
+    "title": "Two thousand spots",
+    "description": "Answer 2,000 drill spots. At this point the charts are yours, not the app's.",
+    "criteria": { "kind": "spots", "count": 2000 }
+  },
+  {
+    "id": "three-day-streak",
+    "title": "Three days running",
+    "description": "Practise three days in a row.",
+    "criteria": { "kind": "streak", "days": 3 }
+  },
+  {
+    "id": "week-streak",
+    "title": "A full week",
+    "description": "Practise seven days in a row.",
+    "criteria": { "kind": "streak", "days": 7 }
+  },
+  {
+    "id": "month-streak",
+    "title": "Thirty days",
+    "description": "Practise thirty days in a row. Consistency beats intensity at this.",
+    "criteria": { "kind": "streak", "days": 30 }
+  },
+  {
+    "id": "first-lesson",
+    "title": "Opened the book",
+    "description": "Finish your first lesson.",
+    "criteria": { "kind": "lessons", "count": 1 }
+  },
+  {
+    "id": "first-module",
+    "title": "Through a module",
+    "description": "Finish the first module — how ranges work, and what a mixed hand means.",
+    "criteria": { "kind": "lessons", "count": 2 }
+  },
+  {
+    "id": "whole-track",
+    "title": "Preflop fundamentals",
+    "description": "Finish every lesson in the track.",
+    "criteria": { "kind": "lessons", "count": 10 }
+  },
+  {
+    "id": "sharp-on-a-spot",
+    "title": "Sharp on a spot",
+    "description": "Hold 90% recent accuracy on any one skill, over at least 30 answers.",
+    "criteria": { "kind": "mastery", "accuracy": 0.9, "minAttempts": 30 }
+  }
+]

@@ -4,8 +4,10 @@ import type { GradeTier, SessionSummary as Summary } from '@poker/engine';
 import { GRADE_TIERS } from '@poker/engine';
 import Link from 'next/link';
 
+import { AchievementBadge } from '@/components/progress/achievement-badge';
 import { Button } from '@/components/ui/button';
 import { percent } from '@/components/range/mix-format';
+import type { SessionRewards } from '@/lib/progress/types';
 
 import { TIER_STYLES } from './grade-tiers';
 
@@ -34,13 +36,74 @@ function tierNote(tier: GradeTier): string {
   }
 }
 
+/**
+ * What the session earned, in one line.
+ *
+ * Every figure here came back from the server that wrote it. The client could
+ * add the tiers up itself and get the same number today — but two arithmetics
+ * over one schedule is how a summary ends up congratulating somebody on XP the
+ * ledger never received, and the ledger is the thing every later screen reads.
+ */
+function Rewards({ rewards }: { rewards: SessionRewards }) {
+  const { streak } = rewards;
+
+  return (
+    <section className="flex flex-col gap-3" aria-labelledby="rewards-heading">
+      <h3 id="rewards-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+        Banked
+      </h3>
+
+      <p className="text-sm text-ink" data-testid="session-rewards">
+        <span className="font-mono text-accent" data-testid="xp-awarded">
+          +{rewards.xpAwarded} XP
+        </span>{' '}
+        <span className="text-ink-muted">
+          · level {rewards.level.level} · {rewards.level.into} of {rewards.level.needed} to the
+          next
+        </span>
+      </p>
+
+      <p className="text-sm text-ink-muted" data-testid="session-streak">
+        {streak.extendedToday
+          ? `${streak.current}-day streak${streak.current === streak.longest && streak.current > 1 ? ' — your best yet' : ''}.`
+          : `${streak.current}-day streak, already counted today.`}
+      </p>
+
+      {rewards.dailyGoal.met ? (
+        /* Not "114 of 20 spots" — once the goal is met the target stops being
+           the interesting number, and reading a total against a smaller
+           denominator is just wrong. */
+        <p className="text-sm text-ink-muted" data-testid="daily-goal-met">
+          Daily goal met — {rewards.dailyGoal.done}{' '}
+          {rewards.dailyGoal.done === 1 ? 'spot' : 'spots'} today.
+        </p>
+      ) : (
+        <p className="text-sm text-ink-muted" data-testid="daily-goal-progress">
+          {rewards.dailyGoal.done} of {rewards.dailyGoal.target} spots today.
+        </p>
+      )}
+
+      {rewards.unlocked.length > 0 ? (
+        <ul className="flex flex-col gap-2" data-testid="unlocked-achievements">
+          {rewards.unlocked.map((achievement) => (
+            <AchievementBadge key={achievement.id} achievement={achievement} />
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
 export function SessionSummary({
   summary,
   studyMode,
+  rewards,
   onRestart,
 }: {
   summary: Summary;
   studyMode: boolean;
+  /** Null for a study session, a session with no answers, or a repeated close. */
+  rewards: SessionRewards | null;
   onRestart: () => void;
 }) {
   return (
@@ -94,9 +157,12 @@ export function SessionSummary({
         </ul>
       </section>
 
+      {rewards ? <Rewards rewards={rewards} /> : null}
+
       {studyMode ? (
         <p className="text-sm text-ink-muted">
-          Study session — recorded in your history, but kept out of your accuracy stats.
+          Study session — recorded in your history, but kept out of your XP, your accuracy
+          and your weak spots. It still counts towards your streak.
         </p>
       ) : null}
 
