@@ -47,6 +47,18 @@ values
 -- are no-ops in a seeded database and inserts in an empty one.
 insert into skill_tags (tag) values ('preflop.rfi.utg') on conflict (tag) do nothing;
 
+-- A lesson to hang progress off. Phase 4 skipped lesson_progress entirely
+-- because `lessons` was empty; Phase 8 filled it, so the gap closes here.
+insert into tracks (id, slug, title, published)
+values ('11111111-0000-4000-8000-000000000001', 'rls-track', 'RLS track', true);
+insert into modules (id, track_id, slug, title)
+values ('22222222-0000-4000-8000-000000000002',
+        '11111111-0000-4000-8000-000000000001', 'rls-module', 'RLS module');
+insert into lessons (id, module_id, slug, title, body, skill_tags)
+values ('33333333-0000-4000-8000-000000000003',
+        '22222222-0000-4000-8000-000000000002', 'rls-lesson', 'RLS lesson',
+        '{"blocks":[]}'::jsonb, array['preflop.rfi.utg']);
+
 -- Bob's private rows, written as Bob so RLS is exercised on the way in.
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"bbbbbbbb-0000-4000-8000-000000000002","role":"authenticated"}';
@@ -61,6 +73,9 @@ values ('bbbbbbbb-0000-4000-8000-000000000002', 42, 'v1',
 insert into drill_sessions (user_id, mode) values ('bbbbbbbb-0000-4000-8000-000000000002', 'quick');
 insert into xp_events (user_id, amount, reason) values ('bbbbbbbb-0000-4000-8000-000000000002', 10, 'drill');
 insert into skill_stats (user_id, skill_tag) values ('bbbbbbbb-0000-4000-8000-000000000002', 'preflop.rfi.utg');
+insert into lesson_progress (user_id, lesson_id, status)
+values ('bbbbbbbb-0000-4000-8000-000000000002',
+        '33333333-0000-4000-8000-000000000003', 'completed');
 
 -- ------------------------------------------------------------
 -- The signup trigger
@@ -236,10 +251,48 @@ select lives_ok(
   'A can append to their own xp ledger'
 );
 
--- lesson_progress is deliberately not exercised here: lesson_id is NOT NULL
--- against a lessons table that stays empty until Phase 8, so there is nothing
--- honest to insert. Its policy is identical in shape to skill_stats', which is
--- covered above.
+-- lesson_progress, which Phase 4 could not exercise because `lessons` was
+-- empty. It matters more than the shape-identical policies around it: this is
+-- the table that decides which lessons a person has access to.
+select lives_ok(
+  $$ insert into lesson_progress (user_id, lesson_id, status)
+     values (auth.uid(), '33333333-0000-4000-8000-000000000003', 'in_progress') $$,
+  'A can INSERT their own lesson_progress'
+);
+
+select throws_ok(
+  $$ insert into lesson_progress (user_id, lesson_id, status)
+     values ('bbbbbbbb-0000-4000-8000-000000000002',
+             '33333333-0000-4000-8000-000000000003', 'completed') $$,
+  '42501', NULL::text,
+  'A cannot mark a lesson complete on B''s behalf'
+);
+
+select is(
+  (select count(*) from lesson_progress), 1::bigint,
+  'A sees only their own lesson_progress, not B''s completed row'
+);
+
+select lives_ok(
+  $$ update lesson_progress set status = 'completed', completed_at = now()
+     where user_id = auth.uid() $$,
+  'A can complete their own lesson'
+);
+
+select is(
+  (select status::text from lesson_progress where user_id = auth.uid()),
+  'completed',
+  'and reads the completion back'
+);
+
+-- The unlock decision is only as trustworthy as this: B's progress must be
+-- untouched by anything A did.
+select is(
+  (select count(*) from lesson_progress
+   where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'),
+  0::bigint,
+  'B''s progress is invisible to A even by count'
+);
 
 select lives_ok(
   $$ update profiles set display_name = 'Alice B' where id = auth.uid() $$,

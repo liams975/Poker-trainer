@@ -186,6 +186,22 @@ select lives_ok(
   'a real IANA zone is accepted'
 );
 
+-- ------------------------------------------------------------
+-- Phase 8: placement is its own drill mode
+-- ------------------------------------------------------------
+
+-- Recording a placement diagnostic as `quick` would leave Phase 9 unable to
+-- keep it out of accuracy stats, the same way `study` is kept out.
+select ok(
+  'placement' = any (enum_range(null::drill_mode)::text[]),
+  'drill_mode carries a placement value'
+);
+
+select lives_ok(
+  $$ insert into drill_sessions (user_id, mode) values (auth.uid(), 'placement') $$,
+  'a placement session can be recorded'
+);
+
 select * from finish();
 
 rollback;

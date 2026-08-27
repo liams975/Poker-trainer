@@ -46,7 +46,16 @@ import { createClient } from '@/lib/supabase/server';
  * recomputed from.
  */
 
-const SESSION_MODES = ['quick', 'focused', 'weak_spots', 'lesson', 'study'] as const;
+// Mirrors the `drill_mode` enum. `placement` was added in migration 0003 so
+// Phase 9 can keep a diagnostic out of accuracy stats, as it does for `study`.
+const SESSION_MODES = [
+  'quick',
+  'focused',
+  'weak_spots',
+  'lesson',
+  'study',
+  'placement',
+] as const;
 export type SessionMode = (typeof SESSION_MODES)[number];
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -1,0 +1,27 @@
+-- ============================================================
+-- Phase 8: the placement diagnostic is its own kind of session
+-- ============================================================
+--
+-- Onboarding runs a short graded drill to decide where in the track to drop a
+-- new user. That is a real session writing real `drill_attempts` rows — the
+-- server grades them exactly as it grades any other spot, which is what stops
+-- the client claiming a placement it did not earn.
+--
+-- It is not a `quick` session, though, and recording it as one would be a
+-- quiet lie in the column Phase 9 reads to decide what counts towards accuracy
+-- and weak-spot detection. `study` already exists for the same reason: a mode
+-- whose attempts are history but not score. Placement is the second such mode.
+--
+-- The alternative considered and rejected was a flag inside `drill_sessions.
+-- config`, which needs no migration but leaves `mode` wrong for every
+-- placement session ever recorded — and `config` is not something a query
+-- filters on comfortably.
+--
+-- No new table, so no new RLS policy and no new grant. `drill_sessions` and
+-- `drill_attempts` already carry both, and an enum value inherits everything.
+--
+-- Postgres 12+ permits ADD VALUE inside a transaction; the new value simply
+-- cannot be *used* until that transaction commits. This migration only adds
+-- it, so the restriction does not bite. Confirmed on the local stack: 17.6.
+
+alter type drill_mode add value if not exists 'placement';

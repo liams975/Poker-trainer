@@ -1,0 +1,459 @@
+[
+  {
+    "slug": "preflop-fundamentals",
+    "title": "Preflop fundamentals",
+    "description": "The ten seeded 6-max charts, and the ideas that make them make sense.",
+    "sortOrder": 0,
+    "published": true,
+    "modules": [
+      {
+        "slug": "how-ranges-work",
+        "title": "How ranges work",
+        "sortOrder": 0,
+        "lessons": [
+          {
+            "slug": "a-range-is-not-a-list",
+            "title": "A range is not a list",
+            "summary": "What a range actually is, and why the difference is where most players stall.",
+            "sortOrder": 0,
+            "version": "1",
+            "skillTags": ["concept.ranges_are_frequencies"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "Most people use the word range to mean a list: these hands I open, those I throw away. That is a reasonable first model and it is where a lot of players stop. A range is something slightly different, and the gap between the two is where the next chunk of your win rate lives."
+              },
+              {
+                "kind": "prose",
+                "text": "A range assigns every one of the 169 starting hands a set of actions and how often you take each. Most hands get one action every time — you are never folding aces on the button, and never opening 72o under the gun. The hands that matter are the ones in between, where the honest answer is that you do one thing some of the time and another thing the rest."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "BTN",
+                "actionSequence": "rfi",
+                "caption": "The button opening range. A solid cell always takes that action; a split cell does both, in the proportions shown."
+              },
+              {
+                "kind": "prose",
+                "text": "The button opens 43.4% of hands here. That figure is weighted by combinations, not by counting squares — there are twelve ways to be dealt AKo, four to be dealt AKs and six to be dealt a pair of aces, so a grid cell is not one hand but a group of different sizes. Any percentage in this app is combination-weighted, which is why it will not match what you get by counting coloured cells."
+              },
+              {
+                "kind": "key_points",
+                "points": [
+                  "A range maps all 169 hands to action frequencies that sum to 1",
+                  "Most hands are pure: one action, every time",
+                  "Percentages are weighted by combinations, not by cells",
+                  "Suited hands are 4 combinations, offsuit 12, pairs 6"
+                ]
+              },
+              {
+                "kind": "callout",
+                "tone": "note",
+                "text": "The charts here are teaching approximations in the shape of standard 6-max ranges. They are not solver output, and this app is not a solver."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-rfi",
+                "spots": 5
+              }
+            ]
+          },
+          {
+            "slug": "playing-a-mixed-hand",
+            "title": "Playing a mixed hand",
+            "summary": "Why the same hand can be both a raise and a fold, and what to do when you get one.",
+            "sortOrder": 1,
+            "version": "1",
+            "skillTags": ["concept.mixed_strategies"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "A mixed hand is one your range plays more than one way. A5o on the button opens half the time and folds half the time. That is not the chart hedging, and it is not an error bar — it is the answer."
+              },
+              {
+                "kind": "prose",
+                "text": "There are two reasons mixing exists. The theoretical one is that a perfectly predictable range can be exploited: if you always open exactly the same hands, a good opponent eventually knows what you hold. The practical one matters more day to day — a hand gets mixed precisely when opening and folding are worth almost the same, so the cost of picking either one is close to nothing."
+              },
+              {
+                "kind": "hands",
+                "hands": ["A5o", "A3o", "K8o", "98o"],
+                "caption": "Four hands the button opens exactly half the time."
+              },
+              {
+                "kind": "prose",
+                "text": "That second reason is the useful one at the table. When you recognise a hand as mixed, you have learned something more valuable than which button to press: you have learned that this spot is close, that no single answer is much better, and that you should not agonise over it. Save the thinking for spots that are not close."
+              },
+              {
+                "kind": "callout",
+                "tone": "warning",
+                "text": "This app will never mark you wrong for taking an action your range takes some of the time. Folding a 50/50 hand is graded exactly as well as opening it."
+              },
+              {
+                "kind": "prose",
+                "text": "One consequence worth stating plainly. If you look up a hand, see 60% raise, and conclude the hand is a raise, you have thrown away the 40%. Over a session that reads as playing a slightly wrong range in every borderline spot at once. The mix is the answer, not a rounding step on the way to one."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-rfi-btn",
+                "spots": 6
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slug": "opening",
+        "title": "Opening ranges",
+        "sortOrder": 1,
+        "lessons": [
+          {
+            "slug": "why-position-pays",
+            "title": "Why position pays",
+            "summary": "The single biggest structural edge preflop, and why it decides how wide you open.",
+            "sortOrder": 0,
+            "version": "1",
+            "skillTags": ["concept.position"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "Six seats act in a fixed order preflop: UTG, HJ, CO, BTN, SB, BB. Two things change as you move round that order, and both push in the same direction."
+              },
+              {
+                "kind": "key_points",
+                "points": [
+                  "Fewer players left behind you, so fewer chances someone wakes up with a better hand",
+                  "You act later on every street after the flop, so you decide with more information",
+                  "Both improve as you move towards the button, so ranges widen the same way"
+                ]
+              },
+              {
+                "kind": "prose",
+                "text": "Under the gun there are five players still to act. On the button there are two, and both of them are in the blinds with hands they did not choose. That is the whole story, and it is worth more than any read you will get on an opponent in a single session."
+              },
+              {
+                "kind": "prose",
+                "text": "The effect on the charts is not subtle. Under the gun this track opens 14.9% of hands. On the button it opens 43.4% — nearly three times as many, with the same cards and the same stack. If you take one thing from this module, take the size of that gap."
+              },
+              {
+                "kind": "callout",
+                "tone": "warning",
+                "text": "The big blind is never first in, because the blinds are already posted. There is no such thing as opening from the big blind, and this track never asks you to."
+              }
+            ]
+          },
+          {
+            "slug": "opening-under-the-gun",
+            "title": "Opening from early position",
+            "summary": "The tightest ranges in the game, and the discipline they take.",
+            "sortOrder": 1,
+            "version": "1",
+            "skillTags": ["preflop.rfi.utg", "preflop.rfi.hj"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "Under the gun you are opening into five unknown hands, and you will be out of position against everyone except the blinds for the rest of the hand. The range reflects that: 14.9% of hands, and almost all of them either strong or suited."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "UTG",
+                "actionSequence": "rfi",
+                "caption": "Under the gun. Note how little of the offsuit region survives."
+              },
+              {
+                "kind": "prose",
+                "text": "Count the offsuit hands in that chart. There are four: AKo, AQo, KQo and AJo. Everything else that opens is either a pair or suited. Being suited is worth only a couple of percent of equity, which sounds like nothing — but this is exactly the region where a couple of percent is the entire decision."
+              },
+              {
+                "kind": "prose",
+                "text": "The hijack widens to 19.9%. One fewer player behind you, and the range grows by a third. The shape stays the same: suited hands come in before their offsuit counterparts, and the small pairs and suited connectors arrive before the weak broadways."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "HJ",
+                "actionSequence": "rfi",
+                "caption": "The hijack. The same shape, one step wider."
+              },
+              {
+                "kind": "key_points",
+                "points": [
+                  "UTG opens 14.9%, HJ 19.9% — both to 2.5bb",
+                  "Suited hands enter the range well before their offsuit versions",
+                  "Borderline hands are marked as a 50/50 mix rather than a rule"
+                ]
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-rfi-utg",
+                "spots": 8
+              }
+            ]
+          },
+          {
+            "slug": "opening-in-late-position",
+            "title": "Opening from late position",
+            "summary": "Where the money is made, and where discipline stops meaning tight.",
+            "sortOrder": 2,
+            "version": "1",
+            "skillTags": ["preflop.rfi.co", "preflop.rfi.btn"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "The cutoff opens 27.6% and the button 43.4%. If those numbers feel loose, that is usually a sign of the most common leak in small-stakes 6-max: playing the button like it is the hijack, and folding away the most profitable seat at the table."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "CO",
+                "actionSequence": "rfi",
+                "caption": "The cutoff, at 27.6%."
+              },
+              {
+                "kind": "prose",
+                "text": "On the button, two things happen at once. Only the blinds are left, so the chance someone behind you has a real hand is at its lowest — and if you are called, you act last on every remaining street. That combination is why the range stretches into hands that would be unplayable anywhere else."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "BTN",
+                "actionSequence": "rfi",
+                "caption": "The button, at 43.4%. Nearly every suited hand, and a deep run of offsuit aces."
+              },
+              {
+                "kind": "prose",
+                "text": "Notice the ace-x offsuit hands running down the left column. A5o and A3o are opens half the time from the button and folds everywhere earlier. They are not good hands. They are hands that make a small amount of money in one specific seat, which is a different claim and the correct one."
+              },
+              {
+                "kind": "key_points",
+                "points": [
+                  "CO 27.6%, BTN 43.4%, both to 2.5bb",
+                  "The button is the most profitable seat — folding it away is a real leak",
+                  "Weak offsuit aces are button-only opens, and often mixed"
+                ]
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-rfi-btn",
+                "spots": 8
+              }
+            ]
+          },
+          {
+            "slug": "opening-the-small-blind",
+            "title": "Opening the small blind",
+            "summary": "The one seat where you open wide and still expect to be out of position.",
+            "sortOrder": 3,
+            "version": "1",
+            "skillTags": ["preflop.rfi.sb"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "The small blind is the odd one out. Only one player is left to act, which argues for a very wide range — but that player has position on you for the entire hand, which argues for a tight one. The result sits between the cutoff and the button, at 34.7%."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "SB",
+                "actionSequence": "rfi",
+                "caption": "The small blind, opening to 3bb rather than 2.5bb."
+              },
+              {
+                "kind": "prose",
+                "text": "The size changes too: 3bb instead of 2.5bb. A larger raise makes it more expensive for the big blind to continue, which matters more here than anywhere else, because the big blind will be in position on you for the whole hand if they do."
+              },
+              {
+                "kind": "callout",
+                "tone": "note",
+                "text": "This track models the small blind as raise-or-fold. Solvers also limp part of this range; that mix is a real simplification here, not an oversight."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-rfi-sb",
+                "spots": 8
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slug": "blind-defence",
+        "title": "Defending the big blind",
+        "sortOrder": 2,
+        "lessons": [
+          {
+            "slug": "the-big-blind-discount",
+            "title": "The big blind discount",
+            "summary": "Why you continue far more often here than anywhere else, and the arithmetic behind it.",
+            "sortOrder": 0,
+            "version": "1",
+            "skillTags": ["concept.pot_odds"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "You have already put a big blind in. It is not yours any more — it is in the pot — but it does change what continuing costs you, and that changes which hands are worth continuing with."
+              },
+              {
+                "kind": "prose",
+                "text": "Take a 2.5bb open folded round to you. The pot is 4bb: 2.5 from the raiser, 0.5 from the small blind and the 1 you already posted. Calling costs 1.5 more, which would make the final pot 5.5. You are risking 1.5 to win 5.5, so you need to win about 27% of the time to break even."
+              },
+              {
+                "kind": "key_points",
+                "points": [
+                  "Facing a 2.5bb open: risk 1.5 to win 5.5, so you need about 27% equity",
+                  "Facing the small blind's 3bb open: risk 2 to win 6, so you need about 33%",
+                  "Every other seat has to put in a full raise or a full call with nothing already in"
+                ]
+              },
+              {
+                "kind": "prose",
+                "text": "27% is a low bar. Most two random cards have close to that against a raising range, which is why the big blind defends far wider than any other seat — 29.0% against an under-the-gun open, rising to 54.8% against the button."
+              },
+              {
+                "kind": "callout",
+                "tone": "warning",
+                "text": "Needing 27% equity does not make defending free. You will be out of position for the rest of the hand, which is exactly why the charts still fold plenty of hands that clear the raw arithmetic."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-bb-defense",
+                "spots": 6
+              }
+            ]
+          },
+          {
+            "slug": "defending-against-late-position",
+            "title": "Defending against late position",
+            "summary": "The widest defending ranges in the game, against the widest opens.",
+            "sortOrder": 1,
+            "version": "1",
+            "skillTags": [
+              "preflop.blind_defense.bb_vs_btn",
+              "preflop.blind_defense.bb_vs_co"
+            ],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "A button open is 43.4% of hands. Most of that range missed the flop, and you get the right price to find out. Against it the big blind continues with 54.8% of hands — more than half of everything you can be dealt."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "BB",
+                "actionSequence": "vs_btn_open",
+                "caption": "Big blind versus a button open. Blue is a call, orange a 3-bet to 11bb."
+              },
+              {
+                "kind": "prose",
+                "text": "This is the first chart in the track with three real actions in it, and the mixes stop being coin flips. AJs 3-bets 75% and calls 25%. ATs is an even split. 77 calls 80% and 3-bets 20%. Those numbers are not decoration — a hand that 3-bets 20% of the time is a hand you should mostly be calling with."
+              },
+              {
+                "kind": "hands",
+                "hands": ["AJs", "ATs", "KQo", "77"],
+                "caption": "Four hands with genuinely different mixes against a button open."
+              },
+              {
+                "kind": "prose",
+                "text": "Against the cutoff everything tightens a step: 42.8% continuing rather than 54.8%, and the 3-bets get more selective. The cutoff opens 27.6% rather than 43.4%, so the hands you are up against are simply better."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "BB",
+                "actionSequence": "vs_co_open",
+                "caption": "The same spot against a cutoff open."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-bb-defense",
+                "spots": 10
+              }
+            ]
+          },
+          {
+            "slug": "defending-against-early-position",
+            "title": "Defending against early position",
+            "summary": "The same price, a much stronger opponent, and a much tighter answer.",
+            "sortOrder": 2,
+            "version": "1",
+            "skillTags": [
+              "preflop.blind_defense.bb_vs_utg",
+              "preflop.blind_defense.bb_vs_hj"
+            ],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "The price is identical to the button spot — 2.5 to open, 1.5 for you to call, 27% equity needed. Everything that changes is on the other side of the table. An under-the-gun open is 14.9% of hands, and that range is stronger than anything else you will face."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "BB",
+                "actionSequence": "vs_utg_open",
+                "caption": "Big blind versus an under-the-gun open: 29.0% continuing, down from 54.8% versus the button."
+              },
+              {
+                "kind": "prose",
+                "text": "Defending drops from 54.8% to 29.0% — roughly half. And the 3-betting range changes character rather than just shrinking: 4.9% here against 9.8% versus the button, and much more of it is genuine strength rather than a hand looking for fold equity."
+              },
+              {
+                "kind": "prose",
+                "text": "AQs 3-bets 60% against an under-the-gun open. ATs 3-bets only 20% and calls the rest. The suited wheel aces — A5s through A2s — 3-bet 75%, because they block the ace-heavy hands that make up so much of an early-position range and play well when called."
+              },
+              {
+                "kind": "hands",
+                "hands": ["AQs", "ATs", "A5s", "99"],
+                "caption": "Strength, a call-down, a blocker bluff, and a hand that mostly just calls."
+              },
+              {
+                "kind": "callout",
+                "tone": "note",
+                "text": "This is the same price as the button spot and roughly half the defending range. When the price does not move but the answer does, the opponent's range is doing all the work."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-bb-defense",
+                "spots": 10
+              }
+            ]
+          },
+          {
+            "slug": "defending-against-the-small-blind",
+            "title": "Defending against the small blind",
+            "summary": "The widest defence in the game, at the worst price, against the only opponent you have position on.",
+            "sortOrder": 3,
+            "version": "1",
+            "skillTags": ["preflop.blind_defense.bb_vs_sb"],
+            "blocks": [
+              {
+                "kind": "prose",
+                "text": "This spot is unlike every other one in the track, and it is worth slowing down for. The small blind opens to 3bb, so you are getting a worse price than usual — 2 to call into a 6bb pot, needing about 33% rather than 27%. And yet you continue with 59.3% of hands, the widest defence anywhere in this track."
+              },
+              {
+                "kind": "prose",
+                "text": "The reason is that this is the only preflop spot where the big blind has position. Everyone else acts after you for the rest of the hand. The small blind does not. That single fact outweighs the worse price by a wide margin."
+              },
+              {
+                "kind": "range",
+                "heroPosition": "BB",
+                "actionSequence": "vs_sb_open",
+                "caption": "Big blind versus a small blind open, 3-betting to 10bb rather than 11."
+              },
+              {
+                "kind": "key_points",
+                "points": [
+                  "Worse price than any other defence — about 33% equity needed",
+                  "Widest defending range in the track at 59.3%",
+                  "The only preflop spot where the big blind acts last after the flop",
+                  "3-bets to 10bb rather than 11bb, because the opener's range is wider"
+                ]
+              },
+              {
+                "kind": "callout",
+                "tone": "warning",
+                "text": "Two spots that look the same can want opposite answers. Price and position pull in different directions here, and position wins."
+              },
+              {
+                "kind": "drill",
+                "templateSlug": "preflop-bb-defense-vs-sb",
+                "spots": 10
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

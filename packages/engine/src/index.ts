@@ -10,6 +10,11 @@
  * The module map from docs/03-poker-engine.md is complete as of Phase 3: rng,
  * cards, evaluator, equity, ranges, game, strategy and drills. What remains for
  * v2 — a bot opponent, postflop solving — is new surface, not gaps in this one.
+ *
+ * Phase 8 adds a ninth, `curriculum`, on the same principle that already puts
+ * the chart and drill-template schemas here: content *schemas* live in the
+ * engine so they can be validated anywhere, while the content itself lives in
+ * `packages/content`. Purity is unaffected.
  */
 
 export * from './rng';
@@ -20,3 +25,4 @@ export * from './ranges';
 export * from './game';
 export * from './strategy';
 export * from './drills';
+export * from './curriculum';

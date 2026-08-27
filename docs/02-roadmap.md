@@ -160,6 +160,15 @@ half of every session — see `docs/05-ui-ux.md`.
 **Exit:** A user completes a lesson, progress persists across reload, next
 lesson unlocks. Placement assessment routes a strong player past basics.
 
+**Settled during the phase.** The track is one course — "Preflop
+fundamentals", 3 modules and 10 lessons — scoped to exactly what the ten
+seeded charts support. Unlocking is linear across the flattened track, and
+placement is honoured in the unlock *rule* rather than by writing `completed`
+rows for lessons nobody opened. Migration `0003` adds a `placement` drill mode
+so Phase 9 can keep the diagnostic out of accuracy stats the way it will keep
+`study` out. `skill_stats` and `xp_events` are still empty and still derivable
+from `drill_attempts`.
+
 ---
 
 ## Phase 9 — Progress and gamification *(moderate depth)*

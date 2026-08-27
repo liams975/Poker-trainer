@@ -35,14 +35,36 @@ async function signUp(page: Page, email: string): Promise<void> {
   await page.getByRole('button', { name: 'Create account' }).click();
 }
 
+/**
+ * Gets a fresh account past onboarding and onto the dashboard.
+ *
+ * Phase 8 sends a new account to the placement diagnostic before the dashboard
+ * — Phase 5's "sign up, land on the dashboard" is now "sign up, get placed,
+ * land on the dashboard". Skipping is one click and leaves the reader at the
+ * start of the track.
+ */
+async function reachDashboard(page: Page): Promise<void> {
+  // The sign-up action redirects; navigating before it settles arrives without
+  // a session cookie and gets bounced to sign-in.
+  await page.waitForURL(/\/(dashboard|onboarding)$/);
+
+  await page.goto('/onboarding');
+  if (new URL(page.url()).pathname === '/onboarding') {
+    await page.getByRole('button', { name: /Skip, start at the beginning/ }).click();
+    await page.waitForSelector('[data-testid="placement-result"]');
+  }
+  await page.goto('/dashboard');
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
 test.describe('the exit criterion', () => {
-  test('sign up, land on the dashboard, sign out', async ({ page }) => {
+  test('sign up, get placed, land on the dashboard, sign out', async ({ page }) => {
     const email = freshEmail('happy');
 
     await signUp(page, email);
 
-    // Landed on the dashboard.
-    await expect(page).toHaveURL(/\/dashboard$/);
+    // Phase 8 puts onboarding first. The dashboard is still where you end up.
+    await reachDashboard(page);
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeAttached();
 
     // It is the *empty* dashboard: six modes, all inert, and honest zeroes.
@@ -61,7 +83,7 @@ test.describe('the exit criterion', () => {
 
   test('and the session actually ended — going back does not restore it', async ({ page }) => {
     await signUp(page, freshEmail('logout'));
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await reachDashboard(page);
 
     await page.getByRole('button', { name: 'Sign out' }).click();
     await expect(page).toHaveURL(/\/sign-in$/);
@@ -87,7 +109,9 @@ test.describe('protected routes', () => {
     await page.getByLabel('Password').fill(PASSWORD);
     await page.getByRole('button', { name: 'Sign in' }).click();
 
-    await expect(page).toHaveURL(/\/dashboard$/);
+    // The `next` param returns them to /dashboard; onboarding then intercepts,
+    // which is the redirect working rather than the return being lost.
+    await expect(page).toHaveURL(/\/(dashboard|onboarding)$/);
   });
 
   test('the root path routes by session rather than showing a page', async ({ page }) => {
@@ -119,7 +143,7 @@ test.describe('the second line of defense', () => {
 
     const email = freshEmail('revoked');
     await signUp(page, email);
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await reachDashboard(page);
 
     const admin = createClient(SUPABASE_URL!, SERVICE_KEY!);
     const { data: users } = await admin.auth.admin.listUsers();
@@ -182,7 +206,9 @@ test.describe('the Phase 4 contract', () => {
 
     const email = freshEmail('tz');
     await signUp(page, email);
-    await expect(page).toHaveURL(/\/dashboard$/);
+    // Onboarding or the dashboard — this test is about what the trigger wrote,
+    // not about where the browser landed.
+    await page.waitForURL(/\/(dashboard|onboarding)$/);
 
     const admin = createClient(SUPABASE_URL!, SERVICE_KEY!);
     const { data: users } = await admin.auth.admin.listUsers();

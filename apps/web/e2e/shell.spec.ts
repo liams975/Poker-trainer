@@ -97,6 +97,16 @@ test.describe('keyboard focus', () => {
     await page.getByLabel('Email').fill(`e2e-focus-${Date.now()}@test.local`);
     await page.getByLabel('Password').fill('correct horse battery staple');
     await page.getByRole('button', { name: 'Create account' }).click();
+
+    // Phase 8 puts the placement diagnostic in front of the dashboard for a new
+    // account. Skipping is one click; the dashboard is what this test is about.
+    await page.waitForURL(/\/(dashboard|onboarding)$/);
+    await page.goto('/onboarding');
+    if (new URL(page.url()).pathname === '/onboarding') {
+      await page.getByRole('button', { name: /Skip, start at the beginning/ }).click();
+      await page.waitForSelector('[data-testid="placement-result"]');
+    }
+    await page.goto('/dashboard');
     await expect(page).toHaveURL(/\/dashboard$/);
 
     const stops = await tabThrough(page, 6);

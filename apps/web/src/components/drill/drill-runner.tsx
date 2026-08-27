@@ -8,6 +8,7 @@ import type {
   RangeChart,
   Rationale,
   SessionSpot,
+  SessionSummary as Summary,
 } from '@poker/engine';
 import {
   createChartRegistry,
@@ -89,10 +90,28 @@ interface Reveal {
 
 type Phase = 'configuring' | 'running' | 'finished';
 
+export type RunnerMode = 'quick' | 'focused' | 'lesson' | 'placement' | 'study';
+
+export interface FinishedSession {
+  sessionId: string | null;
+  summary: Summary;
+}
+
 export interface DrillRunnerProps {
   chartSet: ChartSet;
   templates: readonly { id: string; template: DrillTemplate }[];
-  mode: 'quick' | 'focused';
+  mode: RunnerMode;
+  /**
+   * Skips the config screen and starts immediately.
+   *
+   * This is how a lesson's embedded drill and the placement diagnostic reuse
+   * the runner rather than reimplementing it. One grading path, not two: a
+   * parallel mini-runner could drift from the real one, and the whole risk of
+   * a teaching app is contradicting yourself between the lesson and the drill.
+   */
+  preset?: SessionConfig | undefined;
+  /** When given, the caller renders the ending instead of the built-in summary. */
+  onFinished?: ((result: FinishedSession) => void) | undefined;
 }
 
 function SpotTimer({ startedAt }: { startedAt: number }) {
@@ -115,7 +134,13 @@ function SpotTimer({ startedAt }: { startedAt: number }) {
   );
 }
 
-export function DrillRunner({ chartSet, templates, mode }: DrillRunnerProps) {
+export function DrillRunner({
+  chartSet,
+  templates,
+  mode,
+  preset,
+  onFinished,
+}: DrillRunnerProps) {
   const registry = useMemo(() => createChartRegistry(chartSet), [chartSet]);
   const strategy = useMemo(
     () => createChartStrategy({ registry, chartVersion: chartSet.version }),
@@ -231,6 +256,19 @@ export function DrillRunner({ chartSet, templates, mode }: DrillRunnerProps) {
     [mode, registry, templates],
   );
 
+  /**
+   * A preset session starts itself. The effect is the right place for it: this
+   * is a network call reaching out to an external system on mount, not a piece
+   * of derived state. The ref stops React's development double-invoke from
+   * opening two sessions.
+   */
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (preset === undefined || autoStarted.current) return;
+    autoStarted.current = true;
+    void start(preset);
+  }, [preset, start]);
+
   const answer = useCallback(
     async (choice: Choice) => {
       if (current === undefined || reveal !== null || recommendation === null) return;
@@ -331,7 +369,12 @@ export function DrillRunner({ chartSet, templates, mode }: DrillRunnerProps) {
     pending.current = [];
     setFinishing(false);
     setPhase('finished');
-  }, [sessionId]);
+
+    // Called here rather than from an effect on `phase`: this is the event that
+    // ends the session, so the callback belongs on the same path as the state
+    // change instead of chasing it a render later.
+    onFinished?.({ sessionId, summary: summariseSession(results) });
+  }, [onFinished, results, sessionId]);
 
   const advance = useCallback(() => {
     if (config === null) return;
@@ -432,6 +475,20 @@ export function DrillRunner({ chartSet, templates, mode }: DrillRunnerProps) {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [advance, answer, choices, current, helpOpen, phase, reveal]);
+
+  // With a preset, the caller owns the ending; the built-in summary and config
+  // screen would both be wrong inside a lesson.
+  if (phase === 'finished' && onFinished) {
+    return null;
+  }
+
+  if (phase === 'configuring' && preset !== undefined) {
+    return (
+      <p className="text-sm text-ink-muted" role="status">
+        Setting up your spots…
+      </p>
+    );
+  }
 
   if (phase === 'configuring') {
     return (

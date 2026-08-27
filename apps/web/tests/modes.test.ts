@@ -22,15 +22,15 @@ describe('dashboard modes', () => {
    * The card is the only route into the drill runner from the dashboard, so a
    * mode left marked "coming in Phase 7" would hide a shipped feature.
    */
-  it('has the Phase 7 drill modes live', () => {
-    for (const slug of ['quick-drill', 'focused-drill']) {
+  it('has the shipped modes live', () => {
+    for (const slug of ['quick-drill', 'focused-drill', 'range-explorer', 'continue-learning']) {
       const mode = MODES.find((m) => m.slug === slug);
       expect(mode?.availableIn).toBeNull();
     }
   });
 
-  it('still gates the modes Phase 7 did not build', () => {
-    for (const slug of ['continue-learning', 'weak-spots', 'session-review']) {
+  it('still gates the modes that are not built', () => {
+    for (const slug of ['weak-spots', 'session-review']) {
       const mode = MODES.find((m) => m.slug === slug);
       expect(mode?.availableIn).not.toBeNull();
     }

@@ -14,6 +14,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import {
+  SKILL_TAGS,
+  loadChartSet,
+  loadDrillTemplates,
+  loadTracks,
+} from '@poker/content';
+import { orderedLessons } from '@poker/engine';
+
 const URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -258,13 +266,21 @@ describe('anonymous requests', () => {
 });
 
 describe('content is readable and seeded', () => {
-  // Exit criterion: "pnpm db:reset rebuilds from scratch and seeds content."
-  // These counts are what packages/content actually holds.
+  /**
+   * Exit criterion: "pnpm db:reset rebuilds from scratch and seeds content."
+   *
+   * Counts are derived from `packages/content` rather than written as literals.
+   * The literal version broke the moment Phase 8 added the `concept.*` tags —
+   * which is a content change, not a regression, and a test that fails for that
+   * is a test that will be edited to whatever number makes it pass.
+   */
   it.each([
-    ['skill_tags', 10],
+    ['skill_tags', SKILL_TAGS.length],
     ['range_chart_sets', 1],
-    ['range_charts', 10],
-    ['drill_templates', 8],
+    ['range_charts', loadChartSet().charts.length],
+    ['drill_templates', loadDrillTemplates().length],
+    ['tracks', loadTracks().length],
+    ['lessons', loadTracks().reduce((n, t) => n + orderedLessons(t).length, 0)],
   ])('%s has %i rows after a sync', async (table, expected) => {
     const { count, error } = await alice.db
       .from(table as string)

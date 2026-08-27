@@ -27,6 +27,7 @@
  * Usage:
  *   pnpm content:sync
  *   pnpm content:sync --confirm-remote     # against a deployed project
+ *   pnpm content:sync --drop-progress      # allow retiring a lesson people started
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -37,7 +38,9 @@ import {
   SKILL_TAGS,
   loadChartSet,
   loadDrillTemplates,
+  loadTracks,
 } from '@poker/content';
+import { orderedLessons } from '@poker/engine';
 
 // '[::1]' with the brackets: that is what `new URL(...).hostname` returns for
 // an IPv6 literal, so the bare '::1' form would never match anything.
@@ -112,6 +115,7 @@ async function verifyCount(
 
 async function main(): Promise<void> {
   const confirmRemote = process.argv.includes('--confirm-remote');
+  const dropProgress = process.argv.includes('--drop-progress');
   const url = required('SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL');
   const serviceRoleKey = required('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -121,6 +125,7 @@ async function main(): Promise<void> {
   // must never reach a database, and these throw listing every problem.
   const chartSet = loadChartSet();
   const templates = loadDrillTemplates();
+  const tracks = loadTracks();
 
   const db = createClient(url, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -225,6 +230,117 @@ async function main(): Promise<void> {
   if (templatePruneError) throw new Error(`drill_templates (pruning): ${templatePruneError.message}`);
 
   await verifyCount(db, 'drill_templates', templates.length);
+
+  // 5. The learning track: tracks -> modules -> lessons, each needing its
+  //    parent's id before it can be written.
+  let moduleTotal = 0;
+  let lessonTotal = 0;
+
+  for (const track of tracks) {
+    const { data: trackRow, error: trackError } = await db
+      .from('tracks')
+      .upsert(
+        {
+          slug: track.slug,
+          title: track.title,
+          description: track.description ?? null,
+          sort_order: track.sortOrder,
+          published: track.published,
+        },
+        { onConflict: 'slug' },
+      )
+      .select('id')
+      .single();
+    if (trackError) throw new Error(`tracks: ${trackError.message}`);
+
+    const { data: moduleRows, error: moduleError } = await db
+      .from('modules')
+      .upsert(
+        track.modules.map((module) => ({
+          track_id: trackRow.id,
+          slug: module.slug,
+          title: module.title,
+          sort_order: module.sortOrder,
+        })),
+        { onConflict: 'track_id,slug' },
+      )
+      .select('id, slug');
+    if (moduleError) throw new Error(`modules: ${moduleError.message}`);
+
+    const moduleIdBySlug = new Map((moduleRows ?? []).map((row) => [String(row.slug), String(row.id)]));
+
+    const lessonRowsToWrite = track.modules.flatMap((module) =>
+      module.lessons.map((lesson) => ({
+        module_id: moduleIdBySlug.get(module.slug)!,
+        slug: lesson.slug,
+        title: lesson.title,
+        // Everything that is not a first-class column goes in `body`, which is
+        // the shape `lessons` was designed around.
+        body: { summary: lesson.summary, blocks: lesson.blocks },
+        skill_tags: lesson.skillTags,
+        sort_order: lesson.sortOrder,
+        version: lesson.version,
+      })),
+    );
+
+    const { data: lessonRows, error: lessonError } = await db
+      .from('lessons')
+      .upsert(lessonRowsToWrite, { onConflict: 'module_id,slug' })
+      .select('id');
+    if (lessonError) throw new Error(`lessons: ${lessonError.message}`);
+
+    const keptLessonIds = (lessonRows ?? []).map((row) => String(row.id));
+
+    /**
+     * Pruning a lesson is not like pruning a chart.
+     *
+     * `lesson_progress.lesson_id` is `on delete cascade`, so deleting a retired
+     * lesson silently takes real user progress with it — where
+     * `drill_attempts.template_id` is `on delete set null` and merely orphans
+     * the history. Losing somebody's place in the course to a content edit is
+     * not a thing to discover afterwards, so it is counted first and refused.
+     */
+    const { data: doomed, error: doomedError } = await db
+      .from('lessons')
+      .select('id')
+      .in('module_id', [...moduleIdBySlug.values()])
+      .not('id', 'in', inList(keptLessonIds));
+    if (doomedError) throw new Error(`lessons (finding retired): ${doomedError.message}`);
+
+    const doomedIds = (doomed ?? []).map((row) => String(row.id));
+
+    if (doomedIds.length > 0) {
+      const { count, error: progressError } = await db
+        .from('lesson_progress')
+        .select('*', { count: 'exact', head: true })
+        .in('lesson_id', doomedIds);
+      if (progressError) throw new Error(`lesson_progress: ${progressError.message}`);
+
+      if ((count ?? 0) > 0 && !dropProgress) {
+        throw new Error(
+          `retiring ${doomedIds.length} lesson(s) would cascade-delete ${count} lesson_progress ` +
+            'row(s). Re-run with --drop-progress if that is genuinely intended.',
+        );
+      }
+
+      const { error: pruneError } = await db.from('lessons').delete().in('id', doomedIds);
+      if (pruneError) throw new Error(`lessons (pruning): ${pruneError.message}`);
+    }
+
+    const { error: modulePruneError } = await db
+      .from('modules')
+      .delete()
+      .eq('track_id', trackRow.id)
+      .not('id', 'in', inList([...moduleIdBySlug.values()]));
+    if (modulePruneError) throw new Error(`modules (pruning): ${modulePruneError.message}`);
+
+    moduleTotal += track.modules.length;
+    lessonTotal += orderedLessons(track).length;
+  }
+
+  await verifyCount(db, 'tracks', tracks.length);
+  await verifyCount(db, 'modules', moduleTotal);
+  await verifyCount(db, 'lessons', lessonTotal);
 
   console.log(`done — chart set ${CHART_SET_VERSION}`);
 }

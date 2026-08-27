@@ -10,12 +10,14 @@ import {
   handStrategy,
   lookupChart,
   chartKeyOf,
+  orderedLessons,
   toWeights,
   validateChartSet,
 } from '@poker/engine';
 import type { RangeChart } from '@poker/engine';
 
 import { CHART_SET_VERSION, loadChartRegistry, loadChartSet, rawChartSet } from '../src/chart-set';
+import { loadTracks } from '../src/lessons';
 import { SKILL_TAGS, isSkillTag } from '../src/skill-tags';
 
 /**
@@ -294,7 +296,14 @@ describe('skill tags', () => {
   it('declares no unused tags', () => {
     // A vocabulary that drifts ahead of the content silently breaks weak-spot
     // detection, which is the whole reason docs/04 makes it a closed list.
-    const used = new Set(set.charts.flatMap((c) => [...c.skillTags]));
+    //
+    // "Used" spans charts *and* lessons since Phase 8: the `concept.*` tags name
+    // ideas that a lesson teaches and no chart carries. Narrowing this to charts
+    // would forbid ever tagging a concept, which is the opposite of the point.
+    const used = new Set([
+      ...set.charts.flatMap((c) => [...c.skillTags]),
+      ...loadTracks().flatMap((t) => orderedLessons(t).flatMap((l) => [...l.skillTags])),
+    ]);
 
     expect([...SKILL_TAGS].filter((tag) => !used.has(tag))).toEqual([]);
   });

@@ -33,7 +33,7 @@ async function post<T>(url: string, body: unknown, method = 'POST'): Promise<T> 
 }
 
 export interface StartSessionRequest {
-  mode: 'quick' | 'focused' | 'weak_spots' | 'lesson' | 'study';
+  mode: 'quick' | 'focused' | 'weak_spots' | 'lesson' | 'study' | 'placement';
   seed: number;
   spotsPlanned: number | null;
   templateSlugs: readonly string[];

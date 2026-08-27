@@ -25,7 +25,8 @@ export const MODES: readonly Mode[] = [
     title: 'Continue Learning',
     description: 'Resume the track — next lesson and its drills.',
     href: '/learn',
-    availableIn: 8,
+    // Live from Phase 8.
+    availableIn: null,
   },
   {
     slug: 'quick-drill',

@@ -58,7 +58,27 @@ async function signIn(page: Page): Promise<void> {
     .fill(`e2e-range-${Date.now()}-${process.pid}-${sequence}@test.local`);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Create account' }).click();
-  await page.waitForURL(/\/dashboard$/);
+
+  /**
+   * Phase 8 sends a new account to onboarding before the dashboard. Skipping is
+   * one click and leaves the reader at the start of the track, which is what
+   * these tests want — they are about the explorer, not the course.
+   *
+   * Navigated to explicitly rather than by inspecting the post-signup URL: the
+   * sign-up action lands on /dashboard and the server redirect follows, so
+   * reading the pathname straight afterwards races it and sees /dashboard.
+   */
+  await page.waitForURL(/\/(dashboard|onboarding)$/);
+
+  // `goto` follows redirects, so the URL is final once it resolves — an
+  // already-onboarded account lands on /learn instead. `count()` does not
+  // auto-wait, so branching on it here read 0 before the page had rendered;
+  // `click()` does.
+  await page.goto('/onboarding');
+  if (new URL(page.url()).pathname === '/onboarding') {
+    await page.getByRole('button', { name: /Skip, start at the beginning/ }).click();
+    await page.waitForSelector('[data-testid="placement-result"]');
+  }
 }
 
 async function openExplorer(page: Page): Promise<void> {
@@ -82,6 +102,9 @@ async function renderedMixes(page: Page): Promise<Record<string, string>> {
 test.describe('every seeded chart renders correctly', () => {
   test('the dashboard now offers the explorer as a live mode', async ({ page }) => {
     await signIn(page);
+    // signIn leaves the reader on the onboarding confirmation; this test is
+    // about the dashboard card, so go there explicitly.
+    await page.goto('/dashboard');
 
     await page.getByRole('link', { name: /Range Explorer/ }).click();
 

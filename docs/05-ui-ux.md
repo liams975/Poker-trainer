@@ -415,3 +415,71 @@ accuracy stats without discarding it.
   of `drill_attempts` is scoped to the reader by RLS, so a forged `session_id`
   cannot put rows into anyone else's history. Worth a constraint if session
   aggregates ever get computed server-side.
+
+---
+
+## What Phase 8 decided
+
+The track is live. Ten lessons, three modules, and a placement diagnostic in
+front of them.
+
+### Placement is computed on the server, from answers the server graded
+
+`docs/01-architecture.md` §3 permits client-computed values in v1 on one
+condition — that they "never gate money or **unlock content**". A placement
+decides how much of the course opens, so the browser posts a session id and
+nothing else. `POST /api/onboarding/placement` reads that session's
+`drill_attempts` back under RLS and derives the answer itself.
+
+The same rule made lesson completion a server decision: `setLessonStatus`
+recomputes the unlock state before writing, so posting a completion for the
+final lesson is refused rather than opening the whole track. Without it the
+ordering would be enforced only by which links the UI happened to render.
+
+### Placement never writes progress it did not observe
+
+The obvious implementation marks skipped lessons `completed` so the next one
+unlocks. That writes a record saying you read something you never opened.
+Instead `lessonStates()` takes `placementSkillTag` as an input, and takes the
+**maximum** of placement and real progress — so `lesson_progress` stays a
+truthful log, a later weaker placement cannot re-lock finished material, and
+"why is this unlocked" has exactly one answer.
+
+### Placement groups are lesson-sized, not tag-sized
+
+Ten drillable tags at three answers each is a thirty-spot diagnostic before
+anything can be demonstrated. A shorter one would leave every tag untested,
+place everybody at lesson one, and look exactly like a working feature. Six
+lesson-sized groups is a decision a 24-spot diagnostic can actually support.
+
+The bias is deliberately one-directional: an untested group counts as *not*
+demonstrated. Placing someone too far back costs fifteen minutes; too far
+forward costs them the lesson that would have fixed the leak they arrived with.
+
+### The prose is tested against the charts it describes
+
+`packages/content/tests/lessons.test.ts` extracts every one-decimal percentage
+written in the lessons and requires each to be a figure some seeded chart
+actually produces, and requires every hand a `hands` block highlights to be
+genuinely mixed.
+
+The first version of both checks was **vacuous**, and mutation testing is what
+found it: asserting "43.4% appears somewhere" passed with the figure changed to
+48.0%, because the same number was quoted in a second lesson. Presence is not
+accuracy. The check now runs in the direction that catches a bad edit.
+
+### Callouts and lesson chrome are monochrome
+
+A lesson page puts a warning box a few hundred pixels above a 13x13 grid.
+Colouring the warning would introduce a sixth meaning-bearing hue next to five
+that mean actions, so tone is carried by a glyph and a label instead.
+
+### Still open
+
+- **Onboarding is a hard gate on the dashboard.** A new account is redirected
+  once, and skipping is one click. It changes Phase 5's "sign up, land on an
+  empty dashboard" to "sign up, get placed, land on the dashboard".
+- **The concept lessons have no drill.** `concept.*` tags name ideas, and no
+  chart or template carries one, so they cannot be practised or placed into.
+- **No lesson-to-explorer links.** A `range` block renders the grid inline but
+  does not offer "open this in the explorer".
