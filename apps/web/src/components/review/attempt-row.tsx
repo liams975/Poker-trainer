@@ -32,11 +32,34 @@ export function AttemptRow({ attempt, currentChartVersion }: {
   const style = TIER_STYLES[attempt.grade];
 
   const mix = orderedMix(attempt.frequencies);
-  const chosen = attempt.frequencies.find(
-    (entry) =>
-      entry.action === attempt.userAction &&
-      (attempt.userSize === null || entry.size === undefined || entry.size === attempt.userSize),
-  );
+
+  /**
+   * The entry the answer corresponds to — matched on the **action**, falling
+   * back to the highest-frequency entry for it when the size differs.
+   *
+   * Phase 7 fixed exactly this in the drill runner and it came straight back
+   * here. Matching on action *and* size means raising to 10bb against a chart
+   * that raises to 11bb finds nothing, and the row then reads "Also fine — not
+   * in the mix", which contradicts itself in the same sentence. `gradeAnswer`
+   * grades the action and penalises the size separately; this has to agree with
+   * it, and it is the size mismatch that is the interesting part, not the
+   * absence of a match.
+   */
+  const forAction = attempt.frequencies.filter((entry) => entry.action === attempt.userAction);
+  const chosen =
+    forAction.find(
+      (entry) =>
+        attempt.userSize === null || entry.size === undefined || entry.size === attempt.userSize,
+    ) ?? [...forAction].sort((a, b) => b.freq - a.freq)[0];
+
+  /** Set when the action was in the mix but at a different size. */
+  const sizeMismatch =
+    chosen !== undefined &&
+    attempt.userSize !== null &&
+    chosen.size !== undefined &&
+    chosen.size !== attempt.userSize
+      ? chosen.size
+      : null;
   const stale = attempt.chartVersion !== currentChartVersion;
 
   // `rebuildSpot` refuses a scenario that does not describe a real spot, and a
@@ -76,7 +99,10 @@ export function AttemptRow({ attempt, currentChartVersion }: {
 
         <span className="flex-1 text-sm text-ink-muted">
           You {actionLabel(attempt.userAction as never, attempt.userSize ?? undefined)}
-          {chosen ? ` — ${percent(chosen.freq)} of the mix` : ' — not in the mix'}
+          {chosen === undefined
+            ? ' — not in the mix'
+            : ` — ${percent(chosen.freq)} of the mix`}
+          {sizeMismatch === null ? '' : `, at ${sizeMismatch}bb here`}
         </span>
 
         <span className="w-20 shrink-0 text-right font-mono text-xs text-ink-muted">

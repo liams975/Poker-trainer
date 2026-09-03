@@ -62,9 +62,6 @@ export function AccuracyChart({ points }: { points: readonly DayPoint[] }) {
   });
   if (current.length > 1) segments.push(current.join(' '));
 
-  const first = points.findIndex((p) => p.accuracy !== null);
-  const last = points.length - 1 - [...points].reverse().findIndex((p) => p.accuracy !== null);
-
   return (
     <figure className="flex flex-col gap-3" data-testid="accuracy-chart">
       <svg
@@ -112,24 +109,40 @@ export function AccuracyChart({ points }: { points: readonly DayPoint[] }) {
               key={point.day}
               cx={x(index)}
               cy={y(point.accuracy)}
-              r={2.5}
+              // Bigger when it is the only point: one day of history draws no
+              // line at all, so the dot is the whole chart and a 2.5px dot
+              // reads as a rendering fault rather than as data.
+              r={played.length === 1 ? 4 : 2.5}
               fill="var(--color-ink)"
             />
           ),
         )}
 
-        {[first, last].map((index, i) => (
-          <text
-            key={`${index}-${i}`}
-            x={x(index)}
-            y={HEIGHT - 6}
-            textAnchor={i === 0 ? 'start' : 'end'}
-            className="fill-ink-muted"
-            style={{ fontSize: 10 }}
-          >
-            {shortDay(points[index]!.day)}
-          </text>
-        ))}
+        {/*
+          The ends of the *window*, not of the data.
+          Labelling the first and last day with answers put both labels on top
+          of each other the moment somebody had practised on only one day —
+          which is every new account's first week. The window's ends are always
+          apart, and they also say what the axis actually spans.
+        */}
+        <text
+          x={x(0)}
+          y={HEIGHT - 6}
+          textAnchor="start"
+          className="fill-ink-muted"
+          style={{ fontSize: 10 }}
+        >
+          {shortDay(points[0]!.day)}
+        </text>
+        <text
+          x={x(points.length - 1)}
+          y={HEIGHT - 6}
+          textAnchor="end"
+          className="fill-ink-muted"
+          style={{ fontSize: 10 }}
+        >
+          {shortDay(points.at(-1)!.day)}
+        </text>
       </svg>
 
       {/* The chart's accessible equivalent, and the reason `desc` above does
