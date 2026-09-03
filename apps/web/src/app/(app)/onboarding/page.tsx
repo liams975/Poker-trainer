@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { TrackEvent } from '@/components/analytics/track-event';
 import { PlacementFlow } from '@/components/onboarding/placement-flow';
 import { fetchChartSet } from '@/lib/charts/queries';
 import { fetchDrillTemplates } from '@/lib/drills/queries';
@@ -30,9 +31,12 @@ export default async function Page() {
   if (reader.onboardingCompleted) redirect('/learn');
 
   return (
-    <PlacementFlow
-      chartSet={chartSet}
-      templates={templates.map((entry) => ({ id: entry.id, template: entry.template }))}
-    />
+    <>
+      <TrackEvent event="onboarding_started" />
+      <PlacementFlow
+        chartSet={chartSet}
+        templates={templates.map((entry) => ({ id: entry.id, template: entry.template }))}
+      />
+    </>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -20,8 +21,10 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Sentry lands in Phase 10; until then the console is the report.
-    console.error(error);
+    // The digest shown below is Next's correlation id; reporting the error here
+    // is what makes it resolve to something an operator can open. Without this
+    // the reference on screen would be a number with nothing behind it.
+    Sentry.captureException(error);
   }, [error]);
 
   return (

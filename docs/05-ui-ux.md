@@ -562,3 +562,106 @@ one surface, and shipping a third of it now means shipping it three times.
 - **An abandoned session leaves `skill_stats` stale** until the next session
   closes. The attempts are stored, so nothing is lost — the rollup is simply
   behind until something recomputes it.
+
+---
+
+## What Phase 10 decided
+
+The last three surfaces: Session Review, ⌘K, and a landing page. Plus the
+accessibility audit this document's quality floor has been promising since
+Phase 5.
+
+### The accessibility audit is a test, and it found six real things
+
+`e2e/a11y.spec.ts` runs axe over every route on every CI run. An audit is a
+claim about one afternoon; a spec is a claim that keeps holding. It was worth
+more than expected, because `eslint-plugin-jsx-a11y` had been running since
+Phase 5 and catches none of what axe does — it reads each component in
+isolation, and most of these only exist once components are composed.
+
+What it found:
+
+1. **The range grid had `role="grid"` with no rows.** Cells carried
+   `role="gridcell"`, the container carried `role="grid"`, and nothing carried
+   `role="row"` — which is required between them. A screen reader announced 169
+   buttons with no row or column context at all, in a matrix whose entire
+   meaning is positional. Two critical violations, shipped since Phase 6. Fixed
+   with `display: contents` row wrappers, which add semantics and no layout box.
+2. **The TODAY strip's `<dl>` was malformed** — a `<p>` sibling inside each
+   term/definition group breaks the association between them.
+3. **Locked lessons** at `text-ink-muted opacity-60` and **folded seats** at
+   `opacity-40` were both under the 4.5:1 contrast floor. Opacity on
+   already-muted text is the recurring version of this mistake; both now recede
+   by colour instead, which is what the design meant anyway.
+4. **The command palette's listbox was wrong twice** — `role="listbox"` strips
+   the `<ul>`'s list semantics, so its `<li>` children were no longer in a list,
+   and an `option` must be a direct child of the listbox or a `group` within it.
+5. **The palette's scroll region was mouse-only**, and the bug behind that flag
+   was real: focus stays in the input under `aria-activedescendant`, so
+   arrowing past the eighth entry moved the highlight below the fold and the
+   list sat still.
+
+The scan also caught a **500 on `/review`** by way of a document with no
+`<title>` — a client component was importing a value from the query module,
+which drags the server Supabase client into the browser bundle. That is the
+second time this exact shape has bitten (the first was `lib/progress/types.ts`
+in Phase 9), so the client-safe types now live in `lib/review/filters.ts` and
+the reason is written at the top of it.
+
+### Session Review replays rather than describes
+
+An attempt row expands into the real spot — the seat map, the hole cards, the
+same components the drill uses — rebuilt from the stored scenario. A prose
+summary of a spot drifts from what you were actually shown; a replay cannot.
+
+**The distribution shown is the one stored on the row**, not one re-derived from
+today's charts. `chart_version` exists so a retune cannot rewrite history, and
+a row graded against an older set says so.
+
+And it never names a right answer. The roadmap calls it a "mistake log" and it
+is deliberately not filtered to mistakes: two of the four tiers are defensible
+answers, so a list of only the other two would assert a pass/fail split the
+engine does not believe. An e2e test greps the rendered log for "correct",
+"wrong" and "right answer", because a review screen is exactly where somebody
+would add that column.
+
+### The accuracy chart is SVG, with a table underneath
+
+DOM over canvas, per `docs/01` — it inherits the theme, can be asserted on, and
+carries real text. A day with no practice draws a **gap**, not a zero: joining
+across it would show a line plunging to the floor every rest day, which reads
+as "got much worse" rather than "did not play". The accessible equivalent is a
+real table, not an `aria-label` summarising a shape.
+
+### ⌘K needed no dependency
+
+`cmdk` is the usual reach. The list is eleven entries derived from `MODES` and
+the unlocked lessons, and this repo already owned its keyboard layer — the two
+collisions worth worrying about (⌘K during a drill; typing `f` in the palette)
+were both already handled by `isShortcutTarget` from Phase 7, which refuses
+modifier chords and refuses events targeting an `<input>`.
+
+Locked lessons are omitted rather than greyed out. A jump list that takes you
+somewhere refusing to open is worse than one that does not mention it.
+
+### The landing page makes one argument and shows it working
+
+What it is, who it is for, three things it does, and a **real interactive range
+grid** — not a screenshot. The argument the page makes is that ranges are
+frequencies rather than lists, and the most convincing way to make it is to let
+somebody click `AJo` and see 60/40. It opens on a genuinely mixed hand for that
+reason; a pure hand would illustrate the opposite of the sentence above it.
+
+No testimonials, no user counts, no pricing for a product with no paywall. A
+`/privacy` page says plainly what PostHog and Sentry collect, because shipping
+two third-party trackers without mentioning them is not a thing to do quietly.
+
+### Still open
+
+- **No achievement gallery.** Unlocked badges appear on the summary that
+  unlocked them and nowhere else.
+- **The daily goal is fixed at 20** and there is still no settings surface.
+- **The mistake log has no pagination** — it shows the most recent 25 and the
+  filters are how you reach further back.
+- **Session Review has no CSV export.** `drill_attempts` is the analytics
+  goldmine and a power user will eventually want it out.

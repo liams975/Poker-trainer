@@ -30,6 +30,15 @@ export {
 } from './stats';
 
 export type {
+  DayPoint,
+  HistoryAttempt,
+  HistoryWindow,
+  SessionDigest,
+  TagBreakdown,
+} from './history';
+export { MAX_HISTORY_DAYS, accuracyOverTime, sessionDigest } from './history';
+
+export type {
   Achievement,
   AchievementCriteria,
   AchievementError,

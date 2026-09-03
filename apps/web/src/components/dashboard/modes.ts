@@ -64,9 +64,7 @@ export const MODES: readonly Mode[] = [
     title: 'Session Review',
     description: 'History, mistake log, accuracy over time.',
     href: '/review',
-    // Was marked 9, which contradicted docs/02-roadmap.md — history, the
-    // mistake log and accuracy-over-time are one Phase 10 surface, and
-    // splitting them would ship three partial versions of the same page.
-    availableIn: 10,
+    // Live from Phase 10, the last of the six.
+    availableIn: null,
   },
 ];

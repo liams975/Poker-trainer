@@ -3,14 +3,27 @@ packages:
   - 'apps/*'
   - 'scripts'
 
-# pnpm blocks install-time scripts unless a package is allowed here. esbuild's
-# is what puts its platform-specific binary in place, and without it `tsx`
-# cannot run at all — which means the content sync script cannot run.
-# Nothing else in the tree needs a build script, and that is worth keeping
-# true: this list is the review surface for arbitrary code at install time.
+# pnpm blocks install-time scripts unless a package is allowed here. This list
+# is the review surface for arbitrary code running at install time, so every
+# entry carries its reason and the default answer is no.
+#
+#   esbuild        — its script puts the platform-specific binary in place, and
+#                    without it `tsx` cannot run at all, which means the content
+#                    sync script cannot run.
+#   @sentry/cli    — downloads the sentry-cli binary that uploads source maps
+#                    during `next build`. Without it Sentry still captures every
+#                    error; the stack traces just point at minified output,
+#                    which makes them close to useless. Phase 10.
+#   core-js        — postinstall prints a funding notice and nothing else.
+#                    Denied, because a package that does not need to run code
+#                    should not be given permission to.
 allowBuilds:
+  '@sentry/cli': true
+  core-js: false
   esbuild: true
 
 minimumReleaseAgeExclude:
   - '@tanstack/query-core@5.102.5'
   - '@tanstack/react-query@5.102.5'
+  - '@posthog/types@1.408.0'
+  - posthog-js@1.425.1

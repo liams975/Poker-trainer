@@ -26,10 +26,16 @@ function Stat({
   note?: string | undefined;
 }) {
   return (
+    // The note lives *inside* the <dd>, not beside it. A <dl>'s grouping <div>
+    // may contain only <dt> and <dd> elements — a third sibling breaks the
+    // association between term and definition, which axe flags as a serious
+    // violation and a screen reader simply reads wrong.
     <div className="flex flex-col gap-1">
       <dt className="text-xs uppercase tracking-wider text-ink-muted">{label}</dt>
-      <dd className={`font-mono text-xl ${accent ? 'text-accent' : 'text-ink'}`}>{value}</dd>
-      {note ? <p className="max-w-48 text-xs text-ink-muted">{note}</p> : null}
+      <dd className="flex flex-col gap-1">
+        <span className={`font-mono text-xl ${accent ? 'text-accent' : 'text-ink'}`}>{value}</span>
+        {note ? <span className="max-w-48 text-xs text-ink-muted">{note}</span> : null}
+      </dd>
     </div>
   );
 }

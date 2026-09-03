@@ -1,13 +1,24 @@
 'use client';
 
+import * as Sentry from '@sentry/nextjs';
+import { useEffect } from 'react';
+
 /**
  * Catches errors thrown by the root layout itself, which error.tsx cannot —
  * it renders *inside* that layout. So this file has to supply its own <html>
  * and <body>, and cannot rely on globals.css having loaded. Hence inline
  * styles rather than Tailwind classes: this is the one place in the app where
  * the stylesheet may be the thing that failed.
+ *
+ * It is also the one place where reporting matters most and is least likely to
+ * work: whatever broke the root layout may well have broken the Sentry client
+ * too. Reported anyway — a chance of a report beats none.
  */
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
     <html lang="en">
       <body

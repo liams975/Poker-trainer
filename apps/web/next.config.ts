@@ -2,6 +2,9 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// From `/config`, not the package root: the root re-export is deprecated in
+// v10 and stops working in v11, and it warns on every single build until then.
+import { withSentryConfig } from '@sentry/nextjs/config';
 import type { NextConfig } from 'next';
 
 /**
@@ -46,4 +49,45 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@poker/engine', '@poker/content'],
 };
 
-export default nextConfig;
+/**
+ * Sentry wraps the config rather than being configured inside it, because the
+ * source-map upload is a build step, not a runtime setting.
+ *
+ * With no `SENTRY_AUTH_TOKEN` — every local build, and CI — the plugin skips
+ * the upload and the build is otherwise unchanged. So this is not something
+ * that has to be conditionally applied; it is inert without credentials.
+ *
+ * Without the upload, Sentry still receives every error. The stack traces just
+ * point into minified output, which makes them close to useless — which is why
+ * `@sentry/cli` is the one package besides esbuild allowed to run an install
+ * script in pnpm-workspace.yaml.
+ */
+export default withSentryConfig(nextConfig, {
+  // Spread rather than assigned, because `exactOptionalPropertyTypes` draws a
+  // distinction the plugin's own types rely on: an absent key means "work it
+  // out", an explicit `undefined` does not type-check.
+  ...(process.env.SENTRY_ORG ? { org: process.env.SENTRY_ORG } : {}),
+  ...(process.env.SENTRY_PROJECT ? { project: process.env.SENTRY_PROJECT } : {}),
+  ...(process.env.SENTRY_AUTH_TOKEN ? { authToken: process.env.SENTRY_AUTH_TOKEN } : {}),
+
+  // The plugin is chatty on every build otherwise, and a build log nobody
+  // reads is a build log that hides the warning that mattered.
+  silent: !process.env.CI,
+
+  // Uploads maps for the workspace packages too. The engine is where the
+  // correctness-critical code lives, so a trace that stops at its boundary
+  // would stop exactly where it gets interesting.
+  widenClientFileUpload: true,
+
+  // Strips the maps from the deployed bundle after upload: Sentry can resolve
+  // a trace, a visitor's devtools cannot read the source.
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+
+  // Routes browser reports through the app's own origin, so an ad blocker
+  // stopping requests to sentry.io does not silently stop error reporting.
+  tunnelRoute: '/monitoring',
+
+  // `disableLogger: true` is the older spelling of this and is deprecated.
+  // Strips Sentry's own debug logging from the production bundle.
+  webpack: { treeshake: { removeDebugLogging: true } },
+});

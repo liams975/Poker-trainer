@@ -19,6 +19,21 @@ import { FrequencyCell } from './frequency-cell';
 
 const SIDE = 13;
 
+/**
+ * `CANONICAL_HANDS` is already row-major with ranks descending, so chunking by
+ * 13 gives the rows the ARIA grid pattern needs. The original flat index is
+ * carried along because the roving tabindex, the diff and the cell refs are all
+ * keyed on position in that one array.
+ */
+const ROWS: readonly (readonly { hand: HandNotation; index: number }[])[] = Array.from(
+  { length: SIDE },
+  (_, row) =>
+    CANONICAL_HANDS.slice(row * SIDE, row * SIDE + SIDE).map((hand, column) => ({
+      hand,
+      index: row * SIDE + column,
+    })),
+);
+
 export interface RangeGridProps {
   chart: RangeChart;
   selected: HandNotation | null;
@@ -86,21 +101,40 @@ export function RangeGrid({ chart, selected, onSelect, diff, label }: RangeGridP
         aria-colcount={SIDE}
         className="grid w-full grid-cols-13 gap-px rounded-[var(--radius)] border border-line bg-line p-px"
       >
-        {CANONICAL_HANDS.map((hand, index) => (
-          <FrequencyCell
-            key={hand}
-            hand={hand}
-            frequencies={handStrategy(chart.ranges, hand)}
-            selected={selected === hand}
-            focusable={index === focusIndex}
-            diffDistance={diff?.hands[index]?.distance}
-            onSelect={onSelect}
-            onFocus={() => setFocusIndex(index)}
-            onKeyDown={onKeyDown}
-            cellRef={(node) => {
-              cells.current[index] = node;
-            }}
-          />
+        {/*
+          Rows are required, not decorative.
+          `role="grid"` is only valid with `role="row"` between it and its
+          gridcells — without them a screen reader announces 169 buttons with no
+          row or column context at all, which for a matrix whose entire meaning
+          is positional (rank by rank) is the difference between usable and
+          not. axe flags it as two critical violations; jsx-a11y cannot see it,
+          because it reads each component in isolation and the nesting is only
+          wrong once they are composed.
+
+          `display: contents` keeps the 13x13 CSS grid intact — the wrapper
+          contributes semantics and no layout box. Modern engines preserve ARIA
+          semantics through it; the browsers that dropped them predate this
+          app's desktop-only target by years.
+        */}
+        {ROWS.map((row, rowIndex) => (
+          <div key={rowIndex} role="row" className="contents">
+            {row.map(({ hand, index }) => (
+              <FrequencyCell
+                key={hand}
+                hand={hand}
+                frequencies={handStrategy(chart.ranges, hand)}
+                selected={selected === hand}
+                focusable={index === focusIndex}
+                diffDistance={diff?.hands[index]?.distance}
+                onSelect={onSelect}
+                onFocus={() => setFocusIndex(index)}
+                onKeyDown={onKeyDown}
+                cellRef={(node) => {
+                  cells.current[index] = node;
+                }}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </div>

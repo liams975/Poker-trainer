@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { DrillRunner, type FinishedSession } from '@/components/drill/drill-runner';
+import { track } from '@/lib/analytics/client';
 import { Button } from '@/components/ui/button';
 import { skipPlacement, submitPlacement, type PlacementOutcome } from '@/lib/lessons/client';
 
@@ -60,6 +61,7 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
       if (result.sessionId === null) throw new Error('the diagnostic did not start properly');
       setOutcome(await submitPlacement(result.sessionId));
       setStage('done');
+      track('placement_finished', { skipped: false });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'could not work out your placement');
     } finally {
@@ -74,6 +76,7 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
       await skipPlacement();
       setOutcome({ skillTag: null, byTag: [], startLessonSlug: null });
       setStage('done');
+      track('placement_finished', { skipped: true });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'could not finish onboarding');
     } finally {

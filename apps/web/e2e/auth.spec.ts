@@ -117,9 +117,18 @@ test.describe('protected routes', () => {
     await expect(page).toHaveURL(/\/(dashboard|onboarding)$/);
   });
 
-  test('the root path routes by session rather than showing a page', async ({ page }) => {
+  /**
+   * Phase 10 gave `/` a landing page, so it no longer bounces a signed-out
+   * visitor to sign-in. It still routes by session — signed in goes straight to
+   * the dashboard — and that half is what this now pins, along with the half
+   * that changed: an anonymous visitor gets a page rather than a login wall.
+   */
+  test('the root path shows the landing page when signed out', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveURL(/\/sign-in$/);
+
+    await expect(page).toHaveURL(/localhost:3000\/$/);
+    await expect(page.getByRole('heading', { name: /Learn 6-max preflop properly/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Start free' })).toBeVisible();
   });
 });
 

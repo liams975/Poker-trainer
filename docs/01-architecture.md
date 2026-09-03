@@ -123,3 +123,43 @@ The realistic attack surface for this app, in priority order:
 4. **Secrets in the bundle.** Only the anon key and PostHog public key belong
    in the client. Both are safe *given correct RLS* — which is why item 1 is
    first.
+
+---
+
+## What Phase 10 decided
+
+### Deployment is push-to-`main`, and content is not part of it
+
+Vercel builds from `main`; a branch gets a preview URL. **Migrations and content
+are separate manual steps**, which is the direct consequence of this document's
+"retune without a deploy" — content that shipped with the app would make the
+sync script decorative. `docs/07-operations.md` is the runbook.
+
+### The landing page reads bundled content, and it is the only thing that does
+
+Every other reader goes through Supabase so `pnpm content:sync` means something.
+The landing page cannot: RLS refuses an anonymous visitor every `range_charts`
+row, correctly, and a marketing page that 500s for logged-out visitors is not a
+marketing page. The chart there is illustrative and nothing is graded against
+it.
+
+This is a real seam and worth knowing about — a mutation test exists for it,
+because the failure mode is a page that works perfectly for everyone who is
+already signed in.
+
+### Analytics is cookieless, and that was a design constraint not an accident
+
+PostHog runs with `persistence: 'memory'` and `person_profiles:
+'identified_only'`, so an anonymous visitor gets no cookie and the app needs no
+consent banner. The cost is that returning visitors are counted as new; the
+funnel within a session, which is what the exit criterion asks for, is
+unaffected. `posthog-js` is imported dynamically — measured both ways, a static
+import puts its 268KB chunk in 25 route bundles and the dynamic one in none.
+
+### Secrets that reach production, and one that does not
+
+Vercel holds the Supabase URL and anon key, the PostHog key and host, and the
+Sentry DSN, org, project and auth token. It does **not** hold
+`SUPABASE_SERVICE_ROLE_KEY`: the app never uses it, only `pnpm content:sync`
+does, and a secret that bypasses RLS should not sit in a build environment that
+has no use for it.

@@ -297,6 +297,76 @@ select throws_ok(
   'a rollup cannot claim more correct answers than attempts'
 );
 
+-- ------------------------------------------------------------
+-- Phase 10: an attempt cannot name a session it does not own
+-- ------------------------------------------------------------
+
+-- docs/05-ui-ux.md carried this as "worth a constraint if session aggregates
+-- ever get computed server-side". Phase 9's `awardSessionRewards` reads
+-- attempts by session id and pays XP from them, so the condition was met.
+select lives_ok(
+  $$ insert into drill_sessions (id, user_id, mode)
+     values ('cccccccc-0000-4000-8000-00000000000c', auth.uid(), 'quick') $$,
+  'a user can open their own session'
+);
+
+select lives_ok(
+  $$ insert into drill_attempts (user_id, session_id, seed, chart_version, scenario,
+                                 user_action, primary_action, frequencies, grade)
+     values (auth.uid(), 'cccccccc-0000-4000-8000-00000000000c', 1, 'phase10', '{}',
+             'fold', 'fold', '[{"action":"fold","freq":1}]'::jsonb, 'optimal') $$,
+  'and attach an attempt to it'
+);
+
+-- A session that *exists* and belongs to somebody else.
+--
+-- This distinction is the whole test. A session id that exists nowhere is
+-- rejected by the plain `session_id references drill_sessions(id)` that 0001
+-- already had, so an assertion using one would pass with 0005 reverted and
+-- prove nothing. Only a real session owned by another user separates the two.
+-- Back to the connecting role: `auth.users` is not writable by `service_role`,
+-- which is why the fixtures at the top of this file run before the role switch.
+reset role;
+
+insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
+                        email_confirmed_at, created_at, updated_at,
+                        raw_app_meta_data, raw_user_meta_data)
+values ('dddddddd-0000-4000-8000-0000000000dd',
+        '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+        'frank@test.local', 'x', now(), now(), now(), '{}'::jsonb, '{}'::jsonb);
+
+insert into drill_sessions (id, user_id, mode)
+values ('dddddddd-0000-4000-8000-00000000000d',
+        'dddddddd-0000-4000-8000-0000000000dd', 'quick');
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"eeeeeeee-0000-4000-8000-000000000005","role":"authenticated"}';
+
+select throws_ok(
+  $$ insert into drill_attempts (user_id, session_id, seed, chart_version, scenario,
+                                 user_action, primary_action, frequencies, grade)
+     values (auth.uid(), 'dddddddd-0000-4000-8000-00000000000d', 1, 'phase10', '{}',
+             'fold', 'fold', '[{"action":"fold","freq":1}]'::jsonb, 'optimal') $$,
+  '23503', NULL::text,
+  'an attempt cannot name a session that exists but is not the author''s own'
+);
+
+-- `on delete set null (session_id)` — the column list matters. A bare
+-- `set null` on a composite key nulls `user_id` too, which is `not null`, so
+-- deleting a session would fail outright and account deletion (which cascades
+-- through drill_sessions) would fail with it.
+select lives_ok(
+  $$ delete from drill_sessions where id = 'cccccccc-0000-4000-8000-00000000000c' $$,
+  'deleting a session does not fail on the composite key'
+);
+
+select is(
+  (select count(*)::int from drill_attempts
+   where user_id = auth.uid() and session_id is null and chart_version = 'phase10'),
+  1,
+  'the attempt outlives its session, keeping its owner'
+);
+
 select * from finish();
 
 rollback;

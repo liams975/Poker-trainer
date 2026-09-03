@@ -36,13 +36,26 @@ export function TableSeats({ state, hero }: { state: HandState; hero: Position }
               isHero
                 ? 'border-ink bg-surface-raised'
                 : 'border-line bg-surface',
-              // Folded seats fade rather than disappear: the fact that four
+              // Folded seats recede rather than disappear: the fact that four
               // players folded to you is the shape of the spot.
-              folded && 'opacity-40',
+              //
+              // By colour, not by opacity. `opacity-40` over already-muted text
+              // lands at roughly 2:1 against the surface, well under the 4.5:1
+              // floor docs/05 sets — and a seat you cannot read is worse than
+              // one that does not recede. The border still fades, because a
+              // border carries no text.
+              folded && 'border-line/40',
             )}
           >
             <span className="flex items-baseline gap-1.5">
-              <span className="font-display text-xs font-semibold text-ink">{position}</span>
+              <span
+                className={cn(
+                  'font-display text-xs font-semibold',
+                  folded ? 'text-ink-muted' : 'text-ink',
+                )}
+              >
+                {position}
+              </span>
               {isHero ? (
                 <span className="text-[0.625rem] uppercase tracking-wider text-ink-muted">
                   you

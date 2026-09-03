@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react';
 
+import { IdentifyUser } from '@/components/analytics/identify-user';
+import { CommandPalette } from '@/components/nav/command-palette';
+import { buildDestinations, type LessonLink } from '@/components/nav/destinations';
 import { AppNav } from '@/components/nav/app-nav';
 import { requireUser } from '@/lib/auth/dal';
+import { lessonLinks } from '@/lib/lessons/links';
 
 /**
  * The signed-in shell, and the authoritative auth check for everything under
@@ -19,9 +23,24 @@ import { requireUser } from '@/lib/auth/dal';
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
 
+  /**
+   * The palette's lesson entries. A content problem costs the palette its
+   * lesson section and nothing else — the shell wraps every page in the app,
+   * so a throw here would take all of them down to make a jump list slightly
+   * better.
+   */
+  let lessons: readonly LessonLink[];
+  try {
+    lessons = await lessonLinks();
+  } catch {
+    lessons = [];
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
       <AppNav email={user.email ?? ''} />
+      <IdentifyUser userId={user.id} />
+      <CommandPalette destinations={buildDestinations(lessons)} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
     </div>
   );

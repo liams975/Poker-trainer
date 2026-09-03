@@ -71,7 +71,11 @@ export function TrackNav({ track, states, activeSlug }: TrackNavProps) {
                 return (
                   <li key={lesson.slug} data-status={status}>
                     {status === 'locked' ? (
-                      <span className={cn(shared, 'text-ink-muted opacity-60')} data-locked="true">
+                      // `text-ink-muted` alone, without the opacity that used to
+                      // be stacked on it: muted text at 60% opacity falls under
+                      // the 4.5:1 contrast floor, and the lock glyph beside it
+                      // already carries the meaning without needing to be dim.
+                      <span className={cn(shared, 'text-ink-muted')} data-locked="true">
                         {inner}
                       </span>
                     ) : (

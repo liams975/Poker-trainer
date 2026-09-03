@@ -1,7 +1,9 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+
+import { initAnalytics } from '@/lib/analytics/client';
 
 /**
  * TanStack Query, per docs/01-architecture.md's split: Query owns server state,
@@ -14,6 +16,16 @@ import { useState, type ReactNode } from 'react';
  * one here.
  */
 export function Providers({ children }: { children: ReactNode }) {
+  /**
+   * PostHog starts here rather than at module scope. `posthog.init` touches
+   * `window`, so at module scope it would run during the server render of every
+   * page. An effect runs only in the browser and only once — `initAnalytics`
+   * guards against React's development double-invoke itself.
+   */
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({

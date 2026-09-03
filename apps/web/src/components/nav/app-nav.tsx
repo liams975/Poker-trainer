@@ -23,6 +23,14 @@ export function AppNav({ email }: { email: string }) {
         </Link>
 
         <div className="flex items-center gap-4">
+          {/* Discoverability, for the same reason the drill has a "Shortcuts (?)"
+              button: a keyboard interface nobody knows about is one nobody
+              uses. Not a button — pressing it is the thing to learn. */}
+          <span className="hidden items-center gap-1 text-xs text-ink-muted lg:flex">
+            <kbd className="rounded border border-line px-1.5 py-0.5 font-mono">⌘K</kbd>
+            <span>to jump</span>
+          </span>
+
           <span className="hidden text-sm text-ink-muted sm:inline" title={email}>
             {email}
           </span>

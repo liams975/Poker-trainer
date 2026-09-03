@@ -25,6 +25,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { track } from '@/lib/analytics/client';
 import { chartLabel } from '@/lib/charts/map';
 import { finishSession, recordAttempt, startSession } from '@/lib/drills/client';
 
@@ -261,6 +262,7 @@ export function DrillRunner({
         tokenRef.current += 1;
         setPhase('running');
         setStartedAt(Date.now());
+        track('session_started', { mode: chosen.studyMode ? 'study' : mode });
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : 'could not start the session');
       } finally {
@@ -393,6 +395,8 @@ export function DrillRunner({
     // Called here rather than from an effect on `phase`: this is the event that
     // ends the session, so the callback belongs on the same path as the state
     // change instead of chasing it a render later.
+    track('session_finished', { spots: results.length });
+
     onFinished?.({ sessionId, summary: summariseSession(results), rewards: earned });
   }, [onFinished, results, sessionId]);
 

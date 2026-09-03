@@ -62,6 +62,19 @@ pnpm content:sync   # packages/content -> Supabase
 `pnpm test:e2e` needs both Docker and a seeded database.
 Get credentials with `supabase status -o env` after `pnpm db:start`.
 
+## Deployed
+
+Vercel builds from `main`. **Migrations and content do not deploy with it** —
+that separation is the point of `pnpm content:sync`, and both are manual:
+
+```bash
+supabase db push                    # migrations, then
+pnpm content:sync --confirm-remote  # content
+```
+
+Both read `.env.production.local` (gitignored). Runbook, known limits and
+rollback: `docs/07-operations.md`.
+
 Env lives in **one** `.env.local` at the repo root. `apps/web/next.config.ts`
 loads it explicitly, because Next only looks inside the app directory.
 
@@ -110,6 +123,10 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   See the grading tiers in `docs/03-poker-engine.md`.
 - Never use color alone to encode strategy actions. Palette is
   colorblind-safe and every action also carries a glyph or label.
+- Never import a *value* from a server module into a client component. A `import
+  type` is erased and safe; one value import beside it drags `next/headers` into
+  the browser bundle and 500s the route. Shared shapes go in a types-only module
+  — `lib/progress/types.ts`, `lib/review/filters.ts`. This has bitten twice.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol

@@ -22,35 +22,18 @@ describe('dashboard modes', () => {
    * The card is the only route into the drill runner from the dashboard, so a
    * mode left marked "coming in Phase 7" would hide a shipped feature.
    */
-  it('has the shipped modes live', () => {
-    for (const slug of [
-      'quick-drill',
-      'focused-drill',
-      'range-explorer',
-      'continue-learning',
-      // Phase 9.
-      'weak-spots',
-    ]) {
-      const mode = MODES.find((m) => m.slug === slug);
-      expect(mode?.availableIn, slug).toBeNull();
-    }
-  });
-
-  it('still gates the modes that are not built', () => {
-    for (const slug of ['session-review']) {
-      const mode = MODES.find((m) => m.slug === slug);
-      expect(mode?.availableIn, slug).not.toBeNull();
-    }
-  });
-
   /**
-   * Session Review was marked 9 while docs/02-roadmap.md put session history,
-   * the mistake log and accuracy-over-time in Phase 10. Pinning it here rather
-   * than leaving "not null" to cover both readings, because a card that says
-   * the wrong phase is the same kind of lie as one that says the wrong feature.
+   * Phase 10 is the last one, and Session Review was the last card still
+   * marked "not yet". Every mode docs/05-ui-ux.md specifies is now built.
+   *
+   * Asserted over the whole list rather than a named subset: a seventh mode
+   * added later must either be live or carry a real phase number, and the
+   * next test is what enforces the second half of that.
    */
-  it('dates Session Review to the phase the roadmap gives it', () => {
-    expect(MODES.find((m) => m.slug === 'session-review')?.availableIn).toBe(10);
+  it('has every mode live, which is what finishing the roadmap means', () => {
+    for (const mode of MODES) {
+      expect(mode.availableIn, mode.slug).toBeNull();
+    }
   });
 
   it('points every unavailable mode at a real roadmap phase', () => {

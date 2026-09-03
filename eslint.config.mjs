@@ -161,10 +161,11 @@ export default tseslint.config(
   },
 
   {
-    // The env.ts exemption. Isolating the read into one file is the whole
-    // mechanism by which the rule above is enforceable at all.
+    // The env.ts exemption. Isolating each read into one named file is the
+    // whole mechanism by which the rule above is enforceable at all — so a
+    // second reader gets a second file, not an exception at a call site.
     name: 'web/env-reader',
-    files: ['apps/web/src/lib/supabase/env.ts'],
+    files: ['apps/web/src/lib/*/env.ts'],
     rules: { 'no-restricted-properties': 'off' },
   },
 

@@ -10,6 +10,12 @@ const PUBLIC_PREFIXES = [
   '/sign-in',
   '/sign-up',
   '/auth', // callback + confirm route handlers; they run before a session exists
+  '/privacy', // linked from the landing page, so it must render signed-out
+  // Sentry's tunnel. Browser error reports POST here so an ad blocker cannot
+  // silently stop them, and an error on the landing page has no session — the
+  // proxy redirecting that to sign-in would drop exactly the reports from
+  // visitors who never got in.
+  '/monitoring',
 ] as const;
 
 export function isPublicPath(pathname: string): boolean {

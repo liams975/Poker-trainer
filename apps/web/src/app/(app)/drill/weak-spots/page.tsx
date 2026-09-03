@@ -1,6 +1,7 @@
 import { WEAK_SPOT_MIN_ATTEMPTS } from '@poker/engine';
 import Link from 'next/link';
 
+import { TrackEvent } from '@/components/analytics/track-event';
 import { WeakSpotRunner } from '@/components/drill/weak-spot-runner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { fetchChartSet } from '@/lib/charts/queries';
@@ -65,6 +66,8 @@ export default async function Page({
 
   return (
     <div className="flex flex-col gap-4">
+      <TrackEvent event="weak_spots_opened" />
+
       <p className="text-sm text-ink-muted" data-testid="weak-spot-focus">
         Drilling {focusTags.map((skill) => skillLabel(skill, registry)).join(' · ')}.
       </p>

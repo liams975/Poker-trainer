@@ -210,6 +210,20 @@ Phase 9 in `modes.ts` against this document and is corrected to Phase 10.
 **Exit:** Deployed, monitored, and you can watch a real user complete
 onboarding → lesson → drill → review without intervention.
 
+**Settled during the phase.** Session Review reads `drill_attempts` back and
+**replays** each spot from its stored scenario rather than describing it, using
+the frequencies and `chart_version` on the row — so a chart retune cannot
+rewrite what you were told at the time. ⌘K landed without a dependency, reusing
+Phase 7's keyboard guard. The landing page renders from the *bundled* content,
+because RLS correctly refuses an anonymous visitor every `range_charts` row.
+Migration `0005` closes the attempt/session ownership gap `docs/05` had flagged
+since Phase 7, now that Phase 9 computes session aggregates server-side.
+
+The accessibility audit became `e2e/a11y.spec.ts` rather than an afternoon, and
+found six real defects — including a `role="grid"` with no rows, which had made
+the 13×13 matrix structurally meaningless to a screen reader since Phase 6.
+Operations moved into `docs/07-operations.md`.
+
 ---
 
 ## Deliberately deferred to v2

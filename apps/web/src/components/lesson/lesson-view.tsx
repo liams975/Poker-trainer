@@ -13,6 +13,9 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+// Aliased: `track` is already the curriculum Track in this file, and a
+// silent shadow there would be a confusing bug rather than a compile error.
+import { track as trackEvent } from '@/lib/analytics/client';
 import { setLessonStatus } from '@/lib/lessons/client';
 
 import { LessonBlockView } from './blocks';
@@ -72,6 +75,9 @@ export function LessonView({
     try {
       await setLessonStatus(lesson.slug, 'completed');
       setCompleted(true);
+      // After the write, never before: a funnel step that counts intent rather
+      // than outcome would show a completion rate the database disagrees with.
+      trackEvent('lesson_completed', { lesson: lesson.slug });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'could not save your progress');
     } finally {
