@@ -609,8 +609,8 @@ export function DrillRunner({
 
       {/* Side by side, per docs/05's first desktop advantage: the spot stays on
           screen while the feedback appears beside it. Never a modal. */}
-      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
-        <SpotView spot={current.spot}>
+      <div className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-2">
+        <SpotView spot={current.spot} deal>
           <DecisionControls
             state={current.spot.state}
             hero={current.spot.hero}

@@ -416,6 +416,8 @@ export async function awardSessionRewards(
       xpAwarded: 0,
       totalXp: total,
       level: levelFor(total),
+      // Nothing was paid, so the level cannot have moved.
+      levelBefore: levelFor(total).level,
       streak,
       dailyGoal: { done: 0, target: DAILY_GOAL_SPOTS, met: false },
       unlocked: [],
@@ -470,6 +472,17 @@ export async function awardSessionRewards(
     xpAwarded,
     totalXp: total,
     level: levelFor(total),
+    /**
+     * Subtracted, not queried.
+     *
+     * `xpAwarded` is exactly what *this* call wrote — `awardXp` returns 0 when
+     * the unique index rejects a retry — so `total - xpAwarded` is the ledger
+     * as it stood before the session closed. Reading the total a second time
+     * before awarding would be a second round trip and would still be wrong
+     * under a concurrent write; this cannot disagree with the number beside it
+     * because it is computed from it.
+     */
+    levelBefore: levelFor(total - xpAwarded).level,
     streak,
     dailyGoal: { done: doneToday, target: DAILY_GOAL_SPOTS, met: metGoal },
     unlocked,

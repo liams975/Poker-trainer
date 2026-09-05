@@ -665,3 +665,120 @@ two third-party trackers without mentioning them is not a thing to do quietly.
   filters are how you reach further back.
 - **Session Review has no CSV export.** `drill_attempts` is the analytics
   goldmine and a power user will eventually want it out.
+
+---
+
+## What Phase 11 decided
+
+The first phase of v2, and the first one aimed at a product problem rather than
+a correctness one: v1 works and is not enjoyable to study with.
+
+### The design thesis is amended twice, deliberately
+
+This document opens with "a lab, not a casino" and rejects felt, table imagery
+and celebration. Both halves are now narrower than they were, and neither was
+loosened by accident.
+
+**The app takes the shape of a poker table and none of its palette.** The old
+`table-seats.tsx` cited the thesis as grounds for refusing a table *shape*, and
+that went one step too far. What the thesis protects is the rule that saturated
+colour is reserved exclusively for strategy data — the range grid's five hues
+read as data only because nothing else on screen competes with them. Geometry
+costs none of that. So the seats sit on an ellipse, hero at the bottom, with a
+dealer button and chips sliding to a centre pot, and the whole thing is drawn in
+the monochrome ramp. No felt green, no gold, no action hues, and no accent
+either: amber remains the streak and XP rail and nothing else.
+
+What the strip could not express is the entire point. "You are on the button"
+means the blinds are to your left and act after you — a spatial fact you read
+off a ring instantly and can only reconstruct from a strip by remembering the
+order. Preflop poker is very largely about that fact.
+
+**Milestones are celebrated; individual answers never are.** A level-up, an
+achievement unlock or a streak record gets motion and a badge. An answer gets
+what it always got: the tier, the mix, and no verdict.
+
+That line is not a compromise between two tones — it is the rule the four grade
+tiers already encode, applied one layer further out. Two of the four tiers are
+*defensible answers to a mixed spot*, so a flourish that fires on `optimal` and
+not on `acceptable` asserts a right answer where there is none; the same choice
+would be celebrated on Tuesday and not on Wednesday. `apps/web/tests/feedback-
+motion.test.ts` enforces it at the source level: no motion prop in the feedback
+panel may be conditioned on the tier, and a third test asserts the panel still
+animates *something*, because a guard on a property nothing has cannot fail.
+
+### The reduced-motion block never covered the animations
+
+`globals.css` collapses animation and transition durations under
+`prefers-reduced-motion: reduce`, globally, so a component cannot forget it.
+**It has no effect on anything Motion does.** Motion writes inline styles frame
+by frame, which no stylesheet can reach.
+
+Worse, the test guarding it — `shell.spec.ts`, probing a `div.animate-pulse` —
+would have gone on passing while every animation added in this phase ignored the
+user's stated preference. Verified rather than assumed: with `reducedMotion`
+turned off in `providers.tsx`, all of `shell.spec.ts` stays green and only the
+new `e2e/motion.spec.ts` fails.
+
+The fix is `<MotionConfig reducedMotion="user">`. The test that holds it counts
+**distinct computed transforms across the first 600ms** rather than sampling at
+a fixed instant, which would be a race with the frame clock. Measured: 20
+distinct values with motion allowed, 2 with it reduced.
+
+One honest limit: the declared `initial` state still paints for a single frame
+before Motion jumps to the end. That is a jump, not a tween, and it is Motion's
+documented behaviour.
+
+### The grade slides in; it does not fade
+
+The first version faded the grade section, and `e2e/a11y.spec.ts` failed it for
+contrast — axe scans the moment the element appears and read the tier heading
+mid-fade. Not a scanner artefact to wait out: this document requires the grade
+to land "immediately, under 100ms, no spinner", and fading in the one piece of
+text the user is waiting for is the opposite of that. Transform only, so the
+words are at full contrast on the first frame.
+
+### The table is a projection, not a second reading
+
+`seatRing` in `packages/engine/src/game/seating.ts` returns the seats in action
+order, each carrying a `ringIndex` for placement. It replaced two independent
+derivations that had already drifted: the strip found its own seats and rendered
+`totalCommitted`, while the action list filtered its own history and rendered
+actions — so the strip could say `2.5bb` beside a list saying `Raise to 2.5bb`
+about a seat that had since 3-bet.
+
+Two consequences are load-bearing and both are tested:
+
+- **The DOM is in action order; only the pixels move.** A screen reader walks
+  UTG → BB regardless of where the ring puts them. Emitting the list in ring
+  order instead looks pixel-identical and breaks nothing visible, which is
+  exactly why it is a mutation.
+- **`lastAction` is scoped to the current street.** A preflop raise must stop
+  labelling a seat the moment the flop is dealt.
+
+The seat list is `absolute inset-0` rather than `display: contents`, which is
+known to drop list semantics in some engines — the same bug Phase 10 hit from
+the other direction when `role="listbox"` stripped a `<ul>`'s.
+
+### Stacks appear only when they are not the stated one
+
+Six seats reading `100bb` in a 100bb game is four repetitions of a number
+already printed above the table, and it cost every box a third line. A stack
+shows once chips are in it, which is when it becomes the interesting figure.
+
+### The hand notation moved, because it read as a timer
+
+`54s` is a suited five-four. In the header's top-right corner, beside a drill
+with an optional clock, it read as fifty-four seconds. It now sits under hero's
+cards on the table, where the thing next to it is a hand.
+
+### On bundle size, a negative result
+
+`LazyMotion` with the `domAnimation` feature bundle and `m.*` call sites is the
+documented way to keep Motion's features out of the initial chunk, and that is
+what the app does. But the size argument usually given for it **did not
+reproduce here**: a clean build against `domMax` came out the same to within a
+rounding error, because Turbopack shakes out the unused features either way.
+
+What *is* measured and does matter: none of the four motion-bearing chunks is in
+`rootMainFiles`, so a page that animates nothing does not pay for Motion.

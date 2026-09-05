@@ -28,3 +28,6 @@ export {
 
 export type { LegalAction } from './betting';
 export { applyAction, isHandComplete, legalActions } from './betting';
+
+export type { SeatView } from './seating';
+export { seatRing } from './seating';

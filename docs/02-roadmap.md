@@ -1,7 +1,11 @@
 # 02 — Roadmap
 
-Eleven phases. Each is a stopping point with a demoable or verifiable result.
-Claude Code plans a phase, you approve, it implements, it stops.
+v1 shipped in eleven phases, 0 through 10. v2 continues the same numbering
+rather than restarting, because the phase-gate protocol in CLAUDE.md keys off
+it and a second Phase 1 would make every reference ambiguous.
+
+Each phase is a stopping point with a demoable or verifiable result. Claude Code
+plans a phase, you approve, it implements, it stops.
 
 **Ordering principle:** the engine comes before the UI because it is pure,
 testable, and everything depends on it. But Phase 6 (Range Explorer) is
@@ -226,8 +230,41 @@ Operations moved into `docs/07-operations.md`.
 
 ---
 
-## Deliberately deferred to v2
+# v2
 
-Bot play with post-hand review · spaced repetition scheduling · postflop
-track · leaderboards · paywall UI and RevenueCat · iOS app · tournament/ICM ·
-multi-table or full-ring.
+v1 works. What it is not is *enjoyable to study with* — which is a product
+problem, not a correctness one, and the whole of v2 so far is aimed at it.
+
+## Phase 11 — the table, the icon, and motion
+
+- `game/seating.ts`: the ring as a projection of `HandState`
+- The six-seat strip becomes a real table — hero at the bottom, dealer button,
+  chips to a centre pot, every seat's action in words at its seat
+- A playing-card favicon, which the app had never had
+- `motion` installed at last, and the milestone moments it makes possible
+
+**Exit:** The spot reads as a table, the deal animates, and reduced motion is
+honoured by the animations themselves rather than only by the stylesheet.
+
+**Settled during the phase.** Two amendments to `docs/05-ui-ux.md`'s design
+thesis, both taken deliberately: the app takes the **shape** of a poker table
+but none of the casino palette, and it now **celebrates milestones — never
+individual answers**. The second line is the same rule the four grade tiers
+encode, held one layer further out.
+
+The load-bearing discovery: the global CSS `prefers-reduced-motion` block does
+nothing for JS-driven animation, and the test guarding it would have gone on
+passing while every new animation ignored the preference. Verified by mutation —
+with `reducedMotion` disabled, `shell.spec.ts` stays entirely green and only the
+new `motion.spec.ts` fails.
+
+## Phase 12 — bot play *(next)*
+
+Full-scale bot games with post-hand review. The interfaces were scaffolded in
+v1 and deliberately left unimplemented.
+
+## Later
+
+Spaced repetition scheduling · postflop track · leaderboards · achievement
+gallery · dashboard rebuild · daily quests · paywall UI and RevenueCat · iOS
+app · tournament/ICM · multi-table or full-ring.

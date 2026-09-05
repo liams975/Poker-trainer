@@ -1,3 +1,7 @@
+'use client';
+
+import { m } from 'motion/react';
+
 /**
  * Hero's two cards.
  *
@@ -37,30 +41,78 @@ function describeCard(card: string): string {
   return `${RANK_NAMES[rank] ?? rank} of ${SUIT_NAMES[suit] ?? suit}`;
 }
 
-export function HoleCards({ hole, hand }: { hole: readonly [string, string]; hand: string }) {
+/**
+ * Two sizes, because the cards moved onto the table.
+ *
+ * `sm` is what sits at hero's seat, where the card has to read at a glance
+ * without swamping the seat it belongs to. `lg` is the standalone display.
+ */
+const SIZES = {
+  lg: { card: 'h-24 w-16', rank: 'text-2xl', hand: 'text-sm' },
+  sm: { card: 'h-11 w-8 @lg:h-14 @lg:w-10', rank: 'text-base @lg:text-xl', hand: 'text-xs' },
+} as const;
+
+export function HoleCards({
+  hole,
+  hand,
+  size = 'lg',
+  dealKey,
+}: {
+  hole: readonly [string, string];
+  hand: string;
+  size?: keyof typeof SIZES;
+  /**
+   * Changing this deals the cards again. Absent means no deal — the cards are
+   * simply there, which is what Session Review's replay wants: a hand from
+   * three weeks ago is not being dealt to you now.
+   */
+  dealKey?: string | undefined;
+}) {
+  const scale = SIZES[size];
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col items-center gap-1">
       <div
-        className="flex gap-2"
+        className="flex gap-1.5"
         role="img"
         aria-label={`Your hand: ${hole.map(describeCard).join(' and ')}`}
       >
-        {hole.map((card) => (
-          <span
-            key={card}
-            className="flex h-24 w-16 flex-col items-center justify-center rounded-[var(--radius)] border border-line bg-surface-raised font-mono text-ink"
+        {hole.map((card, index) => (
+          /**
+           * Dealt, one then the other, from the middle of the table.
+           *
+           * The single most satisfying 200ms available in a poker app, and the
+           * reason the geometry was worth building: cards arriving *from the
+           * dealer* is only legible once there is a table for them to come
+           * from. `-24` on y is toward the centre, because hero sits at the
+           * bottom of the ring.
+           */
+          <m.span
+            key={dealKey === undefined ? card : `${dealKey}-${card}`}
+            className={`flex ${scale.card} flex-col items-center justify-center rounded-[var(--radius)] border border-line bg-surface-raised font-mono text-ink`}
+            {...(dealKey === undefined
+              ? {}
+              : {
+                  initial: { opacity: 0, y: -24, scale: 0.8, rotate: index === 0 ? -7 : 7 },
+                  animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
+                  transition: {
+                    duration: 0.3,
+                    delay: index * 0.07,
+                    ease: [0.22, 1, 0.36, 1] as const,
+                  },
+                })}
           >
-            <span className="text-2xl leading-none">{card[0]}</span>
-            <span className="text-2xl leading-none" aria-hidden="true">
+            <span className={`${scale.rank} leading-none`}>{card[0]}</span>
+            <span className={`${scale.rank} leading-none`} aria-hidden="true">
               {SUIT_PIPS[card[1] ?? ''] ?? card[1]}
             </span>
-          </span>
+          </m.span>
         ))}
       </div>
 
       {/* The canonical notation, because it is the key everything else in the
           app is addressed by — the grid cell, the chart, the skill tag. */}
-      <p className="font-mono text-sm text-ink-muted">{hand}</p>
+      <p className={`font-mono ${scale.hand} text-ink-muted`}>{hand}</p>
     </div>
   );
 }

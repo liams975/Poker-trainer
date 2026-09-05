@@ -2,6 +2,7 @@
 
 import type { ActionFreq, Answer, Grade, HandNotation, Rationale, RangeChart } from '@poker/engine';
 import { handStrategy } from '@poker/engine';
+import { m } from 'motion/react';
 import { useState } from 'react';
 
 import { actionLabel, actionStyle } from '@/components/range/action-colors';
@@ -38,13 +39,29 @@ export interface FeedbackPanelProps {
   verbose: boolean;
 }
 
-/** One row of the distribution: label, proportional bar, exact frequency. */
+/**
+ * One row of the distribution: label, proportional bar, exact frequency.
+ *
+ * The bar grows to its frequency rather than appearing at it. docs/05 calls
+ * this "where retention is won or lost", and the difference between a mix that
+ * *arrives* and one that is simply there is most of the felt quality of the
+ * whole app.
+ *
+ * **`index` drives the stagger; the grade does not reach this component at
+ * all.** That is deliberate and enforced by `tests/feedback-motion.test.ts`: a
+ * flourish on `optimal` that did not also fire on `acceptable` would re-assert
+ * the right/wrong framing the four tiers exist to reject. Two of the four are
+ * defensible answers to a mixed spot, so there is nothing here to celebrate
+ * and nothing to commiserate.
+ */
 function MixRow({
   entry,
   chosen,
+  index,
 }: {
   entry: ActionFreq;
   chosen: boolean;
+  index: number;
 }) {
   const style = actionStyle(entry.action);
 
@@ -60,9 +77,12 @@ function MixRow({
       </span>
 
       <span className="h-2 flex-1 overflow-hidden rounded-full bg-surface-raised">
-        <span
+        <m.span
           className="block h-full"
-          style={{ width: `${entry.freq * 100}%`, backgroundColor: style.hex }}
+          style={{ backgroundColor: style.hex }}
+          initial={{ width: 0 }}
+          animate={{ width: `${entry.freq * 100}%` }}
+          transition={{ duration: 0.4, delay: 0.05 + index * 0.05, ease: [0.22, 1, 0.36, 1] }}
         />
       </span>
 
@@ -118,7 +138,30 @@ export function FeedbackPanel({
   return (
     <div className="flex flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-5">
       {grade && answer && tier ? (
-        <section className="flex flex-col gap-2" aria-live="polite" data-testid="grade">
+        /**
+         * One entrance, identical for all four tiers.
+         *
+         * `initial`/`animate`/`transition` here are constants — nothing about
+         * `grade.tier` reaches them. The tier decides the hue and the words, as
+         * it always has; it must never decide the motion.
+         *
+         * **It slides; it does not fade.** The first version animated opacity
+         * too, and `e2e/a11y.spec.ts` immediately failed it for contrast:
+         * axe scans the moment the element appears and read the tier heading
+         * mid-fade. That is not a scanner artefact to wait out — docs/05
+         * requires the grade to land "immediately, under 100ms, no spinner",
+         * and fading in the one piece of text the user is waiting for is the
+         * opposite of that. Transform only, so the words are at full contrast
+         * on the first frame.
+         */
+        <m.section
+          className="flex flex-col gap-2"
+          aria-live="polite"
+          data-testid="grade"
+          initial={{ y: -6 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+        >
           <div className="flex items-center gap-2">
             <span
               aria-hidden="true"
@@ -141,7 +184,7 @@ export function FeedbackPanel({
           <p className="font-mono text-xs text-ink-muted">
             EV loss {grade.evLoss}bb
           </p>
-        </section>
+        </m.section>
       ) : null}
 
       <section className="flex flex-col gap-2" aria-labelledby="mix-heading">
@@ -150,10 +193,13 @@ export function FeedbackPanel({
         </h3>
 
         <ul className="flex flex-col gap-1.5" data-testid="distribution" data-mix={describeMix(hand, frequencies)}>
-          {orderedMix(frequencies).map((entry) => (
+          {orderedMix(frequencies).map((entry, index) => (
             <MixRow
-              key={`${entry.action}-${entry.size ?? ''}`}
+              // Keyed on the hand too: moving to the next spot must re-grow the
+              // bars rather than sliding the previous hand's widths across.
+              key={`${hand}-${entry.action}-${entry.size ?? ''}`}
               entry={entry}
+              index={index}
               chosen={chosenKey === `${entry.action}-${entry.size ?? ''}`}
             />
           ))}

@@ -2,9 +2,11 @@
 
 import type { GradeTier, SessionSummary as Summary } from '@poker/engine';
 import { GRADE_TIERS } from '@poker/engine';
+import { m } from 'motion/react';
 import Link from 'next/link';
 
 import { AchievementBadge } from '@/components/progress/achievement-badge';
+import { CountUp } from '@/components/progress/count-up';
 import { Button } from '@/components/ui/button';
 import { percent } from '@/components/range/mix-format';
 import type { SessionRewards } from '@/lib/progress/types';
@@ -44,8 +46,43 @@ function tierNote(tier: GradeTier): string {
  * over one schedule is how a summary ends up congratulating somebody on XP the
  * ledger never received, and the ledger is the thing every later screen reads.
  */
+/**
+ * The milestone moments.
+ *
+ * Phase 11's tone decision, and the line it draws: **a level-up, an achievement
+ * or a streak record gets a real moment; an individual answer never does.**
+ *
+ * That is not a softening of docs/05's "a coach nodding, not a slot machine".
+ * It is where the metaphor actually points. A coach does not applaud a hand you
+ * played fine — two of the four tiers are correct answers to a mixed spot, so
+ * there is nothing there to applaud — but a coach absolutely does mark the week
+ * you finally strung seven days together. The milestones are the things that
+ * are unambiguously achievements; the answers are not, and that is the whole
+ * distinction.
+ */
+function Milestone({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.34, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </m.div>
+  );
+}
+
 function Rewards({ rewards }: { rewards: SessionRewards }) {
   const { streak } = rewards;
+
+  const leveledUp = rewards.level.level > rewards.levelBefore;
+  const bestStreak =
+    streak.extendedToday && streak.current === streak.longest && streak.current > 1;
+
+  // The bar the XP is filling. Capped, because `into` can equal `needed` on the
+  // exact boundary and a bar over 100% renders past its track.
+  const intoLevel =
+    rewards.level.needed === 0 ? 0 : Math.min(1, rewards.level.into / rewards.level.needed);
 
   return (
     <section className="flex flex-col gap-3" aria-labelledby="rewards-heading">
@@ -53,19 +90,61 @@ function Rewards({ rewards }: { rewards: SessionRewards }) {
         Banked
       </h3>
 
-      <p className="text-sm text-ink" data-testid="session-rewards">
-        <span className="font-mono text-accent" data-testid="xp-awarded">
-          +{rewards.xpAwarded} XP
-        </span>{' '}
-        <span className="text-ink-muted">
-          · level {rewards.level.level} · {rewards.level.into} of {rewards.level.needed} to the
-          next
+      <div className="flex flex-col gap-2" data-testid="session-rewards">
+        <p className="text-sm text-ink">
+          <CountUp
+            to={rewards.xpAwarded}
+            className="font-mono text-accent"
+            prefix="+"
+            suffix=" XP"
+          />{' '}
+          <span className="text-ink-muted">
+            · level {rewards.level.level} · {rewards.level.into} of {rewards.level.needed} to the
+            next
+          </span>
+        </p>
+
+        {/* The number above, as a bar filling. Accent is allowed here: docs/05
+            reserves it for the streak and XP rail, and this is the XP rail. */}
+        <span
+          className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-surface-raised"
+          aria-hidden="true"
+        >
+          <m.span
+            className="block h-full bg-accent"
+            initial={{ width: 0 }}
+            animate={{ width: `${intoLevel * 100}%` }}
+            transition={{ duration: 0.9, ease: 'easeOut' }}
+          />
         </span>
-      </p>
+
+        {/* Kept as its own node with the old test id: the e2e suite asserts the
+            exact integer here, and a count-up would make it flaky. */}
+        <span className="sr-only" data-testid="xp-awarded">
+          +{rewards.xpAwarded} XP
+        </span>
+      </div>
+
+      {leveledUp ? (
+        <Milestone>
+          {/* `inline-block`, so the badge hugs its sentence. Full width it read
+              as an alert bar across the card rather than as a thing earned. */}
+          <p
+            className="inline-block rounded-[var(--radius)] border border-accent/40 bg-surface-raised px-3 py-2 text-sm text-ink"
+            data-testid="level-up"
+          >
+            <span aria-hidden="true" className="mr-2 text-accent">
+              ▲
+            </span>
+            Level {rewards.level.level}. That is {rewards.level.level - rewards.levelBefore}{' '}
+            {rewards.level.level - rewards.levelBefore === 1 ? 'level' : 'levels'} this session.
+          </p>
+        </Milestone>
+      ) : null}
 
       <p className="text-sm text-ink-muted" data-testid="session-streak">
         {streak.extendedToday
-          ? `${streak.current}-day streak${streak.current === streak.longest && streak.current > 1 ? ' — your best yet' : ''}.`
+          ? `${streak.current}-day streak${bestStreak ? ' — your best yet' : ''}.`
           : `${streak.current}-day streak, already counted today.`}
       </p>
 
@@ -84,9 +163,15 @@ function Rewards({ rewards }: { rewards: SessionRewards }) {
       )}
 
       {rewards.unlocked.length > 0 ? (
+        // Staggered, one after another, so unlocking three reads as three
+        // things rather than one block appearing.
         <ul className="flex flex-col gap-2" data-testid="unlocked-achievements">
-          {rewards.unlocked.map((achievement) => (
-            <AchievementBadge key={achievement.id} achievement={achievement} />
+          {rewards.unlocked.map((achievement, index) => (
+            <AchievementBadge
+              key={achievement.id}
+              achievement={achievement}
+              delay={0.12 + index * 0.12}
+            />
           ))}
         </ul>
       ) : null}

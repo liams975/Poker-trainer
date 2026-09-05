@@ -22,7 +22,7 @@ human**. Do not silently work around them.
 | Backend | Supabase (Postgres + Auth + RLS). No custom API server. |
 | Engine location | `packages/engine` — pure TS, zero React/DOM/Node-API deps |
 | Monetization (v1) | Entitlement seam built, **no paywall UI shipped** |
-| Bot play | v2. Scaffold the interfaces, don't build the bot. |
+| Bot play | v2 Phase 12. Interfaces scaffolded in v1, bot not built. |
 
 Full rationale: `docs/01-architecture.md`
 
@@ -127,6 +127,17 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   type` is erased and safe; one value import beside it drags `next/headers` into
   the browser bundle and 500s the route. Shared shapes go in a types-only module
   — `lib/progress/types.ts`, `lib/review/filters.ts`. This has bitten twice.
+- Never rely on the CSS `prefers-reduced-motion` block in `globals.css` to
+  cover a JS animation. It collapses CSS durations and reaches nothing Motion
+  does — Motion writes inline styles frame by frame. `MotionConfig
+  reducedMotion="user"` in `providers.tsx` is what covers those, and
+  `e2e/motion.spec.ts` is what proves it: `shell.spec.ts` probes a CSS class
+  and stayed **green** through the mutation that turned the whole thing off.
+- Never condition a motion prop on a grade tier. Two of the four tiers are
+  correct answers to a mixed spot, so a flourish on `optimal` alone asserts a
+  right answer where there is none. Milestones — a level-up, an achievement, a
+  streak record — are the things that get celebrated. Enforced by
+  `apps/web/tests/feedback-motion.test.ts`.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol

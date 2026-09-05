@@ -11,6 +11,29 @@ test('the app boots and serves the signed-out shell', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
 });
 
+test('the tab carries a real icon', async ({ page }) => {
+  /**
+   * `app/icon.svg`, picked up by Next's metadata file convention — there is no
+   * `<link>` written by hand anywhere, so a rename or a move stops emitting one
+   * silently and the tab quietly falls back to the browser default.
+   *
+   * Asserted through the emitted tag rather than by fetching `/icon.svg`,
+   * because the tag is the contract: Next generates the href, and a hard-coded
+   * path here would keep passing after the convention stopped working.
+   */
+  await page.goto('/sign-in');
+
+  const icon = page.locator('link[rel="icon"]');
+  await expect(icon).toHaveCount(1);
+
+  const href = await icon.getAttribute('href');
+  expect(href, 'the icon link has no href').toBeTruthy();
+
+  const response = await page.request.get(href!);
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('svg');
+});
+
 test('the design tokens reach the page', async ({ page }) => {
   await page.goto('/sign-in');
 

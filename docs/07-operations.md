@@ -77,6 +77,12 @@ recreating the project. If the dashboard ever feels slow from Europe, this is
 why, and the answer is a second project in `eu-west-2` plus a migration of the
 data — not a code change.
 
+**The favicon is SVG-only.** `apps/web/src/app/icon.svg` is picked up by Next's
+metadata file convention, and Safari before 16 ignores an SVG `rel=icon` — those
+users get the browser default in the tab and nothing else is affected. A
+`favicon.ico` fallback would fix it and needs a binary asset generated outside
+the repo, which is why it has not been done rather than because it was missed.
+
 **XP is honour-system.** `authenticated` holds `insert` on `xp_events`, so a
 determined user can award themselves XP. `docs/04-data-model.md` accepts this
 explicitly. `drill_attempts` and `skill_stats` are the ones that matter and are

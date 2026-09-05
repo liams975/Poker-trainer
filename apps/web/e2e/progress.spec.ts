@@ -668,3 +668,72 @@ test.describe('the daily goal', () => {
     await expect(page.getByTestId('today-strip')).toContainText('0 / 20');
   });
 });
+
+/**
+ * The level-up moment, added in Phase 11.
+ *
+ * Phase 11's tone decision is "celebrate milestones, never answers", and a
+ * milestone that fires every time is not a milestone — it is a participation
+ * banner, and the second time somebody sees it they stop reading it.
+ *
+ * `SessionRewards.levelBefore` exists so the client never has to remember what
+ * level the session started at. This is the test that says it is actually being
+ * compared against, rather than the level merely being above 1.
+ */
+test.describe('the level-up moment', () => {
+  test('fires only when the level actually moved', async ({ page }) => {
+    test.setTimeout(240_000);
+    await ready(page);
+
+    /**
+     * Twenty-five spots first, to get clear of level 1.
+     *
+     * Not ten: pressing `f` is not always the top action, so a spot pays
+     * anywhere from 1 to 10 XP and ten spots can land short of the 100 that
+     * level 2 begins at. The first draft asserted a level-up after ten and
+     * failed for exactly that reason — the test was assuming an outcome the
+     * grading does not guarantee.
+     */
+    await playSession(page, 25);
+
+    // Read from the strip, which derives the level from `xp_events`, rather
+    // than from the summary that has just made a claim about it.
+    const levelNow = async (): Promise<number> => {
+      await page.goto('/dashboard');
+      const strip = await page.getByTestId('today-strip').innerText();
+      const level = Number(/Level (\d+)/.exec(strip)?.[1]);
+      expect(level, `no level in the TODAY strip: ${strip}`).toBeGreaterThanOrEqual(1);
+      return level;
+    };
+
+    const before = await levelNow();
+
+    // Non-vacuous: with the account still on level 1 the mutation this test
+    // exists to catch would not fire either, and it would pass proving nothing.
+    expect(before, '25 spots did not reach level 2; the test below is vacuous').toBeGreaterThan(1);
+
+    // A second, shorter session. Ten spots is at most 100 XP and level 3 needs
+    // 300, so the level holds — but the assertion below does not rely on that.
+    await playSession(page, 10);
+    const badge = page.getByTestId('level-up');
+    const claimed = (await badge.count())
+      ? Number(/Level (\d+)/.exec(await badge.innerText())?.[1])
+      : null;
+
+    const after = await levelNow();
+
+    /**
+     * The invariant, both ways round. The badge appears exactly when the level
+     * moved, and names where it moved to.
+     *
+     * Stated as a biconditional rather than as "absent" because what a session
+     * pays depends on how its spots graded, and a test pinned to an exact total
+     * would be pinned to today's charts.
+     */
+    if (after > before) {
+      expect(claimed, 'the level moved and nothing said so').toBe(after);
+    } else {
+      expect(claimed, 'the summary celebrated a level it was already on').toBeNull();
+    }
+  });
+});

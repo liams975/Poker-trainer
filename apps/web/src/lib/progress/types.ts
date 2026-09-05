@@ -28,6 +28,16 @@ export interface SessionRewards {
   xpAwarded: number;
   totalXp: number;
   level: LevelProgress;
+  /**
+   * The level this session started at, so the client knows whether to mark a
+   * level-up without keeping its own copy of the number.
+   *
+   * Derived here rather than remembered there. The summary's governing rule is
+   * that every figure in it came back from the server that wrote it — a client
+   * diffing a level it cached before the session is a second arithmetic over
+   * one ledger, and a reload mid-session would silently lose the "before".
+   */
+  levelBefore: number;
   streak: StreakReport;
   dailyGoal: DailyGoalReport;
   /** Achievements this call was the first to record. */

@@ -1,3 +1,7 @@
+'use client';
+
+import { m } from 'motion/react';
+
 /**
  * The daily goal, as a ring.
  *
@@ -40,7 +44,10 @@ export function GoalRing({ done, target }: { done: number; target: number }) {
           stroke="var(--color-surface-raised)"
           strokeWidth={stroke}
         />
-        <circle
+        {/* Fills to today's share on mount rather than being drawn at it. One
+            line, and the largest change in felt quality per character anywhere
+            in the app — the dashboard's first frame now does something. */}
+        <m.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -49,7 +56,9 @@ export function GoalRing({ done, target }: { done: number; target: number }) {
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={circumference * (1 - share)}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: circumference * (1 - share) }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           // Starts at twelve o'clock rather than three.
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />

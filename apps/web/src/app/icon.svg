@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>Poker Trainer</title>
+
+  <!--
+    Drawn for 16px first.
+
+    A favicon is a 16-pixel silhouette before it is anything else, so this is a
+    card outline and one large centred pip and nothing else — no rank glyph in
+    the corner, which at this size is three grey pixels, and no second card
+    fanned behind, which at this size is a smudge on one edge.
+
+    It carries its own dark ground rather than inheriting the app's canvas: a
+    favicon renders against browser chrome, in whatever theme the user runs, and
+    a transparent card face disappears into a dark tab strip.
+
+    The spade is filled in `--color-ink`, the one colour in this product that is
+    allowed to be used for something that is not strategy data.
+  -->
+  <rect width="32" height="32" rx="7" fill="#0b0f14" />
+  <rect x="7.5" y="5.5" width="17" height="21" rx="2.5" fill="#e6edf3" />
+  <path
+    fill="#0b0f14"
+    d="M16 9.4c-1.1 1.9-2.4 3.2-3.5 4.4-1 1.1-1.7 2.1-1.7 3.4 0 1.6 1.2 2.8 2.7 2.8.9 0 1.6-.4 2.1-1-.2 1.4-.8 2.5-1.7 3.2h4.2c-.9-.7-1.5-1.8-1.7-3.2.5.6 1.2 1 2.1 1 1.5 0 2.7-1.2 2.7-2.8 0-1.3-.7-2.3-1.7-3.4-1.1-1.2-2.4-2.5-3.5-4.4z"
+  />
+</svg>
