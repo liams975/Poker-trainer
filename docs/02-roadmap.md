@@ -258,12 +258,45 @@ passing while every new animation ignored the preference. Verified by mutation �
 with `reducedMotion` disabled, `shell.spec.ts` stays entirely green and only the
 new `motion.spec.ts` fails.
 
-## Phase 12 — bot play *(next)*
+## Phase 12a — the engine plays a whole hand
 
-Full-scale bot games with post-hand review. The interfaces were scaffolded in
-v1 and deliberately left unimplemented.
+- `game/pot.ts`, `game/settle.ts` — side pots, showdown, the pot award
+- `game/dealer.ts` — a shuffled deck, dealt from a seed
+- `strategy/heuristic-strategy.ts` — decisions where no chart reaches
+- `bot/` — the eleventh engine module: sampling, a hand, a table
+
+**Exit:** A hundred thousand simulated hands conserve chips exactly, every
+action is legal, every hand terminates, and the same seed replays identically.
+
+**Settled during the phase.** `docs/01-architecture.md` promised bot play would
+be "mostly UI work because the decision-making already exists". It does not.
+The seeded content is **ten charts** — RFI for five seats, big-blind defence
+against five openers — and `chart-strategy.ts` throws everywhere else by
+design, so a bot could not complete one preflop orbit. There was no postflop
+decision-making at all, deliberately.
+
+So the phase split. 12a builds a heuristic that decides where charts do not
+reach, and it drives the **bot only** — `heuristics.ts`'s refusal to grade
+against invented logic is narrowed to its actual reason rather than reversed,
+and two source-level guards enforce the narrowing.
+
+`betting.ts`'s two Phase 3 omissions — no side pots, no showdown — are closed.
+Chip conservation over a long session is what proves it: a side-pot bug does
+not crash, it silently pays the wrong player.
+
+## Phase 12b — bot play, playable *(next)*
+
+Persistence (a hand-history table, RLS, grants), the full-hand table UI —
+board, multiple betting rounds, showdown reveal — and post-hand review.
+Preflop decisions graded on the existing tiers; postflop **reported, never
+graded**, because the bot's postflop play is a heuristic and grading against it
+would teach the heuristic.
 
 ## Later
+
+**The missing preflop charts** — cold-calls, 3-bets, vs-3-bets, squeezes. The
+highest-value content work left: they would let the bot play chart-driven poker
+far deeper into the tree, and unlike heuristics they could also grade.
 
 Spaced repetition scheduling · postflop track · leaderboards · achievement
 gallery · dashboard rebuild · daily quests · paywall UI and RevenueCat · iOS

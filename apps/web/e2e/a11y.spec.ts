@@ -165,8 +165,21 @@ test.describe('signed in', () => {
 
     await signIn(page);
     await page.goto('/dashboard');
-    await page.keyboard.press('ControlOrMeta+k');
-    await expect(page.getByTestId('command-input')).toBeVisible();
+
+    /**
+     * The keypress is retried, not just the assertion.
+     *
+     * ⌘K is bound by an effect, so before React hydrates there is no listener
+     * and the keystroke goes nowhere — a single press followed by a wait
+     * asserts against a palette that was never told to open. It passed for two
+     * phases because the dev server happened to be warm, and failed the moment
+     * the whole suite ran against a cold Turbopack cache: consistently under
+     * parallel load, never in isolation.
+     */
+    await expect(async () => {
+      await page.keyboard.press('ControlOrMeta+k');
+      await expect(page.getByTestId('command-input')).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 20_000 });
 
     const { violations } = await scan(page);
     expect(report(violations), report(violations)).toBe('');

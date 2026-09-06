@@ -133,26 +133,91 @@ function buildRationale(
   return rationale(factors);
 }
 
-export function createChartStrategy(options: ChartStrategyOptions): Strategy {
+/**
+ * The chart's answer for this spot, or `undefined` when no chart covers it.
+ *
+ * Split out of `recommend` in Phase 12a so the bot's composite strategy can ask
+ * "is this a charted spot?" **without using exceptions for control flow.** The
+ * bot leaves charted territory on almost every hand — the seeded content is ten
+ * spots, and a hand that gets past the first raise is already outside it — so a
+ * try/catch around every decision would be the normal path rather than the
+ * exceptional one.
+ *
+ * The two throws below are misuse rather than absence, and stay throws:
+ * recommending for a seat that is not acting, or for one holding no cards, is a
+ * caller bug at any level of coverage.
+ */
+export function chartRecommendation(
+  state: HandState,
+  hero: Position,
+  options: ChartStrategyOptions,
+): ActionRecommendation | undefined {
   const { registry, chartVersion } = options;
 
+  // Coverage, not misuse: v1 authored 6-max 100bb and nothing else.
+  if (state.tableSize !== TABLE_SIZE_6MAX || state.stackDepth !== STACK_DEPTH_100BB) {
+    return undefined;
+  }
+
+  if (state.toAct !== hero) {
+    throw new RangeError(
+      `it is ${state.toAct ?? 'nobody'}'s turn, not ${hero}'s — nothing to recommend`,
+    );
+  }
+
+  const seat = seatAt(state, hero);
+  if (seat.hole === undefined) {
+    throw new RangeError(`${hero} has no cards, so there is nothing to recommend`);
+  }
+
+  const sequence = deriveActionSequence(state, hero);
+  if (sequence === undefined) return undefined;
+
+  const chart = lookupChart(registry, chartKeyFor(hero, sequence));
+  if (chart === undefined) return undefined;
+
+  const hand = handNotationOf(seat.hole[0], seat.hole[1]);
+  const frequencies = handStrategy(chart.ranges, hand);
+  const best = primaryAction(frequencies);
+
+  return {
+    frequencies,
+    primary: best.action,
+    ...(best.size !== undefined ? { primarySize: best.size } : {}),
+    rationale: buildRationale(state, hero, hand, sequence, chart, frequencies),
+    source: 'chart',
+    chartVersion,
+  };
+}
+
+function chartKeyFor(hero: Position, actionSequence: string): ChartKey {
+  return {
+    tableSize: TABLE_SIZE_6MAX,
+    stackDepth: STACK_DEPTH_100BB,
+    heroPosition: hero,
+    actionSequence,
+  };
+}
+
+/**
+ * The throwing form, and the only one the drill path uses.
+ *
+ * Unchanged in behaviour: when no chart family covers the spot this still
+ * throws naming the key it looked for, because "a confidently wrong
+ * recommendation is far worse for a teaching tool than a missing one". The
+ * reason is re-derived here rather than carried out of `chartRecommendation`,
+ * so each failure keeps the specific message it always had.
+ */
+export function createChartStrategy(options: ChartStrategyOptions): Strategy {
   return {
     recommend(state: HandState, hero: Position): ActionRecommendation {
+      const recommendation = chartRecommendation(state, hero, options);
+      if (recommendation !== undefined) return recommendation;
+
       if (state.tableSize !== TABLE_SIZE_6MAX || state.stackDepth !== STACK_DEPTH_100BB) {
         throw new RangeError(
           `v1 charts cover 6-max 100bb only, got ${state.tableSize}-max ${state.stackDepth}bb`,
         );
-      }
-
-      if (state.toAct !== hero) {
-        throw new RangeError(
-          `it is ${state.toAct ?? 'nobody'}'s turn, not ${hero}'s — nothing to recommend`,
-        );
-      }
-
-      const seat = seatAt(state, hero);
-      if (seat.hole === undefined) {
-        throw new RangeError(`${hero} has no cards, so there is nothing to recommend`);
       }
 
       const sequence = deriveActionSequence(state, hero);
@@ -162,30 +227,9 @@ export function createChartStrategy(options: ChartStrategyOptions): Strategy {
         );
       }
 
-      const key: ChartKey = {
-        tableSize: TABLE_SIZE_6MAX,
-        stackDepth: STACK_DEPTH_100BB,
-        heroPosition: hero,
-        actionSequence: sequence,
-      };
-
-      const chart = lookupChart(registry, key);
-      if (chart === undefined) {
-        throw new RangeError(`no chart for ${chartKeyId(key)}`);
-      }
-
-      const hand = handNotationOf(seat.hole[0], seat.hole[1]);
-      const frequencies = handStrategy(chart.ranges, hand);
-      const best = primaryAction(frequencies);
-
-      return {
-        frequencies,
-        primary: best.action,
-        ...(best.size !== undefined ? { primarySize: best.size } : {}),
-        rationale: buildRationale(state, hero, hand, sequence, chart, frequencies),
-        source: 'chart',
-        chartVersion,
-      };
+      // The sequence is derivable and the spot is 6-max 100bb, so the only
+      // thing left is a key nobody authored a chart for.
+      throw new RangeError(`no chart for ${chartKeyId(chartKeyFor(hero, sequence))}`);
     },
   };
 }

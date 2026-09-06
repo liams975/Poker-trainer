@@ -14,6 +14,7 @@ export type {
 export {
   STREETS,
   actionOrder,
+  boardCardsNeeded,
   activeSeats,
   amountToCall,
   contestingSeats,
@@ -31,3 +32,12 @@ export { applyAction, isHandComplete, legalActions } from './betting';
 
 export type { SeatView } from './seating';
 export { seatRing } from './seating';
+
+export type { Pot, UncalledPortion } from './pot';
+export { buildPots, uncalledPortion } from './pot';
+
+export type { HandResult, PotAward, SeatPayout, ShowdownEntry } from './settle';
+export { settleHand } from './settle';
+
+export type { Dealt } from './dealer';
+export { dealHand, dealStreet } from './dealer';

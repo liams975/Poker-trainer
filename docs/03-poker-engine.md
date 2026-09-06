@@ -159,3 +159,109 @@ real spots and doesn't learn a distorted prior.
 
 Aim for high coverage in `evaluator`, `ranges`, and `drills` specifically —
 those three are where a bug silently teaches someone the wrong thing.
+---
+
+## What Phase 12a decided
+
+The engine can play a hand of poker. Eleven modules now; `bot` is the new one.
+
+### The seam existed. What it connects to did not.
+
+`docs/01-architecture.md` says building the bot "becomes mostly UI work because
+the decision-making already exists and is already tested". The seam is real —
+`Strategy.recommend` is genuinely the same function for a drill and a bot — but
+what sits behind it covers **ten spots**: RFI for five seats and big-blind
+defence against five openers. `deriveActionSequence` returns `undefined` for any
+postflop street, any limped pot, any 3-bet, any non-BB seat facing an open, and
+any open outside 1–4bb, and `recommend` throws on all of them by design.
+
+A bot could not complete one preflop orbit: UTG opens from a chart, and the
+very next seat has no chart at all.
+
+### The heuristic drives the bot and never grades anybody
+
+`heuristics.ts` refused to ship a decision-making strategy in Phase 3:
+
+> "A crude postflop strategy would be able to *grade* a user, and grading
+> someone against invented postflop logic teaches wrong play."
+
+That refusal is narrowed to its actual reason rather than reversed. What is
+forbidden is **grading** against invented logic. An opponent that *plays* by
+invented logic is just an opponent, and nobody is being told their play was
+wrong.
+
+Narrowing is enforced in three places rather than asserted once:
+
+- Every heuristic recommendation carries `source: 'heuristic'` and
+  `chartVersion: HEURISTIC_VERSION` — the literal string `heuristic`,
+  deliberately not shaped like a chart set's dated version, so one reaching
+  `drill_attempts.chart_version` is obvious in the data.
+- `tests/grading-isolation.test.ts` — `drills/` cannot import `bot/` or name a
+  heuristic constructor, and `gradeAnswer` takes frequencies rather than a
+  strategy, so there is no argument through which one could arrive.
+- `apps/web/tests/grading-strategy.test.ts` — the only two places that grade a
+  user build `createChartStrategy` and nothing else.
+
+**It does not claim to play well**, and nothing in the tests claims it does.
+It plays legally, it mixes, and it responds to equity, price and stack depth.
+Hand strength is equity against a *uniformly random* opponent, discounted
+`equity ** opponents` for a multiway pot — a crude model chosen over a
+hand-picked continuing range precisely because a range hardcoded in engine
+logic would be strategy content in the wrong place, and invented numbers on top
+of invented logic.
+
+### The composite prefers the chart, and asks rather than catches
+
+`createBotStrategy` is `chartRecommendation(...) ?? heuristic.recommend(...)`.
+One expression, one direction: a chart is authored content and the heuristic is
+a guess, so wherever both could answer the chart wins outright. Never blended —
+a blend would make the bot play a strategy nobody wrote.
+
+`chartRecommendation` was split out of `recommend` for this. Leaving charted
+territory is the *normal* path for a bot, not the exceptional one, so a
+try/catch around every decision would be exception-driven control flow for the
+majority case. `recommend` keeps throwing, unchanged, for the drill path.
+
+### Chip conservation is the exit criterion
+
+`betting.ts` had carried two omissions since Phase 3: "side pots are not split,
+and no showdown is awarded". Both are closed — `pot.ts` layers the pots and
+returns the uncalled portion, `settle.ts` ranks and pays.
+
+A side-pot bug does not crash and does not look wrong. It quietly pays the
+wrong player, and the only way to see it from outside is to count:
+
+```
+sum(stacks) === startingTotal + rebought
+```
+
+Verified over 100,000 hands (`pnpm test:engine:bot`); 2,000 run in `pnpm test`.
+Two rules that are silent when broken get their own tests: **odd chips go to the
+first eligible seat left of the button** — which is why `Pot.eligible` arrives
+in postflop action order rather than seat order — and **a folded-out pot has no
+showdown**, so `HandResult.showdown` is `undefined` rather than empty.
+
+### Dead money and uncalled bets are derived, not special-cased
+
+Two rules that implementations usually hardcode fall out of the arithmetic:
+
+- A folded seat's chips stay in the pot and fill **the layers they reached** —
+  a seat that called 35 before folding leaves 20 in a 20-level main pot and 15
+  in the side pot, not all 35 in the main pot.
+- "Everyone folds to the big blind" needs no rule. The big blind is the top
+  contributor and the small blind the second, so 0.5bb comes back uncalled and
+  the big blind nets exactly the small blind.
+
+### Still open
+
+- **`playHand` runs to completion**, so a human cannot sit down yet.
+  `advanceHand` / `actInHand` are exported for 12b to drive a step at a time.
+- **When everyone is all-in, the board is dealt five at once** rather than
+  street by street, because `applyAction` walks the streets out on its own. The
+  cards are identical — same deck, same order — so a UI can slice `board` to
+  reveal them one at a time.
+- **A table seats exactly six.** Short-handed play is not a smaller version of
+  this: `createHandState` drops the earliest positions, so four-handed is
+  CO/BTN/SB/BB and heads-up has no button seat in this model. Those are real
+  position rules and inventing them to make a test easier would put made-up
+  poker in the engine.

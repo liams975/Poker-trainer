@@ -32,3 +32,4 @@ export * from './strategy';
 export * from './drills';
 export * from './curriculum';
 export * from './progress';
+export * from './bot';

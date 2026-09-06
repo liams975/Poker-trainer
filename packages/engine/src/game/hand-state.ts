@@ -36,6 +36,14 @@ export function actionOrder(street: Street): readonly Position[] {
 /** How many cards the board holds once a street is fully dealt. */
 const BOARD_SIZE: Record<Street, number> = { preflop: 0, flop: 3, turn: 4, river: 5 };
 
+/**
+ * Cards the current street still owes the board. Zero or less when it is
+ * already complete, which is how `dealStreet` knows preflop wants nothing.
+ */
+export function boardCardsNeeded(state: HandState): number {
+  return BOARD_SIZE[state.street] - state.board.length;
+}
+
 export type SeatStatus = 'active' | 'folded' | 'allin';
 
 export interface Seat {

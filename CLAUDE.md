@@ -17,12 +17,13 @@ human**. Do not silently work around them.
 |---|---|
 | Game scope | Texas Hold'em, 6-max cash, 100bb, no ICM |
 | Strategy model | Preflop charts + postflop heuristics. **Not** a real solver. |
+| Heuristic scope | The postflop heuristic drives **bots only**. It never grades a user. |
 | Platform (v1) | Desktop web. Not mobile-responsive-first. |
 | Frontend | Next.js (App Router) + TypeScript + Tailwind + shadcn/ui |
 | Backend | Supabase (Postgres + Auth + RLS). No custom API server. |
 | Engine location | `packages/engine` — pure TS, zero React/DOM/Node-API deps |
 | Monetization (v1) | Entitlement seam built, **no paywall UI shipped** |
-| Bot play | v2 Phase 12. Interfaces scaffolded in v1, bot not built. |
+| Bot play | v2. Engine done in 12a; UI and persistence are 12b. |
 
 Full rationale: `docs/01-architecture.md`
 
@@ -47,6 +48,7 @@ docs/         Specs. Read the relevant one before starting a phase.
 pnpm dev            # web app on :3000
 pnpm test           # vitest, all packages
 pnpm test:engine    # engine only, watch mode
+pnpm test:engine:bot # 100k simulated hands; chips must balance exactly
 pnpm typecheck      # tsc --noEmit across workspace
 pnpm lint
 pnpm db:start       # local Supabase stack (needs Docker)
@@ -138,6 +140,12 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   right answer where there is none. Milestones — a level-up, an achievement, a
   streak record — are the things that get celebrated. Enforced by
   `apps/web/tests/feedback-motion.test.ts`.
+- Never grade a user against `createHeuristicStrategy` or `createBotStrategy`.
+  Those are the bot's decisions — invented logic, by design. `heuristics.ts`
+  refused to ship any postflop strategy for four phases precisely because one
+  could be used to grade, and 12a built one only on the promise that it would
+  not be. `packages/engine/tests/grading-isolation.test.ts` and
+  `apps/web/tests/grading-strategy.test.ts` hold the line at both ends.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol
