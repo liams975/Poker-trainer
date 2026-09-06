@@ -18,7 +18,7 @@ export {
 } from './chart-strategy';
 
 export type { ExplainChartHandOptions } from './explain';
-export { explainChartHand } from './explain';
+export { chartSpot, explainChartHand } from './explain';
 
 export type { BoardTexture, PotOdds } from './heuristics';
 export { classifyBoard, potOdds, spr } from './heuristics';

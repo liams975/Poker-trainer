@@ -25,6 +25,7 @@ describe('isPublicPath', () => {
     '/dashboard',
     '/range-explorer',
     '/drill/quick',
+    '/play',
     '/review',
     '/settings',
     // A route nobody has written yet must be protected anyway.

@@ -28,7 +28,7 @@ export {
 } from './hand-state';
 
 export type { LegalAction } from './betting';
-export { applyAction, isHandComplete, legalActions } from './betting';
+export { applyAction, isHandComplete, legalActions, potBetSizes } from './betting';
 
 export type { SeatView } from './seating';
 export { seatRing } from './seating';

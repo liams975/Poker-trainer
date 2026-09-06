@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { chartId, chartLabel } from '@/lib/charts/map';
 
 import { ActionLegend } from './action-legend';
+import { ChartSpotTable } from './chart-spot-table';
 import { ChartSelector } from './chart-selector';
 import { HandDetail } from './hand-detail';
 import { RangeGrid } from './range-grid';
@@ -153,22 +154,39 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
             comparing ? 'grid grid-cols-1 gap-6 2xl:grid-cols-2' : 'max-w-[46rem]'
           }
         >
-          <RangeGrid
-            chart={primary}
-            label={chartLabel(primary)}
-            selected={selectedHand}
-            onSelect={setSelectedHand}
-            diff={diff}
-          />
+          {/*
+            The spot, above the grid it belongs to.
 
-          {comparing ? (
+            One per grid rather than one for the screen, so compare mode shows
+            *both* spots side by side — which is the mode's whole question. "How
+            does my range widen in position" is two rings with the button in
+            different places, and a single table above a split view would be
+            captioning one grid and not the other.
+          */}
+          <div className="flex flex-col gap-6">
+            <ChartSpotTable chart={primary} registry={registry} hand={selectedHand} />
+
             <RangeGrid
-              chart={comparison}
-              label={chartLabel(comparison)}
+              chart={primary}
+              label={chartLabel(primary)}
               selected={selectedHand}
               onSelect={setSelectedHand}
-              diff={reverseDiff}
+              diff={diff}
             />
+          </div>
+
+          {comparing ? (
+            <div className="flex flex-col gap-6">
+              <ChartSpotTable chart={comparison} registry={registry} hand={selectedHand} />
+
+              <RangeGrid
+                chart={comparison}
+                label={chartLabel(comparison)}
+                selected={selectedHand}
+                onSelect={setSelectedHand}
+                diff={reverseDiff}
+              />
+            </div>
           ) : null}
         </div>
 

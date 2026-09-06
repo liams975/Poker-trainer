@@ -23,7 +23,7 @@ human**. Do not silently work around them.
 | Backend | Supabase (Postgres + Auth + RLS). No custom API server. |
 | Engine location | `packages/engine` — pure TS, zero React/DOM/Node-API deps |
 | Monetization (v1) | Entitlement seam built, **no paywall UI shipped** |
-| Bot play | v2. Engine done in 12a; UI and persistence are 12b. |
+| Bot play | Playable from 12b. Review of played hands is 12c. |
 
 Full rationale: `docs/01-architecture.md`
 
@@ -146,6 +146,20 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   could be used to grade, and 12a built one only on the promise that it would
   not be. `packages/engine/tests/grading-isolation.test.ts` and
   `apps/web/tests/grading-strategy.test.ts` hold the line at both ends.
+- Never write a second loop over `stepHand`. `playHand`, `playTableHand` and
+  the table on screen all drive the one in `bot/step.ts`; the screen differs
+  only by passing `human`. A UI-shaped copy would leave the 100,000-hand
+  conservation proof covering a sibling of the code people actually play.
+- Never trust a posted hand. `lib/bot/record.ts` replays it from the seed and
+  hero's actions and writes what **it** derives; a replay that disagrees is
+  refused with a 409, never repaired. And never let the browser and the server
+  build the opponents differently — `BOT_TRIALS` is a rng-consumption count, not
+  a tuning knob, and changing it invalidates every stored hand's replay.
+- Never grade a spot no chart covers. `reviewHandDecisions` returns a tier or an
+  `uncharted` reason and never both; with ten charts most of a real hand is
+  uncharted, and the UI says so rather than hiding it. The alternative is
+  grading against the heuristic, which is the thing all of this exists to
+  prevent.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol

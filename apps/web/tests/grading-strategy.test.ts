@@ -72,3 +72,66 @@ describe('the grading path builds the chart strategy and nothing else', () => {
     expect(record).not.toContain("'heuristic'");
   });
 });
+
+/**
+ * 12b puts the two on the same screen for the first time.
+ *
+ * Bot play *builds* `createBotStrategy` — that is the whole point of it — and
+ * on the very same hand it grades hero's own preflop decisions. So the runner
+ * is the one file in the app that legitimately holds both, and the separation
+ * has to be asserted differently: not "never touches the bot" but "never grades
+ * with it".
+ */
+describe('bot play grades through the review path, never through the bot', () => {
+  /**
+   * Comments stripped before checking, and the reason is not tidiness.
+   *
+   * These two files have to *explain* the rule — "grading against
+   * `createHeuristicStrategy` is what this avoids" is the clearest sentence
+   * available for it — and a raw-text guard reads that sentence as a violation.
+   * The rule is about what the code can reach, so the check is over code. The
+   * two grading paths above keep the raw-text form because neither discusses
+   * the banned names, and a stricter guard that passes is worth keeping.
+   */
+  const withoutComments = (source: string): string =>
+    source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  const runner = withoutComments(read('../src/components/play/bot-table-runner.tsx'));
+  const summary = withoutComments(read('../src/components/play/hand-summary.tsx'));
+  const summarySource = read('../src/components/play/hand-summary.tsx');
+
+  it('grades hero through reviewHandDecisions', () => {
+    // Non-vacuity, again: with the grading deleted the next assertion passes.
+    expect(runner).toContain('reviewHandDecisions');
+  });
+
+  it('never grades an answer against a strategy of any kind', () => {
+    /**
+     * `reviewHandDecisions` lives in `drills/`, which the engine's own
+     * isolation test forbids from importing `bot/` at all. So the guarantee
+     * here is narrower and sufficient: whatever the runner constructs for the
+     * *opponents*, the thing it grades with takes decision points and a chart
+     * registry, and there is no argument through which a heuristic could
+     * arrive.
+     */
+    expect(runner, 'the runner must not grade against a strategy').not.toContain('gradeAnswer');
+    expect(runner).not.toContain('createChartStrategy');
+    expect(runner).not.toContain('createHeuristicStrategy');
+
+    // And the panel that renders the result only ever displays one.
+    for (const banned of BANNED) {
+      expect(summary, `hand-summary.ts reaches ${banned}`).not.toContain(banned);
+    }
+    expect(summary).not.toContain('gradeAnswer');
+  });
+
+  it('says out loud when a spot has no chart, rather than scoring it anyway', () => {
+    /**
+     * The visible half of the rule, and the reason it is worth a test: an
+     * uncharted decision that silently grew a tier would look exactly like a
+     * charted one, and would mean grading against the heuristic.
+     */
+    expect(summarySource).toContain('uncharted');
+    expect(summarySource).toMatch(/No chart covers this spot yet/);
+  });
+});

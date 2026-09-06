@@ -125,6 +125,7 @@ export function LessonView({
             block={block}
             chartFor={chartFor}
             nearestChart={nearestCharts[index]}
+            registry={registry}
             drill={{ chartSet, templates }}
           />
         ))}

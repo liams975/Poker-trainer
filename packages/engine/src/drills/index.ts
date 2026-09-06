@@ -17,3 +17,11 @@ export type {
   SessionSummary,
 } from './session';
 export { generateSession, raiseSizeOptions, skillTagsFor, summariseSession } from './session';
+
+export type {
+  HeroDecision,
+  ReviewDecisionsOptions,
+  ReviewedDecision,
+  UnchartedReason,
+} from './hand-review';
+export { reviewHandDecisions } from './hand-review';

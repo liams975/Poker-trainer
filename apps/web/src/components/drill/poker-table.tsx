@@ -1,11 +1,12 @@
 'use client';
 
-import type { HandState, Position, SeatView } from '@poker/engine';
-import { potSize, seatRing } from '@poker/engine';
+import type { HandResult, HandState, Position, SeatView } from '@poker/engine';
+import { formatCard, potSize, seatRing } from '@poker/engine';
 import { m } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 
+import { BoardCards } from './board-cards';
 import { HoleCards } from './hole-cards';
 
 /**
@@ -24,11 +25,15 @@ import { HoleCards } from './hole-cards';
  * hues only read as data because nothing else on screen competes with them.
  * **So this is a table in geometry and monochrome in colour.** No felt green,
  * no gold, no action hues, and no accent either: amber is the streak and XP
- * rail and nothing else.
+ * rail and nothing else. That holds through 12b: a winning seat is marked in
+ * weight and words, never in green.
  *
  * Every seat's action is rendered in words at the seat. That is both what makes
  * it readable and what makes it accessible — there is no separate description
  * for a screen reader, because the visible text already is one.
+ *
+ * 12b widened it from one preflop spot to a whole hand: a board in the middle,
+ * opponents holding cards, and a showdown that turns some of them over.
  */
 
 /** Where hero sits, in degrees. 90° is the bottom of the screen: y grows down. */
@@ -119,14 +124,20 @@ function Seat({
   count,
   stackDepth,
   dealKey,
+  faceDown,
+  won,
 }: {
   view: SeatView;
-  /** Hero's cards, which sit at hero's seat. Undefined for everyone else. */
+  /** The cards to show at this seat, if any are visible. */
   hole?: readonly [string, string] | undefined;
   hand?: string | undefined;
   count: number;
   stackDepth: number;
   dealKey?: string | undefined;
+  /** Draw two card backs — this seat holds cards you cannot see. */
+  faceDown?: boolean;
+  /** Chips coming back to this seat, when the hand is over. */
+  won?: number | undefined;
 }) {
   const { seat, isHero, isToAct } = view;
   const folded = seat.status === 'folded';
@@ -139,6 +150,8 @@ function Seat({
    * has put chips in, their stack is the interesting figure and it appears.
    */
   const showStack = !folded && seat.stack !== stackDepth;
+  const showCards = hole !== undefined || (faceDown === true && !folded);
+  const winner = won !== undefined && won > 0;
 
   return (
     <li
@@ -148,6 +161,7 @@ function Seat({
       data-position={seat.position}
       data-hero={isHero || undefined}
       data-status={seat.status}
+      data-winner={winner ? '' : undefined}
     >
       <div
         className={cn(
@@ -161,11 +175,22 @@ function Seat({
           // 4.5:1 floor — an axe violation Phase 10 found and fixed once
           // already, and `e2e/a11y.spec.ts` would find it again.
           folded && 'border-line/40',
+          // A seat that just won. Weight, not hue: `docs/05` reserves saturated
+          // colour for strategy data, and "you won this pot" is not strategy.
+          winner && 'border-ink',
         )}
       >
-        {/* Hero's cards sit beside the label rather than under it. Stacked, the
-            box grew tall enough to push the bottom of the ring off the table. */}
-        {hole && hand ? <HoleCards hole={hole} hand={hand} size="sm" dealKey={dealKey} /> : null}
+        {/* Cards sit beside the label rather than under it. Stacked, the box
+            grew tall enough to push the bottom of the ring off the table. */}
+        {showCards ? (
+          <HoleCards
+            hole={hole}
+            {...(hand === undefined ? {} : { hand })}
+            size={isHero ? 'sm' : 'xs'}
+            {...(dealKey === undefined ? {} : { dealKey })}
+            {...(isHero ? {} : { owner: seat.position })}
+          />
+        ) : null}
 
         <div className="flex min-w-[3.75rem] flex-col items-start gap-0.5 @md:min-w-[4.5rem]">
           <span className="flex items-baseline gap-1">
@@ -196,7 +221,14 @@ function Seat({
             {seatActivity(view)}
           </span>
 
-          {showStack ? (
+          {winner ? (
+            <span
+              className="whitespace-nowrap font-mono text-[0.625rem] font-semibold text-ink"
+              data-testid="seat-won"
+            >
+              Won {won}bb
+            </span>
+          ) : showStack ? (
             <span className="font-mono text-[0.5625rem] text-ink-muted">{seat.stack}bb</span>
           ) : null}
         </div>
@@ -211,21 +243,63 @@ export function PokerTable({
   hole,
   hand,
   dealKey,
+  boardShown,
+  result,
+  faceDownOpponents = false,
 }: {
   state: HandState;
   hero: Position;
-  /** Hero's cards, drawn at hero's seat. */
-  hole: readonly [string, string];
-  hand: string;
+  /**
+   * Hero's cards, drawn at hero's seat.
+   *
+   * Optional since 12b: the Range Explorer draws the spot a chart describes
+   * before any cell is picked, and there is no hand to show yet.
+   */
+  hole?: readonly [string, string] | undefined;
+  hand?: string | undefined;
   /**
    * Identifies the hand on the table. Changing it re-deals; omitting it means
    * the table simply is, which is what a replay of an old attempt wants.
    */
   dealKey?: string | undefined;
+  /**
+   * How many board cards are face up. Defaults to all of them.
+   *
+   * Needed because an all-in run-out arrives as five cards in one step — see
+   * `board-cards.tsx`, and `advanceHand` in the engine for why.
+   */
+  boardShown?: number | undefined;
+  /**
+   * The finished hand. Turns cards over and marks who won.
+   *
+   * Pass the **pre-settle** state alongside it: `settleHand` sweeps the pot into
+   * the winners' stacks, so a settled state shows an empty middle and chips
+   * already moved, which is not the moment anybody wants to look at.
+   */
+  result?: HandResult | undefined;
+  /** Draw card backs at every seat still in the hand. */
+  faceDownOpponents?: boolean;
 }) {
   const ring = seatRing(state, hero);
   const count = ring.length;
   const pot = potSize(state);
+  const board = state.board.map(formatCard);
+
+  /**
+   * Whose cards are face up.
+   *
+   * **`showdown` being undefined is the rule, not an absence of data.**
+   * `settle.ts`: "A folded-out pot has no showdown. One seat left means no
+   * cards are ranked and none are revealed. `HandResult.showdown` is
+   * `undefined` rather than empty, so a caller cannot accidentally treat
+   * 'nobody had to show' as 'nobody had anything'." Revealing a winner's cards
+   * when everyone folded would hand out information the hand never produced.
+   */
+  const revealed = new Set(result?.showdown?.map((entry) => entry.position) ?? []);
+
+  const won = new Map(
+    (result?.payouts ?? []).filter((payout) => payout.won > 0).map((p) => [p.position, p.won]),
+  );
 
   return (
     // `@container`, not a viewport breakpoint. This renders full width on the
@@ -258,12 +332,20 @@ export function PokerTable({
           className="absolute inset-x-[15%] inset-y-[24%] rounded-[50%] border border-line/50"
         />
 
-        {/* The pot, in the middle, where the chips are heading. */}
-        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5">
-          <span className="text-[0.5625rem] uppercase tracking-wider text-ink-muted">Pot</span>
-          <span className="font-mono text-sm text-ink @md:text-base" data-testid="pot">
-            {pot}bb
-          </span>
+        {/* The middle: the board, then the pot the chips are heading into. */}
+        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5">
+          <BoardCards
+            board={board}
+            {...(boardShown === undefined ? {} : { shown: boardShown })}
+            {...(dealKey === undefined ? {} : { dealKey })}
+          />
+
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-[0.5625rem] uppercase tracking-wider text-ink-muted">Pot</span>
+            <span className="font-mono text-sm text-ink @md:text-base" data-testid="pot">
+              {pot}bb
+            </span>
+          </div>
         </div>
 
         {/* Chips in front of each seat. Separate from the seat list so they can
@@ -318,15 +400,28 @@ export function PokerTable({
          * `<ol>` an ordinary list.
          */}
         <ol className="absolute inset-0" aria-label="Seats, in order of action">
-          {ring.map((view) => (
-            <Seat
-              key={view.position}
-              view={view}
-              count={count}
-              stackDepth={state.stackDepth}
-              {...(view.isHero ? { hole, hand, dealKey } : {})}
-            />
-          ))}
+          {ring.map((view) => {
+            const shown = view.seat.hole;
+            const seatHole: readonly [string, string] | undefined = view.isHero
+              ? hole
+              : revealed.has(view.position) && shown !== undefined
+                ? [formatCard(shown[0]), formatCard(shown[1])]
+                : undefined;
+
+            return (
+              <Seat
+                key={view.position}
+                view={view}
+                count={count}
+                stackDepth={state.stackDepth}
+                faceDown={faceDownOpponents}
+                {...(seatHole === undefined ? {} : { hole: seatHole })}
+                {...(view.isHero && hand !== undefined ? { hand } : {})}
+                {...(dealKey === undefined ? {} : { dealKey })}
+                {...(won.has(view.position) ? { won: won.get(view.position) } : {})}
+              />
+            );
+          })}
         </ol>
       </div>
     </div>

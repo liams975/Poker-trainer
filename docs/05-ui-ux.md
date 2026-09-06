@@ -782,3 +782,78 @@ rounding error, because Turbopack shakes out the unused features either way.
 
 What *is* measured and does matter: none of the four motion-bearing chunks is in
 `rootMainFiles`, so a page that animates nothing does not pay for Motion.
+
+---
+
+## What Phase 12b decided
+
+The phase that made the app playable, and the one that finished the v2 request
+Phase 11 only half-delivered.
+
+### The table reached the two screens that only ever named a position
+
+Phase 11 built the ring and put it on the drill and on Session Review's replay.
+It never reached the **Range Explorer**, which is the app's whole chart-study
+surface and states its spot in words only — the selector says *"BB vs BTN
+open"* and nothing draws it. Nor the lesson `range` block, which embeds a chart
+mid-lesson with the same label and the same silence.
+
+Both now render `ChartSpotTable`, over the engine's `chartSpot` — **the same
+construction `explainChartHand` has used since Phase 6** to produce the
+rationale in the panel beside it. One state, not two: the picture and the
+explanation cannot come to disagree about which spot is on screen.
+
+Full width above the grid, and one per grid in compare mode. "How does my range
+widen in position" is two rings with the button in different places; a single
+table above a split view would be captioning one grid and not the other.
+
+Selecting a cell deals that hand into hero's seat, which is where it pays off —
+`AKs` in the big blind, the button's 2.5bb already in front of them.
+
+### The ring grew a board, and kept the palette
+
+`poker-table.tsx` now draws community cards, face-down cards at every live seat,
+a showdown reveal and a winner. None of it spends a hue. **A winning seat is
+marked in weight and words** — a brighter border and "Won 12.5bb" — because
+`docs/05` reserves saturated colour for strategy data and "you won this pot" is
+not strategy. Green for a winner would have been the first breach of the rule
+Phase 11 went to some trouble to keep.
+
+`HandResult.showdown` being `undefined` is what gates the reveal, and it is a
+rule rather than missing data: `settle.ts` returns `undefined` rather than an
+empty array precisely so that "nobody had to show" cannot be mistaken for
+"nobody had anything". Turning a winner's cards over on a folded-out pot would
+hand out information the hand never produced.
+
+### An all-in run-out is revealed street by street, in the UI
+
+The engine deals all five board cards at once when everyone is all-in —
+`applyAction` walks the streets out on its own. The cards are identical either
+way, so this is purely a pacing question, and pacing is not the engine's
+business. The runner reveals to the next street boundary on each beat: flop,
+then turn, then river. It is the one moment in poker where the cards arriving
+separately is the entire point.
+
+### No feedback until the hand is over — and no verdict on the hand
+
+Grades appear in the summary, never mid-hand. A tier landing on your preflop
+call while you still have a flop to play is the drill's moment in a place it
+does not belong.
+
+And the hand itself gets no framing at all: the net is a number, with no
+"nicely played" and no "unlucky". Winning a pot is not playing well. That is the
+same rule the four tiers encode and the same one Phase 11 held one layer out
+when it settled that **milestones are celebrated and individual answers never
+are** — a hand is one sample.
+
+### The uncharted case is said out loud
+
+Most of hero's decisions in a real hand cannot be graded: with ten charts, only
+first-in and big-blind-versus-one-open are covered. Those decisions say *"No
+chart covers this spot yet"* rather than being hidden or quietly scored.
+
+Hiding them would make the screen look like it had graded a hand it had barely
+looked at. Scoring them would mean grading against the bot's invented postflop
+logic, which is the one thing this whole line of work is built not to do. Saying
+it has a third benefit: it makes the missing preflop charts visible as a hole in
+the product rather than a line in the roadmap.

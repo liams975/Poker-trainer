@@ -14,14 +14,31 @@ export { sampleAction } from './act';
 export type { BotProfile } from './profile';
 export { BOT_PROFILES, profileById } from './profile';
 
-export type { HandProgress, PlayHandOptions, PlayedHand } from './hand';
-export { actInHand, advanceHand, playHand } from './hand';
+export type { HandProgress, Step, StepOptions } from './step';
+export { actInHand, advanceHand, stepHand } from './step';
+
+export type {
+  HeroDecisionPoint,
+  PlayHandOptions,
+  PlayedHand,
+  ReplayHandOptions,
+  ReplayedHand,
+} from './hand';
+export { playHand, replayHand } from './hand';
 
 export type {
   CreateTableOptions,
+  OpenTableHand,
   PlayTableHandOptions,
   Table,
   TableHand,
   TablePlayer,
 } from './table';
-export { createTable, playTableHand, positionsFor } from './table';
+export {
+  createTable,
+  finishTableHand,
+  playTableHand,
+  positionsFor,
+  startTableHand,
+  tableHandConfig,
+} from './table';

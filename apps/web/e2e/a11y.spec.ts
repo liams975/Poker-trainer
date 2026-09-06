@@ -95,6 +95,10 @@ test.describe('signed in', () => {
     '/drill/quick',
     '/drill/weak-spots',
     '/review',
+    // Phase 12b. Scanned at the deal; the mid-hand DOM — a board, face-down
+    // cards at five seats, and the decision controls — is covered by the
+    // dedicated scan below.
+    '/play',
   ]) {
     test(`${path} has no accessibility violations`, async ({ page }) => {
       test.setTimeout(120_000);
@@ -150,6 +154,32 @@ test.describe('signed in', () => {
     await page.waitForSelector('[data-testid="progress"]');
     await page.keyboard.press('f');
     await page.waitForSelector('[data-testid="grade"]');
+
+    const { violations } = await scan(page);
+    expect(report(violations), report(violations)).toBe('');
+  });
+
+  /**
+   * A hand in progress, which is a different DOM again: a board in the felt,
+   * face-down cards at five seats, a winner marked at one of them, and the
+   * decision controls beside it.
+   *
+   * The contrast rules are the ones most at risk here. Phase 10 found and fixed
+   * an `opacity-40` on a folded seat that landed near 2:1, and 12b added three
+   * more muted-on-muted surfaces to the same ring.
+   */
+  test('a bot hand mid-play has no accessibility violations', async ({ page }) => {
+    test.setTimeout(120_000);
+
+    await signIn(page);
+    await page.goto('/play');
+    await page.waitForSelector('[data-testid="seat"]');
+
+    // Wait for hero's turn, so the decision controls are on screen too.
+    await expect(async () => {
+      const controls = page.locator('[data-testid^="choice-"]').first();
+      await expect(controls).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 40_000 });
 
     const { violations } = await scan(page);
     expect(report(violations), report(violations)).toBe('');

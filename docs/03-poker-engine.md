@@ -254,8 +254,8 @@ Two rules that implementations usually hardcode fall out of the arithmetic:
 
 ### Still open
 
-- **`playHand` runs to completion**, so a human cannot sit down yet.
-  `advanceHand` / `actInHand` are exported for 12b to drive a step at a time.
+- ~~**`playHand` runs to completion**, so a human cannot sit down yet.~~
+  Closed in 12b by `stepHand`; see below.
 - **When everyone is all-in, the board is dealt five at once** rather than
   street by street, because `applyAction` walks the streets out on its own. The
   cards are identical — same deck, same order — so a UI can slice `board` to
@@ -265,3 +265,104 @@ Two rules that implementations usually hardcode fall out of the arithmetic:
   CO/BTN/SB/BB and heads-up has no button seat in this model. Those are real
   position rules and inventing them to make a test easier would put made-up
   poker in the engine.
+
+---
+
+## What Phase 12b decided
+
+The engine half of 12b is small, because 12a left it the right seams. What it
+mostly did was close the two gaps the "Still open" list above named.
+
+### One hand loop, driven two ways
+
+`bot/step.ts` holds it. `stepHand(progress, { rng, strategyFor, human? })`
+returns what one step did:
+
+| `kind` | Meaning |
+|---|---|
+| `deal` | The street was owed a board and got it |
+| `acted` | A seat acted, and here is the action the engine recorded |
+| `hero` | It is the human's turn; **nothing advanced** |
+| `complete` | The hand is over; **nothing advanced** |
+
+Dealing is a step of its own rather than folded into the action that closed the
+street, because on screen those are two separate moments: a bet lands, then the
+cards turn over.
+
+`hero` and `complete` return the progress they were given, by identity, so a
+caller can tell that nothing happened without comparing states.
+
+**`playHand` and `playTableHand` are both written over it.** That is the whole
+point and it is not a tidiness argument: the 100,000-hand conservation run and
+the table on screen differ by one option, so the simulation proves the code the
+app actually runs rather than a sibling of it. `strategy/explain.ts` has carried
+the general form of this warning since Phase 6 — "that is a second
+implementation of the thing the drill does, and the two would drift".
+
+The table split the same way: `startTableHand` deals, `finishTableHand` settles,
+moves the button and rebuys, and `playTableHand` is the two with a loop between.
+
+### `replayHand`: a hand is a seed and hero's actions
+
+```ts
+replayHand({ rng, strategyFor, config, human, humanActions }): ReplayedHand
+```
+
+Because every source of randomness is seeded and injected, the deal, the board
+and all five opponents' decisions are reproducible from one number. A hand of
+six players therefore compresses to a seed, the seating, and **hero's own
+actions** — which is what `bot_hands` stores, and why it stores no cards.
+
+It returns `decisions`: the state hero faced before each of their own actions.
+That is what post-hand review needs, because grading a spot needs the spot and
+not just the action taken in it.
+
+It **throws** on any disagreement — an action the rules reject, one the hand
+never needed, one it needed and did not get. The server uses it to check what a
+browser claims, and a claim that does not replay is one to refuse rather than
+repair.
+
+### Grading lives in `drills/`, and takes plain data
+
+`drills/hand-review.ts` grades hero's decisions inside a hand:
+
+- Postflop → `uncharted: 'postflop'`. No chart family covers it, by construction.
+- Preflop with no chart → `uncharted: 'no-chart'`.
+- Otherwise → the existing four tiers, plus the full mix.
+
+Exactly one of `grade` and `uncharted` is ever present.
+
+**Note the module.** `tests/grading-isolation.test.ts` forbids anything in
+`drills/` from importing `bot/` — "the day it imports one is the day a drill
+could be graded against a sampled bot action instead of against a chart".
+Recovering the decision points needs `bot/replayHand`. So the recovery happens
+on the caller's side and this takes the results as data, which keeps the guard
+structural rather than something a later edit could argue past.
+
+The narrowing is worth stating plainly: **"preflop is graded" is too generous.**
+With ten charts, hero is graded only when first in or defending the big blind
+against a single open. A hand played to the river passes through a dozen spots
+and at most one of them can be marked.
+
+### `potBetSizes`
+
+The drill's sizes come from `raiseSizeOptions`, which draws from the chart
+*family* so hero's own chart cannot hand over the answer. Bot play has no answer
+to hand over and no chart behind most of its spots, so its sizes come from the
+pot.
+
+**A pot-sized raise is the call plus the pot after that call.** Facing 3 into
+4.5, "pot" is `3 + (4.5 + 3) = 10.5`. Eyeballing it as 4.5 is the most common
+sizing error there is, which is reason enough for it to be engine code with a
+test rather than arithmetic in a component.
+
+Sizes outside what a stack can reach are **dropped, not clamped** — clamping
+collapses three buttons onto one number, and the largest is already offered as
+All in.
+
+### Still open
+
+- **A table still seats exactly six**, unchanged and for the same reason.
+- **The all-in run-out still deals five cards in one step.** The UI reveals them
+  to the next street boundary instead, which is where that belongs: the engine
+  has no opinion about pacing.

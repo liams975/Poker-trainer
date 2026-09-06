@@ -22,7 +22,7 @@
  */
 
 import { CANONICAL_HANDS, combosOf, formatCard, type HandNotation } from '../cards';
-import { rebuildSpot, type DrillScenario } from '../drills';
+import { rebuildSpot, type DrillScenario, type DrillSpot } from '../drills';
 import type { ChartRegistry, RangeChart } from '../ranges';
 import { lookupChart } from '../ranges';
 
@@ -83,9 +83,26 @@ function openSizeFor(chart: RangeChart, registry: ChartRegistry): number | undef
   return [...sizes][0];
 }
 
-export function explainChartHand(options: ExplainChartHandOptions): ActionRecommendation {
-  const { chart, hand, registry, chartVersion } = options;
-
+/**
+ * The spot a chart describes, as a real `HandState`.
+ *
+ * Extracted so the Range Explorer can *draw* the spot it is naming in words.
+ * "BB vs BTN open" is the hard part for anyone still learning, and a ring with
+ * the button's chips already in it is not — position is geometry, which is the
+ * argument Phase 11 made for the table in the first place.
+ *
+ * One construction serves both, deliberately. A second one built for the
+ * picture would eventually disagree with the explanation printed beside it.
+ *
+ * `hand` is optional because the explorer has a spot before it has a selected
+ * cell. Any combo of a notation replays the same spot — the state differs only
+ * in hero's two cards — so which one is dealt never changes the betting.
+ */
+export function chartSpot(
+  chart: RangeChart,
+  registry: ChartRegistry,
+  hand: HandNotation = CANONICAL_HANDS[0]!,
+): DrillSpot {
   if (!CANONICAL_HANDS.includes(hand)) {
     throw new RangeError(`"${hand}" is not one of the 169 canonical hands`);
   }
@@ -108,7 +125,13 @@ export function explainChartHand(options: ExplainChartHandOptions): ActionRecomm
   const openSize = openSizeFor(chart, registry);
   if (openSize !== undefined) scenario.openSize = openSize;
 
-  const spot = rebuildSpot(scenario);
+  return rebuildSpot(scenario);
+}
+
+export function explainChartHand(options: ExplainChartHandOptions): ActionRecommendation {
+  const { chart, hand, registry, chartVersion } = options;
+
+  const spot = chartSpot(chart, registry, hand);
 
   return createChartStrategy({ registry, chartVersion }).recommend(spot.state, spot.hero);
 }

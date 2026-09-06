@@ -21,6 +21,7 @@ import {
   currentBet,
   hasActedSinceLastAggression,
   minRaiseTo,
+  potSize,
   seatAt,
 } from './hand-state';
 
@@ -242,4 +243,51 @@ function settle(state: HandState, actor: Position): HandState {
 
   const next = nextActive(state, actor);
   return next === undefined ? advance(state) : { ...state, toAct: next };
+}
+
+/**
+ * Conventional bet and raise sizes for the seat to act, as *raise-to* amounts.
+ *
+ * A drill takes its sizes from `raiseSizeOptions`, which draws from the chart
+ * family so hero's own chart cannot hand over the answer before they choose.
+ * Bot play has no answer to hand over and no chart behind most of its spots, so
+ * the sizes come from the pot — which is how a poker client offers them and
+ * what a person is learning to think in.
+ *
+ * **A pot-sized raise is the call plus the pot after that call**, not a share of
+ * the pot as it stands. Facing 3 into 4.5, "pot" is 3 + (4.5 + 3) = 10.5, and
+ * eyeballing it as 4.5 is the single most common sizing error there is. Doing
+ * that arithmetic in a component would be poker logic in React, which CLAUDE.md
+ * rules out, and would put it out of reach of a test.
+ *
+ * Sizes outside what this stack can do are **dropped, not clamped**. Clamping
+ * would collapse three buttons onto the same number, and the largest of them is
+ * already offered as All in.
+ */
+const POT_FRACTIONS = [1 / 3, 1 / 2, 3 / 4, 1] as const;
+
+export function potBetSizes(state: HandState): readonly number[] {
+  const position = state.toAct;
+  if (position === undefined) return [];
+
+  const aggressive = legalActions(state).find(
+    (option) => option.action === 'bet' || option.action === 'raise',
+  );
+  if (aggressive?.minTo === undefined || aggressive.maxTo === undefined) return [];
+
+  const bet = currentBet(state);
+  const toCall = amountToCall(state, position);
+  const after = potSize(state) + toCall;
+
+  const sizes = new Set<number>();
+
+  for (const fraction of POT_FRACTIONS) {
+    const raiseTo = chips(bet + fraction * after);
+
+    // Strictly below the maximum: reaching it exactly is an all-in, and the
+    // all-in button already says so in words.
+    if (raiseTo >= aggressive.minTo && raiseTo < aggressive.maxTo) sizes.add(raiseTo);
+  }
+
+  return [...sizes].sort((a, b) => a - b);
 }

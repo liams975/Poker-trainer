@@ -402,6 +402,73 @@ test.describe('compare mode', () => {
   });
 });
 
+/**
+ * Phase 12b: the chart's spot, drawn.
+ *
+ * The selector has named it in words since Phase 6 — "BB vs BTN open" — and for
+ * anyone still learning, the words are the hard part. These assert the ring is
+ * there, that it follows the selector, and that it is the *spot* the chart
+ * describes rather than a generic table.
+ */
+test.describe('the spot above the grid', () => {
+  test('draws the chart’s own seat, and follows the selector', async ({ page }) => {
+    await openExplorer(page);
+
+    const table = page.getByTestId('chart-spot-table');
+    await expect(table).toHaveCount(1);
+    await expect(table.getByTestId('seat')).toHaveCount(6);
+
+    // The default chart is BTN's open, so hero sits on the button.
+    await expect(table).toHaveAttribute('data-hero', 'BTN');
+    await expect(
+      table.locator('[data-testid="seat"][data-hero="true"]'),
+    ).toHaveAttribute('data-position', 'BTN');
+
+    // Switching the chart moves hero's seat with it.
+    await page.getByRole('button', { name: /BB vs BTN open/ }).first().click();
+    await expect(table).toHaveAttribute('data-hero', 'BB');
+  });
+
+  test('shows the opener’s raise already in front of them', async ({ page }) => {
+    await openExplorer(page);
+    await page.getByRole('button', { name: /BB vs BTN open/ }).first().click();
+
+    const table = page.getByTestId('chart-spot-table');
+
+    // Not decoration: the whole reason a defence chart is hard to read as a
+    // label is that "vs BTN open" carries a raiser, a size and five folds.
+    await expect(
+      table.locator('[data-testid="seat"][data-position="BTN"]'),
+    ).toContainText('Raised to');
+    await expect(
+      table.locator('[data-testid="seat"][data-position="UTG"]'),
+    ).toContainText('Folded');
+  });
+
+  test('deals the selected hand into hero’s seat', async ({ page }) => {
+    await openExplorer(page);
+
+    const hero = page
+      .getByTestId('chart-spot-table')
+      .locator('[data-testid="seat"][data-hero="true"]');
+
+    // Nothing selected: hero holds cards, face down.
+    await expect(hero).not.toContainText('AKs');
+
+    await page.locator('[data-hand="AKs"]').first().click();
+    await expect(hero).toContainText('AKs');
+  });
+
+  test('gives compare mode a spot per grid', async ({ page }) => {
+    await openExplorer(page);
+    await page.getByRole('button', { name: 'Compare charts' }).click();
+
+    // Two grids, two rings: "how does my range widen in position" is two
+    // buttons in two different places, which is the question the mode asks.
+    await expect(page.getByTestId('chart-spot-table')).toHaveCount(2);
+  });
+});
+
 test.describe('the grid never borrows the accent colour', () => {
   /**
    * docs/05-ui-ux.md: "Accent (chrome) #E8B04B — streak and XP rail ONLY.

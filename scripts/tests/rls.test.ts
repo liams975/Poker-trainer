@@ -148,6 +148,9 @@ describe('a user sees only their own rows', () => {
     'streaks',
     'user_achievements',
     'entitlements',
+    // Phase 12b.
+    'bot_sessions',
+    'bot_hands',
   ])(
     'Bob gets zero rows from %s',
     async (table) => {
@@ -212,6 +215,90 @@ describe('a user cannot write rows they do not own', () => {
 
     const { data } = await alice.db.from('drill_attempts').select('id');
     expect(data).toHaveLength(1);
+  });
+});
+
+/**
+ * Phase 12b's hand histories, through the same path the app writes them.
+ *
+ * The interesting property is not that Bob cannot read Alice's hands — the
+ * sweep above covers that for every user table at once. It is that a hand is
+ * **append-only**, which is a privilege and not a policy: 12c's review
+ * recomputes from these rows, and a log its own author can rewrite is not
+ * something you can recompute from.
+ */
+describe('bot hand histories', () => {
+  const hand = (userId: string, sessionId: string) => ({
+    user_id: userId,
+    session_id: sessionId,
+    hand_no: 0,
+    seed: 4242,
+    button: 1,
+    hero_position: 'BTN' as const,
+    stacks: { UTG: 100, HJ: 100, CO: 100, BTN: 100, SB: 100, BB: 100 },
+    actions: [],
+    result: { pots: [] },
+    hero_net: -2.5,
+    chart_version: 'v1',
+    heuristic_version: 'heuristic',
+  });
+
+  let aliceSession: string;
+
+  it('Alice opens a sitting and records a hand in it', async () => {
+    const { data, error } = await alice.db
+      .from('bot_sessions')
+      .insert({ user_id: alice.id, config: {} })
+      .select('id')
+      .single();
+
+    expect(error).toBeNull();
+    aliceSession = data!.id as string;
+
+    const inserted = await alice.db.from('bot_hands').insert(hand(alice.id, aliceSession));
+    expect(inserted.error).toBeNull();
+  });
+
+  it('and closes it, which is the one update a sitting needs', async () => {
+    const { error } = await alice.db
+      .from('bot_sessions')
+      .update({ ended_at: new Date().toISOString() })
+      .eq('id', aliceSession);
+
+    expect(error).toBeNull();
+  });
+
+  it('cannot rewrite the hand afterwards, and neither can anybody else', async () => {
+    const mine = await alice.db.from('bot_hands').update({ hero_net: 999 }).eq('user_id', alice.id);
+    expect(mine.error?.code).toBe('42501');
+
+    const theirs = await bob.db.from('bot_hands').update({ hero_net: 999 }).eq('user_id', alice.id);
+    expect(theirs.error?.code).toBe('42501');
+
+    const { data } = await alice.db.from('bot_hands').select('hero_net');
+    expect(Number(data?.[0]?.hero_net)).toBe(-2.5);
+  });
+
+  it('cannot delete it either', async () => {
+    const { error } = await alice.db.from('bot_hands').delete().eq('user_id', alice.id);
+
+    expect(error?.code).toBe('42501');
+  });
+
+  it('refuses a hand filed under a sitting the writer does not own', async () => {
+    // The composite foreign key from 0005, shipped with the table this time.
+    const { error } = await bob.db.from('bot_hands').insert(hand(bob.id, aliceSession));
+
+    expect(error).not.toBeNull();
+    expect(error?.code).toBe('23503');
+  });
+
+  it('refuses a seed that could never replay', async () => {
+    const { error } = await alice.db
+      .from('bot_hands')
+      .insert({ ...hand(alice.id, aliceSession), seed: 4_294_967_296 });
+
+    expect(error?.code).toBe('23514');
   });
 });
 

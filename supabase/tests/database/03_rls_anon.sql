@@ -167,6 +167,15 @@ select throws_ok(
   'nor the append-only xp ledger'
 );
 
+-- Phase 12b. The catalog sweeps above already cover these two the moment they
+-- exist — which is the point of writing them as sweeps — but the append-only
+-- claim is worth stating from the other end as well, the way xp_events is.
+select throws_ok(
+  $$ truncate public.bot_hands $$,
+  '42501', NULL::text,
+  'nor the hand histories, which 12c recomputes from'
+);
+
 reset role;
 
 select is(

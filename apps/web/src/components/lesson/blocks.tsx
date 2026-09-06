@@ -1,9 +1,10 @@
 'use client';
 
-import type { LessonBlock, RangeChart } from '@poker/engine';
+import type { ChartRegistry, LessonBlock, RangeChart } from '@poker/engine';
 import { handStrategy } from '@poker/engine';
 
 import { actionStyle } from '@/components/range/action-colors';
+import { ChartSpotTable } from '@/components/range/chart-spot-table';
 import { orderedMix, percent } from '@/components/range/mix-format';
 import { RangeGrid } from '@/components/range/range-grid';
 import { chartLabel } from '@/lib/charts/map';
@@ -27,6 +28,9 @@ import { EmbeddedDrill, type EmbeddedDrillProps } from './embedded-drill';
 export interface BlockProps {
   block: LessonBlock;
   chartFor: (heroPosition: string, actionSequence: string) => RangeChart | undefined;
+  /** Needed to draw a `range` block's spot: an opener's raise is priced from
+   *  their own RFI chart, which means the whole set, not just this one. */
+  registry: ChartRegistry;
   /**
    * The chart the lesson most recently displayed, so a `hands` block can show
    * what those hands actually do rather than only naming them.
@@ -75,9 +79,11 @@ function Callout({ tone, text }: { tone: 'note' | 'warning'; text: string }) {
 function RangeBlock({
   chart,
   caption,
+  registry,
 }: {
   chart: RangeChart | undefined;
   caption?: string | undefined;
+  registry: ChartRegistry;
 }) {
   if (chart === undefined) {
     // Unreachable through the validator, which rejects a block naming a chart
@@ -91,7 +97,13 @@ function RangeBlock({
   }
 
   return (
-    <figure className="flex max-w-[46rem] flex-col gap-2">
+    <figure className="flex max-w-[46rem] flex-col gap-4">
+      {/* The spot, before the grid of what to do in it.
+          A lesson reader meets "BB vs BTN open" as a phrase they are still
+          learning to parse; the ring says it without their having to. Same
+          component and same `chartSpot` construction as the Range Explorer. */}
+      <ChartSpotTable chart={chart} registry={registry} />
+
       {/* `chartLabel`, not the raw key: "BTN open" rather than "BTN rfi". The
           action sequence is a lookup key, not something to show a reader. */}
       <RangeGrid
@@ -157,7 +169,7 @@ function Hands({
   );
 }
 
-export function LessonBlockView({ block, chartFor, nearestChart, drill }: BlockProps) {
+export function LessonBlockView({ block, chartFor, nearestChart, drill, registry }: BlockProps) {
   switch (block.kind) {
     case 'prose':
       return <Prose text={block.text} />;
@@ -173,6 +185,7 @@ export function LessonBlockView({ block, chartFor, nearestChart, drill }: BlockP
         <RangeBlock
           chart={chartFor(block.heroPosition, block.actionSequence)}
           caption={block.caption}
+          registry={registry}
         />
       );
 

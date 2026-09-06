@@ -84,6 +84,25 @@ describe('the grading path cannot reach the heuristic', () => {
     expect(chart).toContain("source: 'chart'");
   });
 
+  it('hand review grades from a chart or not at all', () => {
+    /**
+     * 12b's addition, and the first thing in the engine that grades a human
+     * inside a hand the bot is also playing. It reaches `chartRecommendation`
+     * and `gradeAnswer` and nothing else — which is what makes "uncharted" a
+     * reported reason rather than a silent handoff to the heuristic.
+     *
+     * The `drills/` sweeps above already forbid it the bot module and the
+     * heuristic constructors. This pins the positive half: it does ask a chart.
+     */
+    const review = readFileSync(join(src, 'drills', 'hand-review.ts'), 'utf8');
+
+    expect(review).toContain('chartRecommendation');
+    expect(review, 'an uncharted spot must carry a reason, never a tier').toMatch(
+      /uncharted: 'no-chart'/,
+    );
+    expect(review).toMatch(/uncharted: 'postflop'/);
+  });
+
   it('the composite prefers the chart, and says so in one place', () => {
     /**
      * The ordering is load-bearing and it is one expression. Asserted on the

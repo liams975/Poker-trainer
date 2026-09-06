@@ -71,6 +71,17 @@ values ('bbbbbbbb-0000-4000-8000-000000000002', 42, 'v1',
         array['preflop.rfi.utg']);
 
 insert into drill_sessions (user_id, mode) values ('bbbbbbbb-0000-4000-8000-000000000002', 'quick');
+
+-- Phase 12b. Bob sits down and plays a hand, so A has something to fail to read.
+insert into bot_sessions (id, user_id)
+values ('bbbbbbbb-1111-4000-8000-000000000002', 'bbbbbbbb-0000-4000-8000-000000000002');
+insert into bot_hands (user_id, session_id, hand_no, seed, button, hero_position,
+                       stacks, actions, result, hero_net,
+                       chart_version, heuristic_version)
+values ('bbbbbbbb-0000-4000-8000-000000000002', 'bbbbbbbb-1111-4000-8000-000000000002',
+        0, 99, 0, 'BTN',
+        '{"UTG":100,"HJ":100,"CO":100,"BTN":100,"SB":100,"BB":100}'::jsonb,
+        '[]'::jsonb, '{"pots":[]}'::jsonb, -1.5, 'v1', 'heuristic');
 insert into xp_events (user_id, amount, reason) values ('bbbbbbbb-0000-4000-8000-000000000002', 10, 'drill_session');
 insert into skill_stats (user_id, skill_tag) values ('bbbbbbbb-0000-4000-8000-000000000002', 'preflop.rfi.utg');
 insert into lesson_progress (user_id, lesson_id, status)
@@ -137,6 +148,11 @@ select is(auth.uid(), 'aaaaaaaa-0000-4000-8000-000000000001'::uuid,
 
 select is((select count(*) from drill_attempts where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'),
           0::bigint, 'case 1: A cannot SELECT B''s drill_attempts');
+
+select is((select count(*) from bot_hands where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'),
+          0::bigint, 'nor B''s bot hands');
+select is((select count(*) from bot_sessions where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'),
+          0::bigint, 'nor the sitting they were played in');
 
 select is((select count(*) from drill_sessions where user_id = 'bbbbbbbb-0000-4000-8000-000000000002'),
           0::bigint, 'A cannot SELECT B''s drill_sessions');
@@ -252,6 +268,81 @@ select lives_ok(
 select lives_ok(
   $$ insert into xp_events (user_id, amount, reason) values (auth.uid(), 25, 'drill_session') $$,
   'A can append to their own xp ledger'
+);
+
+-- ------------------------------------------------------------
+-- Phase 12b: bot play
+-- ------------------------------------------------------------
+
+select lives_ok(
+  $$ insert into bot_sessions (id, user_id)
+     values ('aaaaaaaa-1111-4000-8000-000000000001', auth.uid()) $$,
+  'A can open their own sitting at the table'
+);
+
+select lives_ok(
+  $$ insert into bot_hands (user_id, session_id, hand_no, seed, button, hero_position,
+                            stacks, actions, result, hero_net,
+                            chart_version, heuristic_version)
+     values (auth.uid(), 'aaaaaaaa-1111-4000-8000-000000000001', 0, 7, 2, 'CO',
+             '{"UTG":100,"HJ":100,"CO":100,"BTN":100,"SB":100,"BB":100}'::jsonb,
+             '[]'::jsonb, '{"pots":[]}'::jsonb, 3.25, 'v1', 'heuristic') $$,
+  'A can record their own hand'
+);
+
+select lives_ok(
+  $$ update bot_sessions set ended_at = now() where user_id = auth.uid() $$,
+  'and can close the sitting, which is why bot_sessions carries UPDATE'
+);
+
+-- Append-only, by privilege rather than by policy. `drill_attempts` gets the
+-- same pair of assertions in this file for the same reason: 12c's review
+-- recomputes from these rows, and a log its own author can rewrite is not
+-- something you can recompute from.
+select throws_ok(
+  $$ update bot_hands set hero_net = 999 where user_id = auth.uid() $$,
+  '42501', NULL::text,
+  'a hand cannot be rewritten, even by the person who played it'
+);
+
+select throws_ok(
+  $$ delete from bot_hands where user_id = auth.uid() $$,
+  '42501', NULL::text,
+  'nor deleted'
+);
+
+-- A hand must not be able to name a sitting it does not own. 0005 had to
+-- retrofit exactly this onto drill_attempts; 0006 ships with it.
+select throws_ok(
+  $$ insert into bot_hands (user_id, session_id, hand_no, seed, button, hero_position,
+                            stacks, actions, result, hero_net,
+                            chart_version, heuristic_version)
+     values (auth.uid(), 'bbbbbbbb-1111-4000-8000-000000000002', 1, 8, 0, 'BB',
+             '{"UTG":100,"HJ":100,"CO":100,"BTN":100,"SB":100,"BB":100}'::jsonb,
+             '[]'::jsonb, '{"pots":[]}'::jsonb, 0, 'v1', 'heuristic') $$,
+  '23503', NULL::text,
+  'A cannot file a hand under B''s sitting'
+);
+
+-- Constraints at the DB boundary, not only in TypeScript (CLAUDE.md).
+select throws_ok(
+  $$ insert into bot_hands (user_id, hand_no, seed, button, hero_position,
+                            stacks, actions, result, hero_net,
+                            chart_version, heuristic_version)
+     values (auth.uid(), 0, 8, 9, 'BB',
+             '{}'::jsonb, '[]'::jsonb, '{}'::jsonb, 0, 'v1', 'heuristic') $$,
+  '23514', NULL::text,
+  'a button outside the six seats is refused'
+);
+
+select throws_ok(
+  $$ insert into bot_hands (user_id, hand_no, seed, button, hero_position,
+                            stacks, actions, result, hero_net,
+                            chart_version, heuristic_version)
+     values (auth.uid(), 0, 4294967296, 0, 'BB',
+             '{}'::jsonb, '[]'::jsonb, '{}'::jsonb, 0, 'v1', 'heuristic') $$,
+  '23514', NULL::text,
+  'and a seed that does not fit in a uint32, which would not replay'
 );
 
 -- lesson_progress, which Phase 4 could not exercise because `lessons` was

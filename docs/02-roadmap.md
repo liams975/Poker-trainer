@@ -284,13 +284,47 @@ and two source-level guards enforce the narrowing.
 Chip conservation over a long session is what proves it: a side-pot bug does
 not crash, it silently pays the wrong player.
 
-## Phase 12b — bot play, playable *(next)*
+## Phase 12b — bot play, playable
 
-Persistence (a hand-history table, RLS, grants), the full-hand table UI —
-board, multiple betting rounds, showdown reveal — and post-hand review.
-Preflop decisions graded on the existing tiers; postflop **reported, never
-graded**, because the bot's postflop play is a heuristic and grading against it
-would teach the heuristic.
+- `bot/step.ts` — one hand loop, driven by the simulation and by the screen
+- `bot/hand.ts`'s `replayHand` — a hand from a seed and hero's actions alone
+- `drills/hand-review.ts` — graded where a chart reaches, reported everywhere else
+- `/play` — a seat at a six-handed cash table
+- `bot_sessions` and `bot_hands`, with RLS and grants (migration `0006`)
+- The poker table reaches the **Range Explorer** and the lesson `range` block
+
+**Exit:** A hand deals, plays out against five bots, reaches a showdown and is
+written to Postgres from the server's own replay. Every decision hero made is
+reported afterwards; the ones a chart covers carry a tier and the rest say why
+they do not.
+
+**Settled during the phase.** Three things.
+
+**One loop, not two.** The screen and the 100,000-hand conservation simulation
+both drive `stepHand`; the only difference is a `human` option that makes it
+stop at hero's seat. A second UI-shaped loop would have left the conservation
+proof covering a sibling of the code you actually play, which is the failure
+`strategy/explain.ts` has warned about since Phase 6.
+
+**The client does not decide what is stored.** A browser posts the seed, the
+seating, the stacks and its own actions — nothing downstream of the deal. The
+server replays the hand and writes the actions and result *it* derives. A
+replay that disagrees is refused with a 409 rather than repaired.
+
+**"Preflop graded" turned out to be too generous.** With ten charts, hero is in
+charted territory only when first in or defending the big blind against one
+open; every other preflop decision and all postflop are uncharted. So the rule
+is *graded where a chart reaches*, and the uncharted case says so on screen
+rather than being hidden or quietly scored. That makes the missing charts
+visible as a hole in the product, which is the best argument yet for closing
+them.
+
+## Phase 12c — reviewing bot play *(next)*
+
+The review screen for the hands 12b records: filters, a hand replayer, leaks
+across a sitting. And whether playing earns anything — no XP, streak or
+achievement is awarded for a bot hand today, deliberately, because XP for
+*playing* rather than for answering is farmable by folding.
 
 ## Later
 

@@ -312,3 +312,64 @@ governs. What Phase 9 does is make sure **the app's own write path never
 depends on the client for a number**. `skill_stats` matters most here: it
 decides which spots somebody is sent back to practise, and a user who can write
 it can quietly send themselves to drill the wrong thing for a month.
+
+---
+
+## Phase 12b: `bot_sessions` and `bot_hands`
+
+Bot play writes hand histories. Two tables, mirroring `drill_sessions` /
+`drill_attempts` — a container and the facts inside it.
+
+### A hand is a seed, not a transcript
+
+`bot_hands` stores the seed, the button, hero's position, the stacks at the
+deal, the actions and the result. It stores **no cards**. Every source of
+randomness in this codebase is seeded and injected, so the deal, the board and
+all five opponents' decisions regenerate from one number; a hand of six players
+therefore compresses to a seed and hero's own actions.
+
+Two consequences worth stating:
+
+- `heuristic_version` and `chart_version` are on the row for the same reason
+  `drill_attempts.chart_version` is. The opponents are *reproduced by running
+  the heuristic*, so a hand replays identically only against the version that
+  played it. A retuned heuristic does not corrupt old rows; it makes them
+  interpretable only by their own version, which is exactly what the column
+  records.
+- The `stacks` column is not redundant with `stackDepth`. A cash table carries
+  stacks between hands, so hand 40 does not start at 100bb and cannot be
+  replayed as though it did.
+
+### Append-only, by privilege
+
+`grant select, insert on bot_hands to authenticated` — no update, no delete.
+The same argument `drill_attempts` gets: 12c's review recomputes from these
+rows, and a log its own author can rewrite is not something you can recompute
+from. Enforced by the grant rather than by trusting a future policy edit to
+remember.
+
+`bot_sessions` carries `update` because a sitting is opened and later closed. It
+carries no `delete`: there is no "unplay these hands".
+
+### The ownership foreign key, up front this time
+
+`bot_hands (session_id, user_id)` references `bot_sessions (id, user_id)`, with
+`on delete set null (session_id)` and the column list — which is load-bearing,
+for the reason `0005` spells out at length: a bare `set null` on a composite key
+nulls `user_id` too, and `user_id` is `not null`, so deleting a session would
+fail and account deletion would break.
+
+`0005` had to retrofit exactly this onto `drill_attempts` after Phase 9 started
+computing session aggregates server-side. Shipping it with the table costs one
+unique index that can never hold a duplicate.
+
+### What the client cannot decide
+
+A browser posts the hand's *inputs* — seed, seating, stacks, and its own actions
+— and nothing downstream of the deal. `lib/bot/record.ts` replays the hand and
+writes the actions and the result it derives. There is nothing in the payload to
+be believed about.
+
+Nothing is paid out for playing in 12b: no XP, no streak, no achievement. The
+integrity property is there before it is needed, because these are the rows 12c
+recomputes from.

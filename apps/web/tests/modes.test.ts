@@ -3,8 +3,16 @@ import { describe, expect, it } from 'vitest';
 import { MODES } from '../src/components/dashboard/modes';
 
 describe('dashboard modes', () => {
-  it('has the six entry points docs/05-ui-ux.md specifies', () => {
-    expect(MODES).toHaveLength(6);
+  /**
+   * Six from `docs/05-ui-ux.md`, and Play — v2's seventh, and the first entry
+   * point that is not a drill. A count rather than a list because the point is
+   * that adding one is a decision: `buildDestinations` derives the ⌘K palette
+   * from this array, so a mode appears in two places the moment it appears
+   * here.
+   */
+  it('has the six entry points docs/05-ui-ux.md specifies, plus Play', () => {
+    expect(MODES).toHaveLength(7);
+    expect(MODES.map((mode) => mode.slug)).toContain('play');
   });
 
   it('gives every mode a unique slug and a same-origin href', () => {

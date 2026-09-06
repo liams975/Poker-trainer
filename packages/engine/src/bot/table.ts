@@ -15,14 +15,16 @@
  */
 
 import type { HandConfig } from '../game';
+import { dealHand, settleHand } from '../game';
 import type { Position } from '../ranges';
 import { POSITIONS } from '../ranges';
 import type { Rng } from '../rng';
 import type { Strategy } from '../strategy';
 
 import type { PlayedHand } from './hand';
-import { playHand } from './hand';
 import type { BotProfile } from './profile';
+import type { HandProgress } from './step';
+import { MAX_STEPS, stepHand } from './step';
 
 /** Where the button sits in `POSITIONS`. */
 const BUTTON_INDEX = POSITIONS.indexOf('BTN');
@@ -119,47 +121,62 @@ export interface PlayTableHandOptions {
 export interface TableHand {
   table: Table;
   hand: PlayedHand;
-  /** Which position each player held, for the hand history 12b will store. */
+  /** Which position each player held, for the stored hand history. */
   seats: ReadonlyMap<string, Position>;
 }
 
 /**
- * Plays one hand and returns the table as it stands afterwards.
+ * A hand in progress at a table: the cards, and who is sitting where.
  *
- * The button moves and the rebuys happen here rather than at the start of the
- * next hand, so a `Table` is always in a playable state: every stack can post,
- * and the button is already where the next deal wants it.
+ * The pair is what a caller needs and cannot recompute. `seats` is derived from
+ * the button, which `finishTableHand` moves — so reading it back off the table
+ * afterwards would give the *next* hand's seating and quietly credit the wrong
+ * player.
  */
-export function playTableHand(table: Table, options: PlayTableHandOptions): TableHand {
-  const seats = positionsFor(table);
+export interface OpenTableHand {
+  table: Table;
+  seats: ReadonlyMap<string, Position>;
+  progress: HandProgress;
+}
 
+/** The hand config this table's current seating implies. */
+export function tableHandConfig(table: Table, seats: ReadonlyMap<string, Position>): HandConfig {
   const stacks: Partial<Record<Position, number>> = {};
-  const byPosition = new Map<Position, TablePlayer>();
+  for (const player of table.players) stacks[seats.get(player.id)!] = player.stack;
 
-  for (const player of table.players) {
-    const position = seats.get(player.id)!;
-    stacks[position] = player.stack;
-    byPosition.set(position, player);
-  }
-
-  const config: HandConfig = {
+  return {
     tableSize: table.players.length,
     stackDepth: table.stackDepth,
     bigBlind: table.bigBlind,
     smallBlind: table.bigBlind / 2,
     stacks,
   };
+}
 
-  const hand = playHand({
-    rng: options.rng,
-    config,
-    strategyFor: (position) => options.strategyFor(byPosition.get(position)!),
-  });
+/** Seats everyone by the button and deals. Nothing has acted yet. */
+export function startTableHand(table: Table, rng: Rng): OpenTableHand {
+  const seats = positionsFor(table);
+
+  return { table, seats, progress: dealHand(rng, tableHandConfig(table, seats)) };
+}
+
+/**
+ * Settles the hand and returns the table as it stands afterwards.
+ *
+ * The button moves and the rebuys happen here rather than at the start of the
+ * next hand, so a `Table` is always in a playable state: every stack can post,
+ * and the button is already where the next deal wants it.
+ */
+export function finishTableHand(open: OpenTableHand): TableHand {
+  const { table, seats, progress } = open;
+
+  const { state: final, result } = settleHand(progress.state);
+  const hand: PlayedHand = { final, result, actions: progress.state.history };
 
   let rebought = 0;
 
   const players = table.players.map((player) => {
-    const seat = hand.final.seats.find((candidate) => candidate.position === seats.get(player.id))!;
+    const seat = final.seats.find((candidate) => candidate.position === seats.get(player.id))!;
 
     /**
      * Rebuy at less than one big blind, not at zero.
@@ -187,4 +204,37 @@ export function playTableHand(table: Table, options: PlayTableHandOptions): Tabl
     hand,
     seats,
   };
+}
+
+/**
+ * One whole hand, with a strategy in every seat.
+ *
+ * Start, step, finish — the same three pieces the screen uses, in a closed
+ * loop. That is deliberate and it is what makes the simulation worth anything:
+ * the 100,000-hand conservation run exercises the path the app takes, not a
+ * sibling of it.
+ */
+export function playTableHand(table: Table, options: PlayTableHandOptions): TableHand {
+  const open = startTableHand(table, options.rng);
+
+  const byPosition = new Map<Position, TablePlayer>();
+  for (const player of table.players) byPosition.set(open.seats.get(player.id)!, player);
+
+  let progress = open.progress;
+
+  for (let step = 0; ; step++) {
+    if (step > MAX_STEPS) {
+      throw new RangeError(`a hand took more than ${MAX_STEPS} steps; it is not terminating`);
+    }
+
+    const taken = stepHand(progress, {
+      rng: options.rng,
+      strategyFor: (position) => options.strategyFor(byPosition.get(position)!),
+    });
+    progress = taken.progress;
+
+    if (taken.kind === 'complete') break;
+  }
+
+  return finishTableHand({ ...open, progress });
 }

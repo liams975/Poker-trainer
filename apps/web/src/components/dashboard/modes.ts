@@ -67,4 +67,14 @@ export const MODES: readonly Mode[] = [
     // Live from Phase 10, the last of the six.
     availableIn: null,
   },
+  {
+    slug: 'play',
+    title: 'Play',
+    description: 'Six-handed cash against the engine. Hands, not spots.',
+    href: '/play',
+    // v2's seventh entry point, and the first that is not a drill. Live from
+    // Phase 12b; `buildDestinations` derives ⌘K from this list, so it appeared
+    // in the palette the moment this line did.
+    availableIn: null,
+  },
 ];
