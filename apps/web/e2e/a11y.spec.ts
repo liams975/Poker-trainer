@@ -95,10 +95,6 @@ test.describe('signed in', () => {
     '/drill/quick',
     '/drill/weak-spots',
     '/review',
-    // Phase 12b. Scanned at the deal; the mid-hand DOM — a board, face-down
-    // cards at five seats, and the decision controls — is covered by the
-    // dedicated scan below.
-    '/play',
   ]) {
     test(`${path} has no accessibility violations`, async ({ page }) => {
       test.setTimeout(120_000);
@@ -172,14 +168,30 @@ test.describe('signed in', () => {
     test.setTimeout(120_000);
 
     await signIn(page);
+
+    /**
+     * Not behind `waitForLoadState('networkidle')` like the route sweep above.
+     * This page opens a sitting, deals, and posts the finished hand, and it
+     * re-renders on every beat — so "the network went quiet" is not a moment
+     * that means anything here. The beat is collapsed and the scan happens at a
+     * defined point in the hand instead, which is what the drill and feedback
+     * scans already do.
+     */
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/play');
     await page.waitForSelector('[data-testid="seat"]');
 
-    // Wait for hero's turn, so the decision controls are on screen too.
-    await expect(async () => {
-      const controls = page.locator('[data-testid^="choice-"]').first();
-      await expect(controls).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 40_000 });
+    /**
+     * Hero's turn, **or** the hand ending without one.
+     *
+     * In the big blind against a round of folds there is no decision to make,
+     * so waiting on the decision controls alone waits forever. Either DOM is
+     * worth scanning: one has the controls, the other has a showdown, a winner
+     * marked at a seat, and the summary panel.
+     */
+    const choices = page.locator('[data-testid^="choice-"]').first();
+    const summary = page.getByTestId('hand-summary');
+    await expect(choices.or(summary)).toBeVisible({ timeout: 40_000 });
 
     const { violations } = await scan(page);
     expect(report(violations), report(violations)).toBe('');

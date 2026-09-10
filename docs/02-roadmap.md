@@ -319,10 +319,40 @@ rather than being hidden or quietly scored. That makes the missing charts
 visible as a hole in the product, which is the best argument yet for closing
 them.
 
-## Phase 12c — reviewing bot play *(next)*
+**Verified afterwards.** 12b was committed with `db:test`, `test:db` and
+`test:e2e` unrun — the machine had no disk left for Docker. The pass that
+followed applied `0006` for the first time (pgTAP 109 → 120, RLS 42 → 50,
+Playwright 121 → 132), re-proved chip conservation over 100,000 hands through
+the rewritten loop, and closed the four mutations that had needed a database.
 
-The review screen for the hands 12b records: filters, a hand replayer, leaks
-across a sitting. And whether playing earns anything — no XP, streak or
+Two of those mutations survived their first attempt, which is the part worth
+recording: the stored-actions check passed vacuously because the client's
+payload has no `position` field at all, so `undefined !== 'BTN'` was true for
+every entry; and the reveal check only looked at folded-out pots, which a
+calling hero almost never reaches. Both assertions were wrong in a way that
+looked right.
+
+## Phase 12c — the bots play badly *(next)*
+
+**Measured over 400 hands against the real charts**, six bots at a 100bb table:
+
+| | Bots | 6-max poker |
+|---|---|---|
+| Somebody all-in | **38%** | ~2–3% |
+| Reached showdown | **63%** | ~25% |
+| Mean pot | **208bb** | ~10bb |
+| Chips on the table after 400 hands | **10,400bb** | 600bb |
+
+Two separate causes. `handStrength` measures equity against a **uniformly
+random** range (`CANONICAL_HANDS`) and `weigh` compares that directly to the
+pot odds' `requiredEquity` — so "I beat a random hand" is read as "I beat the
+range that just raised me", and the bot stacks off. And `finishTableHand` tops a
+busted seat back up to 100bb but never takes chips off a winner, so rebuys
+ratchet the table total upward without bound; by hand 400 the average stack is
+1,700bb while `chartRecommendation` still grades hero against 100bb charts.
+
+Plus the review screen for the hands 12b records: filters, a hand replayer,
+leaks across a sitting. And whether playing earns anything — no XP, streak or
 achievement is awarded for a bot hand today, deliberately, because XP for
 *playing* rather than for answering is farmable by folding.
 

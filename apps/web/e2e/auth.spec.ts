@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { expect, test, type Page } from '@playwright/test';
 
+// Relative, not `@/` — Playwright's loader does not resolve the Next path
+// alias. `destinations.ts` imports it the same way and for the same reason.
+import { MODES } from '../src/components/dashboard/modes';
+
 /**
  * The Phase 5 exit criterion, automated: "You can sign up, land on an empty
  * dashboard, and sign out."
@@ -67,8 +71,16 @@ test.describe('the exit criterion', () => {
     await reachDashboard(page);
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeAttached();
 
-    // It is the *empty* dashboard: six modes, all inert, and honest zeroes.
-    await expect(page.getByRole('listitem')).toHaveCount(6);
+    /**
+     * It is the *empty* dashboard: every mode card, and honest zeroes.
+     *
+     * Counted from `MODES` rather than typed, because typing it is what broke
+     * this test when Phase 12b added Play as a seventh entry point — a change
+     * with nothing to do with signing up. On an empty dashboard the mode cards
+     * are the only list items: the weak-spot rail renders prose until there is
+     * something in it.
+     */
+    await expect(page.getByRole('listitem')).toHaveCount(MODES.length);
     // The number in this copy is derived from WEAK_SPOT_MIN_ATTEMPTS rather
     // than typed, since Phase 9: twenty mixed hands spread across ten skills
     // produce no weak spot at all, so the old invitation was a false one.

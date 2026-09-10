@@ -33,7 +33,12 @@ import { buildChoices, DecisionControls, type Choice } from '@/components/drill/
 import { PokerTable } from '@/components/drill/poker-table';
 import { Button } from '@/components/ui/button';
 import { endBotSession, recordBotHand, startBotSession } from '@/lib/bot/client';
-import { botStrategies, type HeroAction, type SeatProfiles } from '@/lib/bot/types';
+import {
+  botStrategies,
+  type BotHandClaim,
+  type HeroAction,
+  type SeatProfiles,
+} from '@/lib/bot/types';
 
 import { HandSummary } from './hand-summary';
 
@@ -137,6 +142,8 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
   /** Hero's own actions this hand, and the spots they were taken in. */
   const heroActions = useRef<HeroAction[]>([]);
   const heroSpots = useRef<ReviewedDecision[]>([]);
+  /** Hands that finished before the sitting's id arrived. See `record`. */
+  const pending = useRef<Omit<BotHandClaim, 'sessionId'>[]>([]);
 
   /**
    * The sitting. Opened once; a failure here costs the history, never the play.
@@ -203,13 +210,28 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
     setPhase('running');
   }, [table, registry, chartSet.version]);
 
-  /** Writes the finished hand. Its failure is reported, never thrown at play. */
+  /** Posts one finished hand. Its failure is reported, never thrown at play. */
+  const send = useCallback((claim: Omit<BotHandClaim, 'sessionId'>, id: string) => {
+    recordBotHand({ ...claim, sessionId: id })
+      .then(() => setRecordingError(null))
+      .catch((cause: unknown) =>
+        setRecordingError(cause instanceof Error ? cause.message : 'it could not be saved'),
+      );
+  }, []);
+
+  /**
+   * Records the finished hand, or holds it until there is a sitting to file it
+   * under.
+   *
+   * **The wait is real, not theoretical.** The session POST is in flight while
+   * the first hand is already dealing, and a hand where everyone folds preflop
+   * is over in a couple of seconds. Returning early here — which is what this
+   * did — dropped that hand with no error shown, which is the single failure
+   * mode this whole path exists to avoid.
+   */
   const record = useCallback(
     (finished: OpenHand, actions: readonly HeroAction[], number: number) => {
-      if (sessionId === null) return;
-
-      recordBotHand({
-        sessionId,
+      const claim: Omit<BotHandClaim, 'sessionId'> = {
         handNo: number,
         seed: finished.seed,
         button: finished.button,
@@ -217,14 +239,27 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
         stacks: finished.stacks,
         profiles: finished.profiles,
         heroActions: actions,
-      })
-        .then(() => setRecordingError(null))
-        .catch((cause: unknown) =>
-          setRecordingError(cause instanceof Error ? cause.message : 'it could not be saved'),
-        );
+      };
+
+      if (sessionId === null) {
+        pending.current = [...pending.current, claim];
+        return;
+      }
+
+      send(claim, sessionId);
     },
-    [sessionId],
+    [sessionId, send],
   );
+
+  // The flush. `setRecordingError` only ever runs inside `send`'s promise
+  // callbacks, so nothing here sets state synchronously in an effect body.
+  useEffect(() => {
+    if (sessionId === null || pending.current.length === 0) return;
+
+    const queued = pending.current;
+    pending.current = [];
+    for (const claim of queued) send(claim, sessionId);
+  }, [sessionId, send]);
 
   /**
    * One beat: reveal a street, take a bot's action, or end the hand.
