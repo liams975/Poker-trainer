@@ -56,7 +56,24 @@ export function ChartSpotTable({
   if (spot === null) return null;
 
   return (
-    <div data-testid="chart-spot-table" data-hero={chart.heroPosition}>
+    /**
+     * Deliberately narrower than the drill's table.
+     *
+     * `PokerTable` caps itself at `max-w-2xl` — 672px, and 420px tall at its
+     * 16:10 ratio — which is right when the spot *is* the screen. Here it is a
+     * caption for the grid, and at full size it pushed all 169 cells below the
+     * fold at 1440×900: you arrived at the study screen and had to scroll to
+     * reach the thing you came for.
+     *
+     * Constraining the wrapper rather than adding a size prop works because the
+     * ring is positioned in percentages inside an `@container`, so it scales
+     * whole and the type scales with it.
+     */
+    <div
+      className="w-full max-w-xl"
+      data-testid="chart-spot-table"
+      data-hero={chart.heroPosition}
+    >
       <PokerTable
         state={spot.state}
         hero={spot.hero}
