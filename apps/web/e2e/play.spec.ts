@@ -195,7 +195,7 @@ test.describe('bot play', () => {
 
     const { data } = await admin()
       .from('bot_hands')
-      .select('seed, actions, hero_position, heuristic_version, chart_version')
+      .select('seed, actions, hero_position, heuristic_version, chart_version, stacks')
       .eq('user_id', userId);
 
     const row = data![0]!;
@@ -235,9 +235,50 @@ test.describe('bot play', () => {
 
     const others = actions.filter((action) => action.position !== row.hero_position);
     expect(others.length, 'no opponent action was reconstructed').toBeGreaterThan(0);
-    // Recorded so a stored hand stays interpretable when either moves.
-    expect(row.heuristic_version).toBe('heuristic');
+    // Recorded so a stored hand stays interpretable when either moves — and
+    // 12c is the first time one of them did. `heuristic.2` is not a chart-shaped
+    // version, which `grading-isolation.test.ts` holds; here it only has to be
+    // the version the running engine reports.
+    expect(row.heuristic_version).toMatch(/^heuristic(\.\d+)?$/);
     expect(row.chart_version).toBeTruthy();
+
+    // Every seat squares up to 100bb between hands from 12c, so the stacks a
+    // hand replays from are the depth the charts describe.
+    expect(Object.values(row.stacks as Record<string, number>)).toEqual(
+      Array.from({ length: SEATS.length }, () => 100),
+    );
+  });
+
+  test('shows what the sitting has cost or paid', async ({ page }) => {
+    /**
+     * The number the stack used to carry.
+     *
+     * Stacks reset to 100bb every hand from 12c — that is what keeps each hand
+     * the 100bb spot the charts describe — so a stack no longer says anything
+     * about how the session has gone, and this has to say it instead.
+     */
+    await signIn(page);
+    await sitDown(page);
+
+    const net = page.getByTestId('session-net');
+    await expect(net).toContainText('Session');
+    await expect(net, 'a sitting starts even').toContainText(/[+−]0\.0bb/);
+
+    await playOneHand(page);
+
+    // What the hand itself paid, from the summary. Asserting the running total
+    // *equals* it after one hand is a real check on the arithmetic; asserting
+    // it merely changed would pass on a chopped pot, where hero gets back
+    // exactly what they put in and zero is the right answer.
+    const handNet = Number(
+      (await page.getByTestId('hero-net').innerText()).replace(/[^\d.-]/g, ''),
+    );
+
+    await page.getByTestId('next-hand').click();
+    await expect(page.getByTestId('hand-count')).toContainText('Hand 2');
+
+    const sessionNet = Number((await net.innerText()).replace('−', '-').replace(/[^\d.-]/g, ''));
+    expect(sessionNet, 'the sitting total after one hand is that hand').toBeCloseTo(handNet, 1);
   });
 
   test('the next hand moves the button', async ({ page }) => {

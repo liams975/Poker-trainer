@@ -23,7 +23,9 @@ human**. Do not silently work around them.
 | Backend | Supabase (Postgres + Auth + RLS). No custom API server. |
 | Engine location | `packages/engine` — pure TS, zero React/DOM/Node-API deps |
 | Monetization (v1) | Entitlement seam built, **no paywall UI shipped** |
-| Bot play | Playable from 12b. Review of played hands is 12c. |
+| Bot play | Playable from 12b. Opponents fixed in 12c. Review of played hands is 12d. |
+| Bot opponent model | The chart registry. Uniform only where no chart reaches. |
+| Bot table stacks | Every seat squares back to 100bb between hands. `net` carries the sitting. |
 
 Full rationale: `docs/01-architecture.md`
 
@@ -160,6 +162,12 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   uncharted, and the UI says so rather than hiding it. The alternative is
   grading against the heuristic, which is the thing all of this exists to
   prevent.
+- Never retune the bot by eye. `weigh`'s constants are fitted against
+  `packages/content/tests/bot-behaviour.test.ts`, which bands the real
+  statistics at the production trial count. The set it replaced was chosen
+  because it read plausibly, and every suite stayed green for two phases while
+  the table raised 41% facing a bet and put the stacks in every third hand.
+  Changing a constant means re-running that measurement, not reasoning about it.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol

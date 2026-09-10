@@ -33,6 +33,15 @@ export interface TablePlayer {
   id: string;
   stack: number;
   profile: BotProfile;
+  /**
+   * What this seat is up or down across the whole sitting, in big blinds.
+   *
+   * The number the stack used to carry, and the one a player actually wants.
+   * Since 12c every seat starts each hand at `stackDepth`, so a stack no longer
+   * says anything about how the session has gone — this does, and it says it
+   * without dragging the table away from the depth the charts describe.
+   */
+  net: number;
 }
 
 export interface Table {
@@ -42,14 +51,27 @@ export interface Table {
   button: number;
   handsPlayed: number;
   /**
-   * Chips added by rebuys since the table opened.
-   *
-   * Tracked because a rebuy is the one thing that legitimately creates chips,
-   * and the conservation invariant is otherwise exact:
-   *
-   *     sum(stacks) === startingTotal + rebought
+   * Chips added by topping a seat back up to `stackDepth`, since the table
+   * opened.
    */
   rebought: number;
+  /**
+   * Chips taken off a seat that finished a hand above `stackDepth`.
+   *
+   * The counterpart 12b was missing. `finishTableHand` topped losers up and
+   * never took anything off a winner, so the table total only ever climbed: by
+   * hand 400 the average stack was around 1,700bb while `chartRecommendation`
+   * was still grading against 100bb charts. Both directions are tracked, so the
+   * books balance:
+   *
+   *     sum(stacks) === startingTotal + rebought - cashedOut
+   *
+   * and, more usefully, the two invariants that follow from resetting:
+   *
+   *     sum(stacks) === players.length * stackDepth
+   *     sum(net)    === 0
+   */
+  cashedOut: number;
   stackDepth: number;
   bigBlind: number;
 }
@@ -84,10 +106,11 @@ export function createTable(options: CreateTableOptions): Table {
   }
 
   return {
-    players: players.map((player) => ({ ...player, stack: stackDepth })),
+    players: players.map((player) => ({ ...player, stack: stackDepth, net: 0 })),
     button,
     handsPlayed: 0,
     rebought: 0,
+    cashedOut: 0,
     stackDepth,
     bigBlind,
   };
@@ -160,12 +183,25 @@ export function startTableHand(table: Table, rng: Rng): OpenTableHand {
   return { table, seats, progress: dealHand(rng, tableHandConfig(table, seats)) };
 }
 
+/** Two decimals, matching the money column everything else rounds to. */
+function chips(amount: number): number {
+  return Math.round(amount * 100) / 100;
+}
+
 /**
  * Settles the hand and returns the table as it stands afterwards.
  *
- * The button moves and the rebuys happen here rather than at the start of the
- * next hand, so a `Table` is always in a playable state: every stack can post,
- * and the button is already where the next deal wants it.
+ * The button moves and the stacks are squared up here rather than at the start
+ * of the next hand, so a `Table` is always in a playable state: every stack can
+ * post, and the button is already where the next deal wants it.
+ *
+ * **Every seat goes back to `stackDepth`.** 12b topped a busted seat up and
+ * never took chips off a winner, so the table total only ever rose — 10,400bb
+ * on the table after 400 hands, and an average stack of 1,700bb being graded
+ * against 100bb charts. Resetting is what keeps every hand the spot the charts
+ * describe, which for a *trainer* is the whole point: you are here to practise
+ * 100bb 6-max, not to be carried into 17x-deep pots nobody has authored a chart
+ * for. What the stack used to tell you moves to `net`, which tells it better.
  */
 export function finishTableHand(open: OpenTableHand): TableHand {
   const { table, seats, progress } = open;
@@ -174,23 +210,20 @@ export function finishTableHand(open: OpenTableHand): TableHand {
   const hand: PlayedHand = { final, result, actions: progress.state.history };
 
   let rebought = 0;
+  let cashedOut = 0;
 
   const players = table.players.map((player) => {
     const seat = final.seats.find((candidate) => candidate.position === seats.get(player.id))!;
 
-    /**
-     * Rebuy at less than one big blind, not at zero.
-     *
-     * A stack of 0.3bb cannot post and would be all-in before the cards came
-     * out, every hand, forever. `createHandState` handles that state correctly
-     * — it is legal poker — but it is not a table anybody wants to sit at.
-     */
-    if (seat.stack < table.bigBlind) {
-      rebought += table.stackDepth - seat.stack;
-      return { ...player, stack: table.stackDepth };
-    }
+    // What the hand cost or paid this seat. The stacks it sits between are the
+    // one at the deal and the one after the pot is awarded, so this is exact
+    // and sums to zero across the table.
+    const delta = chips(seat.stack - player.stack);
 
-    return { ...player, stack: seat.stack };
+    if (seat.stack < table.stackDepth) rebought += table.stackDepth - seat.stack;
+    else cashedOut += seat.stack - table.stackDepth;
+
+    return { ...player, stack: table.stackDepth, net: chips(player.net + delta) };
   });
 
   return {
@@ -199,7 +232,8 @@ export function finishTableHand(open: OpenTableHand): TableHand {
       players,
       button: (table.button + 1) % table.players.length,
       handsPlayed: table.handsPlayed + 1,
-      rebought: Math.round((table.rebought + rebought) * 100) / 100,
+      rebought: chips(table.rebought + rebought),
+      cashedOut: chips(table.cashedOut + cashedOut),
     },
     hand,
     seats,

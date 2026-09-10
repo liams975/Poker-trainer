@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Combo } from '../src/cards';
 import { parseCards } from '../src/cards';
-import { exactEquity, equityVsHands, monteCarloEquity, rangeCombos } from '../src/equity';
+import { exactEquity, equityVsHands, equityVsRange, monteCarloEquity, rangeCombos } from '../src/equity';
 import { mulberry32 } from '../src/rng';
 
 /**
@@ -256,6 +256,129 @@ describe('equityVsHands', () => {
   it('rejects a range that hero blocks completely', () => {
     expect(() =>
       equityVsHands(combo('AsAh'), ['AA'], { rng: mulberry32(7), trials: 10, board: parseCards('AdAc2s') }),
+    ).toThrow();
+  });
+});
+
+/**
+ * The weighted form, added in 12c.
+ *
+ * A chart is a mix: `AJo` opens from the cutoff 60% of the time. Sampling its
+ * combos as often as `AA`'s overstates how much junk the raiser holds, which is
+ * the same error `equityVsHands` makes in the other direction when it is handed
+ * a range that was never uniform to begin with.
+ *
+ * Note what these do *not* import. `equityVsRange` takes a plain
+ * notation-to-number record rather than Phase 2's `Range`, keeping the seam this
+ * module's comment describes: "the weighted range type and the charts arrive in
+ * Phase 2 and will convert down to this". `HandWeights` is structurally that
+ * record, so a caller passes one straight in and equity stays Phase 1.
+ */
+describe('equityVsRange', () => {
+  it('is exactly equityVsHands when one combo survives blocking', () => {
+    // Hero holds two aces, so `AA` is exactly AdAc: a single candidate, picked
+    // by one draw either way. Equality here is exact rather than approximate,
+    // which is the strongest statement available that the two share a sampler.
+    const hero = combo('AsAh');
+
+    const weighted = equityVsRange(hero, { AA: 1 }, { rng: mulberry32(11), trials: 5_000 });
+    const flat = equityVsHands(hero, ['AA'], { rng: mulberry32(11), trials: 5_000 });
+
+    expect(weighted).toEqual(flat);
+  });
+
+  it('drops a hand weighted zero rather than sampling it', () => {
+    const hero = combo('AsAh');
+
+    const withZero = equityVsRange(hero, { AA: 1, KK: 0 }, { rng: mulberry32(12), trials: 5_000 });
+    const without = equityVsRange(hero, { AA: 1 }, { rng: mulberry32(12), trials: 5_000 });
+
+    expect(withZero).toEqual(without);
+  });
+
+  it('matches the flat form when every weight is equal', () => {
+    const hero = combo('AsKd');
+    const hands = ['QQ', 'JJ', 'TT'] as const;
+
+    const weighted = equityVsRange(
+      hero,
+      { QQ: 0.5, JJ: 0.5, TT: 0.5 },
+      { rng: mulberry32(13), trials: TRIALS },
+    );
+    const flat = equityVsHands(hero, [...hands], { rng: mulberry32(14), trials: TRIALS });
+
+    expect(Math.abs(weighted.equity - flat.equity)).toBeLessThan(0.01);
+  });
+
+  it('moves toward the hands that carry the weight', () => {
+    const hero = combo('7c2d');
+
+    // The same two hands, weighted opposite ways. Against mostly-aces hero is
+    // in bad shape; against mostly-junk he is much closer.
+    const mostlyAces = equityVsRange(
+      hero,
+      { AA: 9, '83o': 1 },
+      { rng: mulberry32(15), trials: TRIALS },
+    );
+    const mostlyJunk = equityVsRange(
+      hero,
+      { AA: 1, '83o': 9 },
+      { rng: mulberry32(15), trials: TRIALS },
+    );
+
+    expect(mostlyAces.equity).toBeLessThan(mostlyJunk.equity);
+  });
+
+  it('converges to the weighted average over the range', () => {
+    // The oracle again, this time weighted: enumerate every runout for every
+    // unblocked combo and average with the weight its notation carries. No
+    // published figure, and no trust in the sampler being tested.
+    const hero = combo('AsAh');
+    const board = parseCards('Kd7c2s');
+    const weights = { KK: 0.25, QQ: 1, JJ: 0.5 } as const;
+
+    let numerator = 0;
+    let denominator = 0;
+    for (const [hand, weight] of Object.entries(weights)) {
+      for (const villain of rangeCombos([hand as 'KK'], [...hero, ...board])) {
+        numerator += exactEquity(hero, [villain], board).equity * weight;
+        denominator += weight;
+      }
+    }
+
+    const sampled = equityVsRange(hero, weights, {
+      rng: mulberry32(1357),
+      trials: 200_000,
+      board,
+    });
+
+    expect(Math.abs(sampled.equity - numerator / denominator)).toBeLessThan(0.005);
+  }, 60_000);
+
+  it('is deterministic under seed', () => {
+    const once = equityVsRange(combo('AsAh'), { KK: 1, QQ: 0.4 }, { rng: mulberry32(16), trials: 5_000 });
+    const twice = equityVsRange(combo('AsAh'), { KK: 1, QQ: 0.4 }, { rng: mulberry32(16), trials: 5_000 });
+
+    expect(once).toEqual(twice);
+  });
+
+  it('rejects a weighting with nothing left in it', () => {
+    expect(() => equityVsRange(combo('AsAh'), {}, { rng: mulberry32(17), trials: 10 })).toThrow();
+    expect(() =>
+      equityVsRange(combo('AsAh'), { KK: 0, QQ: 0 }, { rng: mulberry32(17), trials: 10 }),
+    ).toThrow();
+    expect(() =>
+      equityVsRange(combo('AsAh'), { AA: 1 }, {
+        rng: mulberry32(17),
+        trials: 10,
+        board: parseCards('AdAc2s'),
+      }),
+    ).toThrow();
+  });
+
+  it('rejects a negative weight rather than sampling it backwards', () => {
+    expect(() =>
+      equityVsRange(combo('AsAh'), { KK: 1, QQ: -1 }, { rng: mulberry32(18), trials: 10 }),
     ).toThrow();
   });
 });

@@ -193,22 +193,62 @@ wrong.
 Narrowing is enforced in three places rather than asserted once:
 
 - Every heuristic recommendation carries `source: 'heuristic'` and
-  `chartVersion: HEURISTIC_VERSION` — the literal string `heuristic`,
-  deliberately not shaped like a chart set's dated version, so one reaching
-  `drill_attempts.chart_version` is obvious in the data.
+  `chartVersion: HEURISTIC_VERSION` — `heuristic`, optionally with a bump
+  (`heuristic.2` since 12c), deliberately not shaped like a chart set's dated
+  version, so one reaching `drill_attempts.chart_version` is obvious in the
+  data. It bumps when the bot's decisions change, because
+  `bot_hands.heuristic_version` is what keeps an old hand replayable by the
+  engine that played it.
 - `tests/grading-isolation.test.ts` — `drills/` cannot import `bot/` or name a
   heuristic constructor, and `gradeAnswer` takes frequencies rather than a
   strategy, so there is no argument through which one could arrive.
 - `apps/web/tests/grading-strategy.test.ts` — the only two places that grade a
   user build `createChartStrategy` and nothing else.
 
-**It does not claim to play well**, and nothing in the tests claims it does.
-It plays legally, it mixes, and it responds to equity, price and stack depth.
-Hand strength is equity against a *uniformly random* opponent, discounted
-`equity ** opponents` for a multiway pot — a crude model chosen over a
-hand-picked continuing range precisely because a range hardcoded in engine
-logic would be strategy content in the wrong place, and invented numbers on top
-of invented logic.
+**It does not claim to play well.** It plays legally, it mixes, and it responds
+to equity, price and stack depth. What 12c added is that it now also responds to
+*what the other players did*, and that the claim is finally measured.
+
+#### The opponent model is the chart set
+
+Until 12c hand strength was equity against a **uniformly random** opponent, and
+`weigh` compared that straight to the price the pot demanded. Nothing in the
+model knew that anybody had raised, so "I beat a random hand" was read as "I beat
+the range that just raised me". A uniform villain had been chosen deliberately
+over a hardcoded continuing range — a range written in engine logic is strategy
+content in the wrong place — and the reasoning was right about the constraint
+and wrong about the conclusion. The ranges were already there, injected, in
+`ChartRegistry`.
+
+`strategy/opponent-range.ts` resolves a villain's range from **what they did
+preflop**, using the charts the app already teaches: a seat that opened holds
+that seat's RFI range, a big blind that defended holds the defence chart, and
+the frequency is the one the chart gives — a hand opened 50% of the time is
+sampled half as often, which is what `equityVsRange` exists for. Where no chart
+reaches it is uniform, and that is honest twice over: a big blind that checked
+its option really does hold any two cards, and for the cold-call and 3-bet spots
+nobody has authored, "unknown" is the same refusal `hand-review.ts` makes when it
+reports `uncharted` rather than grading against a guess. The preflop range
+carries forward unchanged to later streets; narrowing per street would take
+numbers nobody has written.
+
+Every missing chart therefore costs twice — a grading hole *and* a blind spot in
+the opponent model — which is the strongest argument yet for authoring them.
+
+#### The behaviour is a test
+
+Legality was never the problem. 100,000 hands conserved chips to eight decimals
+while the table played like nothing that has happened in a cardroom: facing a bet
+postflop the bots raised **41%** of the time and folded 14%, somebody was all-in
+in **38%** of hands, and the mean pot was **208bb**.
+
+`packages/content/tests/bot-behaviour.test.ts` bands those statistics, at the
+production trial count and against the real charts. It lives in `content` for
+the reason `strategy.test.ts` does — the dependency runs content → engine — and
+the bands are a product spec ("an opponent worth playing"), not solver output.
+The constants in `weigh` were **fitted against it**; the ones they replaced were
+chosen because they looked reasonable, which is a thing no test could have
+caught and no reader could have seen.
 
 ### The composite prefers the chart, and asks rather than catches
 
@@ -232,8 +272,18 @@ A side-pot bug does not crash and does not look wrong. It quietly pays the
 wrong player, and the only way to see it from outside is to count:
 
 ```
-sum(stacks) === startingTotal + rebought
+sum(stacks) === startingTotal + rebought - cashedOut
+sum(stacks) === players.length * stackDepth      // every hand, exactly
+sum(net)    === 0                                // one seat's win is another's loss
 ```
+
+**Three, since 12c.** 12b tracked only the chips a rebuy *added*, which balanced
+its books while the table quietly inflated: `finishTableHand` topped a busted
+seat back up and never took a chip off a winner, so 400 hands left 10,400bb on a
+table that opened with 600 — and `chartRecommendation` went on grading against
+100bb charts the whole way. Every seat now squares back to `stackDepth` after
+each hand, so the last two hold exactly and what the stack used to say about a
+sitting moves to `TablePlayer.net`, which says it better.
 
 Verified over 100,000 hands (`pnpm test:engine:bot`); 2,000 run in `pnpm test`.
 Two rules that are silent when broken get their own tests: **odd chips go to the
@@ -300,7 +350,17 @@ the general form of this warning since Phase 6 — "that is a second
 implementation of the thing the drill does, and the two would drift".
 
 The table split the same way: `startTableHand` deals, `finishTableHand` settles,
-moves the button and rebuys, and `playTableHand` is the two with a loop between.
+moves the button and squares the stacks up, and `playTableHand` is the two with a
+loop between.
+
+**Every seat returns to `stackDepth` between hands** (12c). A trainer's table is
+not a cash game ledger: you are here to practise the 100bb 6-max spots the charts
+describe, and a sitting that drifts to 1,700bb average stacks is being graded
+against charts for a game it is no longer playing. `TablePlayer.net` carries the
+running result instead, which is the number a player actually wants and the one
+`/play` now shows. `chartRecommendation` also checks the **effective stack at the
+deal** rather than trusting the depth the table declares, so the coverage rule
+holds structurally even if some future table stops squaring up.
 
 ### `replayHand`: a hand is a seed and hero's actions
 

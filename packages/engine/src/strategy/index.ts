@@ -23,6 +23,8 @@ export { chartSpot, explainChartHand } from './explain';
 export type { BoardTexture, PotOdds } from './heuristics';
 export { classifyBoard, potOdds, spr } from './heuristics';
 
+export { UNIFORM_RANGE, continuingRange, narrowestOpponent } from './opponent-range';
+
 export { HEURISTIC_VERSION, createHeuristicStrategy } from './heuristic-strategy';
 export type { HeuristicOptions } from './heuristic-strategy';
 

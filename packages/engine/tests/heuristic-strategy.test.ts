@@ -10,10 +10,15 @@ import {
   legalActions,
 } from '../src/game';
 import type { HandState } from '../src/game';
-import type { Position } from '../src/ranges';
-import { frequencySum } from '../src/ranges';
+import type { Position, Range, RangeChart } from '../src/ranges';
+import {
+  STACK_DEPTH_100BB,
+  TABLE_SIZE_6MAX,
+  createChartRegistry,
+  frequencySum,
+} from '../src/ranges';
 import { mulberry32 } from '../src/rng';
-import { HEURISTIC_VERSION, createHeuristicStrategy } from '../src/strategy';
+import { HEURISTIC_VERSION, createHeuristicStrategy, spr } from '../src/strategy';
 
 /**
  * The bot's brain, and the line this phase must not cross.
@@ -47,8 +52,23 @@ function combo(text: string): Combo {
   return [a!, b!];
 }
 
+/**
+ * A registry is required, not optional, from 12c.
+ *
+ * The opponent model *is* the chart set (`strategy/opponent-range.ts`), and an
+ * optional registry would mean these tests exercise a different bot from the one
+ * people actually play against. An empty one is a legitimate state — it says
+ * "no chart narrows anybody", which is what the seeded content says about most
+ * spots anyway — so most of this file passes one and pins behaviour that does
+ * not depend on the model.
+ */
+const registry = (charts: readonly RangeChart[] = []) =>
+  createChartRegistry({ version: '2026.09.05-1', published: true, charts: [...charts] });
+
+const EMPTY_REGISTRY = registry();
+
 const strategy = (seed = 1) =>
-  createHeuristicStrategy({ rng: mulberry32(seed), trials: 60 });
+  createHeuristicStrategy({ registry: EMPTY_REGISTRY, rng: mulberry32(seed), trials: 60 });
 
 /** Folds to the button, who opens; the big blind calls; flop comes down. */
 function flopHeadsUp(board: string): HandState {
@@ -166,7 +186,8 @@ describe('createHeuristicStrategy — that it responds to the spot at all', () =
    * tight fails on noise rather than on behaviour — which is how the first
    * draft of this file failed.
    */
-  const careful = () => createHeuristicStrategy({ rng: mulberry32(5), trials: 1200 });
+  const careful = () =>
+    createHeuristicStrategy({ registry: EMPTY_REGISTRY, rng: mulberry32(5), trials: 1200 });
 
   /** The big blind facing a raise of `raiseTo` while holding `hole`. */
   function facingRaise(hole: Combo, raiseTo: number): HandState {
@@ -209,6 +230,101 @@ describe('createHeuristicStrategy — that it responds to the spot at all', () =
     const recommendation = strategy().recommend(state, 'BB');
 
     expect(recommendation.frequencies.some((entry) => entry.action === 'fold')).toBe(false);
+  });
+});
+
+/**
+ * The two properties 12c exists to establish.
+ *
+ * Before it, `handStrength` measured equity against one uniformly random hand
+ * and `weigh` gave `call` a weight of `1 - 2|edge|` — a tent peaking at a
+ * *marginal* call and collapsing for strong hands. So the bot could not know
+ * that a raise meant anything, and a hand that was well ahead could not call,
+ * only raise. Both bots did that, and the stacks went in by the turn: 41% raise
+ * facing a bet, 38% of hands with somebody all-in, over 400 measured hands.
+ *
+ * `tests/bot-behaviour.test.ts` holds the aggregate. These two hold the
+ * mechanisms, because an aggregate that drifts back tells you *that* something
+ * broke and these tell you *which* thing.
+ */
+describe('createHeuristicStrategy — what 12c fixed', () => {
+  const TRIALS = 1500;
+
+  /** Hero in the big blind, having called a button open, now facing a flop bet. */
+  function facingFlopBet(hole: Combo, board: string, bet: number): HandState {
+    let state = createHandState({ hole: { BTN: combo('Ah Kd'), BB: hole } });
+    for (let i = 0; i < 3; i++) state = applyAction(state, 'fold'); // UTG, HJ, CO
+    state = applyAction(state, 'raise', 2.5); // BTN opens
+    state = applyAction(state, 'fold'); // SB
+    state = applyAction(state, 'call'); // BB defends
+    state = dealBoard(state, parseCards(board));
+    state = applyAction(state, 'check'); // BB
+    return applyAction(state, 'bet', bet); // BTN
+  }
+
+  const weightOf = (state: HandState, action: string, charts: readonly RangeChart[]): number =>
+    frequencySum(
+      createHeuristicStrategy({ registry: registry(charts), rng: mulberry32(9), trials: TRIALS })
+        .recommend(state, 'BB')
+        .frequencies.filter((entry) => entry.action === action),
+    );
+
+  it('continues less often against a range than against a random hand', () => {
+    // The same spot, the same price, the same seed. The *only* difference is
+    // whether a chart tells the bot what the button opened with — and a button
+    // holding a real opening range beats second pair far more often than a
+    // random hand does.
+    const state = facingFlopBet(combo('Qs Jh'), 'Ks 9h 4c', 5);
+
+    const openRange: Range = {
+      AA: [{ action: 'raise', size: 2.5, freq: 1 }],
+      KK: [{ action: 'raise', size: 2.5, freq: 1 }],
+      AKo: [{ action: 'raise', size: 2.5, freq: 1 }],
+      KQs: [{ action: 'raise', size: 2.5, freq: 1 }],
+      '72o': [{ action: 'fold', freq: 1 }],
+    };
+
+    const blind = weightOf(state, 'fold', []);
+    const informed = weightOf(state, 'fold', [
+      {
+        tableSize: TABLE_SIZE_6MAX,
+        stackDepth: STACK_DEPTH_100BB,
+        heroPosition: 'BTN',
+        actionSequence: 'rfi',
+        skillTags: [],
+        ranges: openRange,
+      },
+    ]);
+
+    expect(
+      informed,
+      'a bot that knows what the button opens with should fold more, not the same',
+    ).toBeGreaterThan(blind);
+  });
+
+  it('can call with a hand that is far ahead, instead of only raising', () => {
+    // The tent. `1 - 2|edge|` bottoms out at 0.05 once hero is 47 points ahead
+    // of the price, so top set could not call a small bet — it raised, the
+    // bettor re-raised off the same broken shape, and the pot went in.
+    const state = facingFlopBet(combo('9s 9h'), '9d 4c 2h', 3);
+
+    const call = weightOf(state, 'call', []);
+    const raise = weightOf(state, 'raise', []);
+    const allin = weightOf(state, 'allin', []);
+
+    expect(call, 'a monster must be able to just call').toBeGreaterThan(0.1);
+    expect(raise + allin, 'and must not raise every single time').toBeLessThan(0.9);
+  });
+
+  it('does not shove a hundred blinds into a three-blind pot', () => {
+    // All-in used to need only `strength > 0.55`, scaled by 1/(1+spr). At an
+    // SPR of 30 that is small but never zero, and "small but never zero"
+    // multiplied by every decision in a session is how 38% of hands ended with
+    // somebody all-in.
+    const state = facingFlopBet(combo('9s 9h'), '9d 4c 2h', 1);
+
+    expect(spr(state, 'BB')).toBeGreaterThan(10);
+    expect(weightOf(state, 'allin', [])).toBeLessThan(0.02);
   });
 });
 

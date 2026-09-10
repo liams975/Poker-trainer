@@ -15,7 +15,7 @@
  */
 
 import type { Card, Combo, HandNotation } from '../cards';
-import { combosOf, formatCards, requireDistinctCards } from '../cards';
+import { CANONICAL_HANDS, combosOf, formatCards, requireDistinctCards } from '../cards';
 import { evaluate } from '../evaluator';
 import type { Rng } from '../rng';
 
@@ -187,29 +187,24 @@ export function rangeCombos(
 }
 
 /**
- * Hero against one opponent holding an unweighted range of hand notations.
- * Each trial draws an unblocked villain combo, then a runout.
+ * Hero against one opponent drawn from a fixed set of combos.
+ *
+ * The shared body behind both range forms. Which combo a trial picks is the
+ * *only* thing that differs between them — uniform for `equityVsHands`,
+ * weight-proportional for `equityVsRange` — and the card removal, the position
+ * index and the swap trick below are subtle enough that a second copy of them
+ * is how the two would come to disagree.
+ *
+ * `pick` is handed the rng rather than an index, so a sampler is free to spend
+ * exactly as many draws as it needs. Both existing ones spend one.
  */
-export function equityVsHands(
+function equityAgainstCombos(
   hero: Combo,
-  villainHands: readonly HandNotation[],
+  candidates: readonly Combo[],
+  pick: (rng: Rng) => number,
   options: MonteCarloOptions,
 ): EquityResult {
   const { rng, trials = DEFAULT_TRIALS, board = [] } = options;
-
-  if (!Number.isInteger(trials) || trials < 1) {
-    throw new RangeError(`trials must be a positive integer, got ${trials}`);
-  }
-
-  const dead: Card[] = [...hero, ...board];
-  requireDistinctCards(dead);
-
-  const candidates = rangeCombos(villainHands, dead);
-  if (candidates.length === 0) {
-    throw new RangeError(
-      `every combo in [${villainHands.join(', ')}] is blocked by the known cards`,
-    );
-  }
 
   const needed = BOARD_SIZE - board.length;
   if (board.length !== 0 && (board.length < 3 || board.length > BOARD_SIZE)) {
@@ -219,7 +214,7 @@ export function equityVsHands(
   // One deck for the whole run, with `position` tracking where each card is so
   // the villain's two cards can be lifted out of the sampling region in O(1)
   // rather than by rebuilding the deck every trial.
-  const deck = deckWithout(dead);
+  const deck = deckWithout([...hero, ...board]);
   const position = new Int8Array(52).fill(-1);
   for (let i = 0; i < deck.length; i++) position[deck[i]!] = i;
 
@@ -249,7 +244,7 @@ export function equityVsHands(
   const villainValues = new Array<number>(1);
 
   for (let t = 0; t < trials; t++) {
-    const villain = candidates[rng.nextInt(candidates.length)]!;
+    const villain = candidates[pick(rng)]!;
 
     // Park the villain's cards past the end of the sampling region.
     swap(position[villain[0]]!, deck.length - 1);
@@ -273,4 +268,131 @@ export function equityVsHands(
   }
 
   return toEquityResult(tally, trials);
+}
+
+/**
+ * Hero against one opponent holding an unweighted range of hand notations.
+ * Each trial draws an unblocked villain combo, then a runout.
+ */
+export function equityVsHands(
+  hero: Combo,
+  villainHands: readonly HandNotation[],
+  options: MonteCarloOptions,
+): EquityResult {
+  requireTrials(options.trials);
+
+  const dead: Card[] = [...hero, ...(options.board ?? [])];
+  requireDistinctCards(dead);
+
+  const candidates = rangeCombos(villainHands, dead);
+  if (candidates.length === 0) {
+    throw new RangeError(
+      `every combo in [${villainHands.join(', ')}] is blocked by the known cards`,
+    );
+  }
+
+  return equityAgainstCombos(hero, candidates, (rng) => rng.nextInt(candidates.length), options);
+}
+
+/**
+ * How often a villain holds each hand, relative to the others. Zero and absent
+ * mean the same thing: not in the range.
+ *
+ * Deliberately a plain record rather than Phase 2's `Range`. This module's
+ * opening comment sets that seam — "the weighted range type and the charts
+ * arrive in Phase 2 and will convert down to this" — and `HandWeights` is
+ * structurally this record, so `toWeights(chart.ranges)` passes straight in
+ * without equity ever learning what a chart is.
+ */
+export type HandWeighting = Readonly<Partial<Record<HandNotation, number>>>;
+
+/** Canonical position of each hand, so key order cannot change a result. */
+const CANONICAL_INDEX: ReadonlyMap<HandNotation, number> = new Map(
+  CANONICAL_HANDS.map((hand, index) => [hand, index]),
+);
+
+/**
+ * Hero against one opponent holding a **mixed** range.
+ *
+ * A chart is a mix — `AJo` opens from the cutoff 60% of the time — and sampling
+ * its combos as often as `AA`'s says the raiser holds far more junk than they
+ * do. That error is the whole reason 12c exists in the engine: measuring equity
+ * against a range nobody is actually playing produces a number the bot then
+ * treats as fact.
+ *
+ * Weights are relative, not probabilities. They are never normalised to 1
+ * because a caller has no reason to: `toWeights` returns "how often is this hand
+ * played", which sums to whatever the range is wide.
+ */
+export function equityVsRange(
+  hero: Combo,
+  weighting: HandWeighting,
+  options: MonteCarloOptions,
+): EquityResult {
+  requireTrials(options.trials);
+
+  const dead: Card[] = [...hero, ...(options.board ?? [])];
+  requireDistinctCards(dead);
+
+  // Validated against the canonical list rather than left to `combosOf`, so a
+  // key that is not a hand at all is rejected instead of silently contributing
+  // nothing — a range that quietly lost half its hands still returns a
+  // plausible number.
+  const entries: { hand: HandNotation; weight: number }[] = [];
+  for (const [hand, weight] of Object.entries(weighting)) {
+    if (!CANONICAL_INDEX.has(hand)) {
+      throw new RangeError(`"${hand}" is not one of the 169 canonical hands`);
+    }
+    if (typeof weight !== 'number' || !Number.isFinite(weight) || weight < 0) {
+      throw new RangeError(`${hand} cannot be weighted ${weight}`);
+    }
+    if (weight > 0) entries.push({ hand, weight });
+  }
+
+  // Canonical order, so two records holding the same weights sample the same
+  // way whatever order they were built in. Object key order is part of the
+  // input in JavaScript, and a hand history that replays differently because a
+  // record was assembled differently is exactly the class of bug the seeded rng
+  // exists to rule out.
+  entries.sort((a, b) => CANONICAL_INDEX.get(a.hand)! - CANONICAL_INDEX.get(b.hand)!);
+
+  const candidates: Combo[] = [];
+  // Cumulative weight per candidate, so a pick is one draw and a binary search.
+  const cumulative: number[] = [];
+  let total = 0;
+
+  for (const { hand, weight } of entries) {
+    for (const combo of rangeCombos([hand], dead)) {
+      candidates.push(combo);
+      total += weight;
+      cumulative.push(total);
+    }
+  }
+
+  if (candidates.length === 0) {
+    throw new RangeError('the weighting holds no combo that the known cards leave available');
+  }
+
+  const pick = (rng: Rng): number => {
+    const roll = rng.nextFloat() * total;
+
+    let low = 0;
+    let high = cumulative.length - 1;
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      if (roll < cumulative[mid]!) high = mid;
+      else low = mid + 1;
+    }
+
+    return low;
+  };
+
+  return equityAgainstCombos(hero, candidates, pick, options);
+}
+
+function requireTrials(trials: number | undefined): void {
+  if (trials === undefined) return;
+  if (!Number.isInteger(trials) || trials < 1) {
+    throw new RangeError(`trials must be a positive integer, got ${trials}`);
+  }
 }

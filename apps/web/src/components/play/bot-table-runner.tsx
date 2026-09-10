@@ -374,6 +374,7 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
 
   const state = hand.open.progress.state;
   const heroSeat = state.seats.find((seat) => seat.position === hand.heroPosition)!;
+  const heroNet = table.players.find((player) => player.id === HERO_ID)!.net;
   const choices =
     phase === 'hero' ? buildChoices(legalActions(state), potBetSizes(state)) : [];
 
@@ -384,8 +385,18 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
           <h2 className="font-display text-sm font-semibold">
             You are {hand.heroPosition} · {heroSeat.stack}bb
           </h2>
-          <span className="font-mono text-xs text-ink-muted" data-testid="hand-count">
-            Hand {handNo + 1}
+          <span className="flex items-baseline gap-3 font-mono text-xs text-ink-muted">
+            {/*
+              The sitting's result, which the stack used to carry.
+              Every seat now starts each hand at 100bb — that is what keeps the
+              spot the one the charts describe, and it is why the stack above no
+              longer says anything about how you are running. This does.
+            */}
+            <span data-testid="session-net">
+              Session {heroNet >= 0 ? '+' : '−'}
+              {Math.abs(heroNet).toFixed(1)}bb
+            </span>
+            <span data-testid="hand-count">Hand {handNo + 1}</span>
           </span>
         </header>
 

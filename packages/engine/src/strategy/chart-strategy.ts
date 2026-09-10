@@ -36,6 +36,59 @@ import type { ActionRecommendation, Strategy } from './strategy';
  */
 export const MAX_OPEN_BLINDS = 4;
 
+/**
+ * How far the effective stack may sit from `stackDepth` and still be the spot
+ * the charts describe.
+ *
+ * `state.stackDepth` is what the table *says* it is, and until 12c that was the
+ * only thing checked. 12b's table topped losers up and never took a chip off a
+ * winner, so a sitting climbed to an average stack of 1,700bb with `stackDepth`
+ * still reading 100 — and every hand of it was graded against 100bb charts. A
+ * 17x-deep pot is a different game: it changes which hands are worth playing,
+ * how much a raise threatens, and what a call is worth, and no seeded chart has
+ * anything to say about it.
+ *
+ * The band is generous on purpose. It is a coverage check, not a strategy: a
+ * few big blinds either side of 100 is the same spot to anybody, and a hand
+ * played 12bb deep or 900bb deep is not.
+ */
+export const CHART_STACK_BAND = { min: 0.6, max: 1.5 } as const;
+
+/**
+ * The effective stack **at the deal**, in big blinds.
+ *
+ * Starting stacks, not current ones — a seat's chips move the moment the blinds
+ * are posted, and reading `seat.stack` would make every blind-defence spot look
+ * short and drop half the seeded content on the floor.
+ *
+ * Effective rather than absolute, because nobody can win more than the shorter
+ * stack: one 900bb seat at an otherwise 100bb table is still playing a 100bb
+ * pot against everybody else.
+ */
+function isChartedDepth(state: HandState, hero: Position): boolean {
+  const effective = effectiveStack(state, hero) / state.bigBlind;
+
+  return (
+    effective >= CHART_STACK_BAND.min * state.stackDepth &&
+    effective <= CHART_STACK_BAND.max * state.stackDepth
+  );
+}
+
+function effectiveStack(state: HandState, hero: Position): number {
+  const startingStack = (position: Position): number => {
+    const seat = seatAt(state, position);
+    return seat.stack + seat.totalCommitted;
+  };
+
+  const opponents = state.seats
+    .filter((seat) => seat.position !== hero && seat.status !== 'folded')
+    .map((seat) => startingStack(seat.position));
+
+  if (opponents.length === 0) return startingStack(hero);
+
+  return Math.min(startingStack(hero), Math.max(...opponents));
+}
+
 export interface ChartStrategyOptions {
   registry: ChartRegistry;
   /** Recorded on every recommendation, and from there onto every attempt. */
@@ -165,6 +218,9 @@ export function chartRecommendation(
     );
   }
 
+  // And the chips, not only the label the table wears. See CHART_STACK_BAND.
+  if (!isChartedDepth(state, hero)) return undefined;
+
   const seat = seatAt(state, hero);
   if (seat.hole === undefined) {
     throw new RangeError(`${hero} has no cards, so there is nothing to recommend`);
@@ -217,6 +273,13 @@ export function createChartStrategy(options: ChartStrategyOptions): Strategy {
       if (state.tableSize !== TABLE_SIZE_6MAX || state.stackDepth !== STACK_DEPTH_100BB) {
         throw new RangeError(
           `v1 charts cover 6-max 100bb only, got ${state.tableSize}-max ${state.stackDepth}bb`,
+        );
+      }
+
+      if (!isChartedDepth(state, hero)) {
+        const effective = Math.round(effectiveStack(state, hero) / state.bigBlind);
+        throw new RangeError(
+          `v1 charts cover ${state.stackDepth}bb; ${hero} has an effective stack of ${effective}bb`,
         );
       }
 

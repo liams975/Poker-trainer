@@ -24,10 +24,14 @@ import { createBotStrategy } from '../src/strategy';
  * return — is verified in the small by its own file; this is the one assertion
  * that catches what those files forgot to think of.
  *
- * The invariant is exact rather than approximate, and rebuys are the only thing
- * that may add chips:
+ * The invariants are exact rather than approximate. 12b tracked only the chips
+ * a rebuy *added*, which balanced the books while the table quietly inflated to
+ * 10,400bb; 12c squares every seat back to `stackDepth` after each hand and
+ * counts both directions, so there are three:
  *
- *     sum(stacks) === startingTotal + rebought
+ *     sum(stacks) === startingTotal + rebought - cashedOut
+ *     sum(stacks) === startingTotal            // every hand, exactly
+ *     sum(net)    === 0                        // one seat's win is another's loss
  *
  * Two thousand hands by default, so `pnpm test` stays hermetic and fast.
  * `ENGINE_BOT_HANDS` turns it up, following the `ENGINE_ORACLE_HANDS` precedent
@@ -112,12 +116,28 @@ describe(`a ${HANDS}-hand session`, () => {
       const played = playTableHand(table, { rng, strategyFor: decide });
       table = played.table;
 
+      const context = `on hand ${hand} — ${JSON.stringify(played.hand.result.pots)}`;
+
+      // The books, both directions. 12b tracked only what a rebuy added and so
+      // could not have noticed the table inflating to 10,400bb; a winner's chips
+      // now leave the table and are counted leaving.
+      expect(chipsOn(table), `chips went wrong ${context}`).toBeCloseTo(
+        opening + table.rebought - table.cashedOut,
+        8,
+      );
+
+      // And the two that follow from squaring up every hand. Both are stronger
+      // than what they replace: the first is exact rather than "exact given the
+      // rebuys", and the second is what conservation actually means at a cash
+      // table — one seat's win is another's loss, forever.
+      expect(chipsOn(table), `the table drifted off ${table.stackDepth}bb ${context}`).toBeCloseTo(
+        opening,
+        8,
+      );
       expect(
-        chipsOn(table),
-        `chips went wrong on hand ${hand} — ${JSON.stringify(
-          played.hand.result.pots,
-        )}`,
-      ).toBeCloseTo(opening + table.rebought, 8);
+        table.players.reduce((sum, player) => sum + player.net, 0),
+        `the sitting stopped being zero-sum ${context}`,
+      ).toBeCloseTo(0, 8);
     }
 
     expect(table.handsPlayed).toBe(HANDS);

@@ -74,8 +74,18 @@ describe('the grading path cannot reach the heuristic', () => {
   it('the heuristic marks itself, and nothing else claims that mark', () => {
     // If a heuristic recommendation ever reaches `drill_attempts.chart_version`
     // it must be obvious in the data rather than look like a real chart set.
+    //
+    // A trailing number is allowed and a dated one is not. The guard's intent is
+    // "never mistakable for a chart set", not "never changes": 12c retuned the
+    // heuristic, and `bot_hands.heuristic_version` exists precisely so old rows
+    // stay interpretable by the version that played them. A constant that could
+    // never move would have made that column decorative.
     const heuristic = readFileSync(join(src, 'strategy', 'heuristic-strategy.ts'), 'utf8');
-    expect(heuristic).toMatch(/HEURISTIC_VERSION\s*=\s*'heuristic'/);
+    expect(heuristic).toMatch(/HEURISTIC_VERSION\s*=\s*'heuristic(\.\d+)?'/);
+    expect(
+      heuristic,
+      'a dated version would be indistinguishable from a chart set',
+    ).not.toMatch(/HEURISTIC_VERSION\s*=\s*'[^']*\d{4}[.-]\d{2}/);
 
     const chart = readFileSync(join(src, 'strategy', 'chart-strategy.ts'), 'utf8');
     expect(chart, 'the chart strategy must never label itself a heuristic').not.toContain(

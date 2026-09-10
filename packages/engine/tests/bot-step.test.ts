@@ -267,8 +267,38 @@ describe('startTableHand and finishTableHand', () => {
     expect(finished.table.handsPlayed).toBe(1);
     expect(finished.table.players[0]!.stack).toBe(100);
     expect(finished.table.rebought).toBeGreaterThan(0);
-    // The conservation invariant, on the one hand that exercises a rebuy.
-    expect(chipsOn(finished.table)).toBeCloseTo(chipsOn(table) + finished.table.rebought, 8);
+    // The conservation invariant, on the one hand that exercises a rebuy. Both
+    // directions since 12c: the seat that won those chips gives back everything
+    // above `stackDepth` in the same breath.
+    expect(chipsOn(finished.table)).toBeCloseTo(
+      chipsOn(table) + finished.table.rebought - finished.table.cashedOut,
+      8,
+    );
+    expect(finished.table.players.reduce((sum, player) => sum + player.net, 0)).toBeCloseTo(0, 8);
+  });
+
+  it('squares every seat back to the stack depth, winners included', () => {
+    /**
+     * The defect this replaces: `finishTableHand` topped a busted seat up and
+     * never took a chip off a winner, so a table only ever grew — 10,400bb after
+     * 400 hands, with `chartRecommendation` still grading against 100bb charts.
+     * Every hand now starts at the depth the charts describe, and what the stack
+     * used to say about the sitting moves to `net`.
+     */
+    const finished = playTableHand(seatSix(), {
+      rng: mulberry32(4242),
+      strategyFor: () => passive,
+    });
+
+    for (const player of finished.table.players) {
+      expect(player.stack, `${player.id} did not square up`).toBe(100);
+    }
+
+    // Somebody won the blinds, so the nets are not all zero — they just sum to
+    // zero. A test that only checked the sum would pass on a table where nothing
+    // ever happened.
+    expect(finished.table.players.some((player) => player.net !== 0)).toBe(true);
+    expect(finished.table.players.reduce((sum, player) => sum + player.net, 0)).toBeCloseTo(0, 8);
   });
 
   it('is what playTableHand is made of', () => {

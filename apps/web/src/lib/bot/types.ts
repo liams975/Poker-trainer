@@ -33,8 +33,16 @@ import type { ChartRegistry } from '@poker/engine';
  */
 export const BOT_TRIALS = 200;
 
-/** Bumped whenever bot decisions change shape, so a stale replay is visible. */
-export const BOT_ENGINE_VERSION = '12b.1';
+/**
+ * Bumped whenever bot decisions change shape, so a stale replay is visible.
+ *
+ * 12c rewrote how the bots decide — equity is measured against the range a
+ * villain can still hold rather than against one uniformly random hand, and
+ * `weigh` was reshaped and refitted. A hand recorded under `12b.1` will not
+ * reproduce against this engine, which is exactly what this string and
+ * `bot_hands.heuristic_version` exist to make visible rather than silent.
+ */
+export const BOT_ENGINE_VERSION = '12c.1';
 
 /** The six seats, and which opponent is in each. Hero's carries no profile. */
 export type SeatProfiles = Partial<Record<Position, string>>;

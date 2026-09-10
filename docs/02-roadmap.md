@@ -332,35 +332,88 @@ every entry; and the reveal check only looked at folded-out pots, which a
 calling hero almost never reaches. Both assertions were wrong in a way that
 looked right.
 
-## Phase 12c — the bots play badly *(next)*
+## Phase 12c — the bots play poker
 
-**Measured over 400 hands against the real charts**, six bots at a 100bb table:
+- `strategy/opponent-range.ts` — a villain's range, resolved from the charts
+- `equity/equityVsRange` — a weighted range, sampled by the weight it carries
+- `strategy/heuristic-strategy.ts` — `weigh` reshaped, and refitted by measurement
+- `bot/table.ts` — every seat squares back to 100bb; `net` carries the sitting
+- `packages/content/tests/bot-behaviour.test.ts` — the behaviour, banded
 
-| | Bots | 6-max poker |
-|---|---|---|
-| Somebody all-in | **38%** | ~2–3% |
-| Reached showdown | **63%** | ~25% |
-| Mean pot | **208bb** | ~10bb |
-| Chips on the table after 400 hands | **10,400bb** | 600bb |
+**Exit:** The table plays like poker, and a suite says so. Facing a bet postflop
+the bots raise under 15% and fold over a third of the time; nobody is all-in in
+more than 8% of hands; a sitting still holds exactly 600bb at the end.
 
-Two separate causes. `handStrength` measures equity against a **uniformly
-random** range (`CANONICAL_HANDS`) and `weigh` compares that directly to the
-pot odds' `requiredEquity` — so "I beat a random hand" is read as "I beat the
-range that just raised me", and the bot stacks off. And `finishTableHand` tops a
-busted seat back up to 100bb but never takes chips off a winner, so rebuys
-ratchet the table total upward without bound; by hand 400 the average stack is
-1,700bb while `chartRecommendation` still grades hero against 100bb charts.
+**What was wrong.** Measured over 400 hands against the real charts:
 
-Plus the review screen for the hands 12b records: filters, a hand replayer,
-leaks across a sitting. And whether playing earns anything — no XP, streak or
-achievement is awarded for a bot hand today, deliberately, because XP for
-*playing* rather than for answering is farmable by folding.
+| | 12b | Now | Real 6-max |
+|---|---|---|---|
+| Facing a bet postflop: raise | **41.0%** | 8–11% | ~8% |
+| Facing a bet postflop: fold | **13.7%** | 43–49% | ~50% |
+| Somebody all-in | **38.0%** | 2.6–3.4% | ~2–3% |
+| Reached showdown | **63.0%** | 16–19% | ~25% |
+| Mean pot | **208bb** | 13–15bb | ~10bb |
+| Chips on the table after 400 hands | **10,400bb** | 600bb | 600bb |
+
+Two separate causes, and an experiment that told them apart: **resetting the
+stacks every hand did not move the all-in rate at all** (37.8%), only the mean
+pot. Chip inflation was the amplifier; the heuristic was the disease.
+
+`handStrength` measured equity against a uniformly random hand, so nothing in
+the bot knew that a raise meant anything. And `weigh` gave `call` a weight of
+`1 - 2|edge|` — a tent peaking at a *marginal* call and collapsing to its floor
+for anything strong, so a hand that was well ahead could not call, only raise.
+Both seats did that to each other and the stacks went in by the turn. The
+all-ins were not preflop: 2 of 400 started there.
+
+Separately, `finishTableHand` topped a busted seat up and never took a chip off
+a winner, so the table only ever grew — by hand 400 the average stack was
+1,700bb while `chartRecommendation` still graded against 100bb charts.
+
+**Settled during the phase.** Three things.
+
+**The opponent model is the chart set.** A seat that opened holds that seat's
+RFI range, a big blind that defended holds the defence chart, and everything
+else is uniform. No hand lists in the engine — CLAUDE.md keeps strategy content
+in `packages/content` — and every missing chart now costs twice: a grading hole
+*and* a blind spot in the opponent model.
+
+**Legality was never the problem.** 100,000 hands conserved chips to eight
+decimals while the table played like nothing that has ever happened in a
+cardroom. Every suite was green. So the behaviour itself is now banded, at the
+production trial count and against the real charts, and the constants in `weigh`
+were fitted against that measurement rather than chosen because they read
+plausibly.
+
+**A trainer's table squares up.** Every seat returns to 100bb between hands, so
+every hand is the spot the charts describe; `TablePlayer.net` carries the
+sitting's result and `/play` shows it. `chartRecommendation` now also checks the
+effective stack at the deal rather than the depth the table declares, so "never
+grade a spot no chart covers" holds structurally rather than by coincidence.
+
+## Phase 12d — the review screen *(next)*
+
+The half of the old 12c this phase displaced. Filters over the hands 12b
+records, a hand replayer, leaks across a sitting.
+
+Replay has to gate on `bot_hands.heuristic_version`: 12c bumped it to
+`heuristic.2`, and a hand recorded under `12b.1` will not reproduce against this
+engine. That column has existed since 0006 for exactly this, and 12c is the first
+time it meant anything — the screen must say "played on an older engine" rather
+than replay it wrongly.
+
+And whether playing earns anything — no XP, streak or achievement is awarded for
+a bot hand today, deliberately, because XP for *playing* rather than for
+answering is farmable by folding.
 
 ## Later
 
 **The missing preflop charts** — cold-calls, 3-bets, vs-3-bets, squeezes. The
-highest-value content work left: they would let the bot play chart-driven poker
-far deeper into the tree, and unlike heuristics they could also grade.
+highest-value content work left, and 12c made the case twice as strong: they
+would let the bot play chart-driven poker far deeper into the tree, they could
+grade where a heuristic never may, **and** each one narrows the opponent model,
+which is now the chart registry itself. Every spot nobody has authored is a spot
+where the bots read their opponents as holding any two cards.
 
 Spaced repetition scheduling · postflop track · leaderboards · achievement
 gallery · dashboard rebuild · daily quests · paywall UI and RevenueCat · iOS

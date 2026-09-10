@@ -28,14 +28,16 @@
  * and nowhere near enough to grade against.
  */
 
-import { CANONICAL_HANDS } from '../cards';
-import { equityVsHands } from '../equity';
+import type { Card } from '../cards';
+import { equityVsRange, rangeCombos } from '../equity';
+import type { HandWeighting } from '../equity';
 import type { HandState, LegalAction } from '../game';
 import { amountToCall, contestingSeats, currentBet, legalActions, potSize, seatAt } from '../game';
-import type { Action, ActionFreq, Position } from '../ranges';
+import type { Action, ActionFreq, ChartRegistry, Position } from '../ranges';
 import type { Rng } from '../rng';
 
 import { classifyBoard, potOdds, spr } from './heuristics';
+import { UNIFORM_RANGE, continuingRange, narrowestOpponent } from './opponent-range';
 import type { RationaleFactor } from './rationale';
 import { factor, rationale } from './rationale';
 import type { ActionRecommendation, Strategy } from './strategy';
@@ -46,12 +48,21 @@ import type { ActionRecommendation, Strategy } from './strategy';
  * Not a version. Chart sets are dated — `2026.08.25-1` — and this must never be
  * mistakable for one if it ends up in a stored row.
  */
-export const HEURISTIC_VERSION = 'heuristic';
+export const HEURISTIC_VERSION = 'heuristic.2';
 
 /** Frequencies below this are rounding, not strategy, and are dropped. */
 const MIN_FREQ = 0.01;
 
 export interface HeuristicOptions {
+  /**
+   * The charts, which are also the opponent model — see `opponent-range.ts`.
+   *
+   * **Required, not optional.** An optional registry would mean the bot in the
+   * tests is a different bot from the one people play against, and the whole of
+   * 12c is the discovery that nobody had checked which one they were measuring.
+   * An empty registry is a legitimate value; it simply narrows nobody.
+   */
+  registry: ChartRegistry;
   rng: Rng;
   /**
    * Monte Carlo runouts per decision. The default is a compromise: high enough
@@ -78,15 +89,21 @@ function chips(amount: number): number {
 }
 
 /**
- * Hero's equity against **one uniformly random hand**, discounted for the
- * number of opponents still in.
+ * Hero's equity against **the range the dangerous opponent can still hold**,
+ * discounted for the number of opponents still in.
  *
- * A uniform opponent is a crude model and is chosen deliberately over a
- * hand-picked "continuing range": a range hardcoded here would be strategy
- * content living in engine logic, which CLAUDE.md forbids, and it would be
- * invented numbers on top of invented logic. Sampling every combo is at least a
- * defined quantity, and `rangeCombos` already removes the cards hero and the
- * board can see.
+ * Until 12c this measured equity against one uniformly random hand, and `weigh`
+ * compared that straight to the price the pot was offering. Nothing in it knew
+ * that anybody had raised, so "I beat a random hand" was read as "I beat the
+ * range that just raised me" — and top pair on the flop, which is 80% against a
+ * random hand and much less against an opening range, raised into a bet 41% of
+ * the time. Somebody was all-in in 38% of hands.
+ *
+ * The range comes from `opponent-range.ts`, which is the chart registry rather
+ * than a table written here: CLAUDE.md keeps strategy content in
+ * `packages/content`. Where no chart reaches it is uniform, which is what this
+ * always was — the change is that where a chart *does* reach, the bot now uses
+ * it.
  *
  * The multiway discount is `equity ** opponents` — the chance of beating them
  * all if their hands were independent, which they are not. It is an
@@ -95,17 +112,68 @@ function chips(amount: number): number {
  */
 function handStrength(state: HandState, hero: Position, options: HeuristicOptions): number {
   const seat = seatAt(state, hero);
-  const opponents = contestingSeats(state).length - 1;
+  const opponents = opponentCount(state, hero);
 
   if (opponents <= 0) return 1;
 
-  const { equity } = equityVsHands(seat.hole!, CANONICAL_HANDS, {
+  const villain = narrowestOpponent(state, hero, options.registry);
+  const weighting =
+    villain === undefined ? UNIFORM_RANGE : continuingRange(state, villain, options.registry);
+
+  const { equity } = equityVsRange(seat.hole!, available(weighting, [...seat.hole!, ...state.board]), {
     rng: options.rng,
     trials: options.trials ?? DEFAULT_TRIALS,
     board: state.board,
   });
 
   return equity ** opponents;
+}
+
+/**
+ * How many opponents hero actually has to beat.
+ *
+ * Postflop this is every seat still contesting: they have all seen the same
+ * board and chosen to still be here.
+ *
+ * **Preflop it is only the seats that have put money in voluntarily**, floored
+ * at one, and that distinction is worth stating because getting it wrong is
+ * what made the first draft of 12c unplayably tight. Facing a lone cutoff open
+ * from the button, `contestingSeats` counts five opponents — the raiser, the two
+ * blinds, and seats that have not acted at all — and `equity ** 5` folds
+ * everything, forever. A human in that seat is facing *one* raiser and prices
+ * the seats behind by folding to them when they wake up, which is what the pot
+ * odds on the next decision already do.
+ */
+function opponentCount(state: HandState, hero: Position): number {
+  const contesting = contestingSeats(state).filter((seat) => seat.position !== hero);
+
+  if (state.street !== 'preflop') return contesting.length;
+
+  const committed = contesting.filter((seat) =>
+    state.history.some(
+      (entry) =>
+        entry.street === 'preflop' &&
+        entry.position === seat.position &&
+        (entry.action === 'call' || entry.action === 'raise' || entry.action === 'allin'),
+    ),
+  );
+
+  return contesting.length === 0 ? 0 : Math.max(1, committed.length);
+}
+
+/**
+ * The weighting, or uniform when the visible cards have blocked all of it away.
+ *
+ * A narrow chart range can be emptied by the board — hero holding two of the
+ * three hands a tight opener raises, say — and `equityVsRange` refuses to sample
+ * an empty range rather than returning a fabricated number. Falling back to
+ * uniform is the same answer this function gave for every spot before 12c, and
+ * it is reached now only where the model genuinely has nothing left to say.
+ */
+function available(weighting: HandWeighting, dead: readonly Card[]): HandWeighting {
+  const hands = Object.keys(weighting).filter((hand) => (weighting[hand] ?? 0) > 0);
+
+  return rangeCombos(hands, dead).length === 0 ? UNIFORM_RANGE : weighting;
 }
 
 /**
@@ -132,6 +200,46 @@ function sizeFor(state: HandState, option: LegalAction, strength: number): numbe
   return chips(clamp(target, low, high));
 }
 
+/**
+ * The tuning. Every number here was **fitted against measured table
+ * statistics**, not chosen because it looked reasonable — which is what
+ * happened to the set these replaced, and `tests/bot-behaviour.test.ts` is what
+ * stops it happening again.
+ *
+ * The shape matters more than the values, and three things about it are
+ * deliberate:
+ *
+ *   - `call` **rises** with edge. The old weight was `1 - 2|edge|`, a tent
+ *     peaking at a marginal call and collapsing to its 0.05 floor for anything
+ *     strong — so a hand that was well ahead could not call, only raise. Both
+ *     seats did that to each other and the stacks went in by the turn.
+ *   - `raise` needs a real edge, not merely a positive one, and is damped by the
+ *     aggression already on the street. A fourth re-raise should be harder than
+ *     the first; before, each one was as easy as the last.
+ *   - `allin` needs a large edge *and* a low SPR. It used to need only
+ *     `strength > 0.55`, scaled by `1/(1 + spr)` — small at 30bb deep but never
+ *     zero, and never-zero across every decision of a session is how 38% of
+ *     hands ended with somebody all-in.
+ */
+const TUNING = {
+  /** Facing a bet: fold weight is `FOLD_BASE - FOLD_EDGE * edge`. */
+  FOLD_BASE: 0.8,
+  FOLD_EDGE: 2,
+  /** Facing a bet: call weight is `CALL_BASE + CALL_EDGE * edge`. */
+  CALL_BASE: 0.1,
+  CALL_EDGE: 1.5,
+  /** Facing a bet: raise needs `edge` past RAISE_GATE, then scales by RAISE_GAIN. */
+  RAISE_GATE: 0.27,
+  RAISE_GAIN: 1.4,
+  /** Unbet: check weight is `1 - strength`, floored, and bet is the mirror. */
+  BET_GATE: 0.34,
+  BET_GAIN: 1.15,
+  /** All-in needs this much edge and no more than this much stack behind. */
+  ALLIN_GATE: 0.34,
+  ALLIN_SPR: 3,
+  ALLIN_GAIN: 1.2,
+} as const;
+
 /** Raw, unnormalised weight per legal action. */
 function weigh(
   state: HandState,
@@ -147,30 +255,58 @@ function weigh(
   const facingBet = amountToCall(state, hero) > 0;
   const stackToPot = spr(state, hero);
 
+  // How much better hero's equity is than the price demands. This is the whole
+  // decision; everything else scales it. With nothing to call the price is zero,
+  // so edge is just strength.
+  const edge = strength - requiredEquity;
+
+  /**
+   * Aggression already on this street, so a re-raise is harder than a raise.
+   *
+   * Actual raises, not history length — the same count and the same reasoning as
+   * `chart-strategy.ts`'s rationale, which has needed it since Phase 6.
+   */
+  const priorRaises = state.history.filter(
+    (entry) =>
+      entry.street === state.street && (entry.action === 'raise' || entry.action === 'allin'),
+  ).length;
+
   const weights = new Map<Action, number>();
   const has = (action: Action) => legal.some((option) => option.action === action);
 
   if (facingBet) {
-    // How much better hero's equity is than the price demands. This is the
-    // whole decision; everything else scales it.
-    const edge = strength - requiredEquity;
-
-    if (has('fold')) weights.set('fold', clamp(0.5 - 3 * edge) / looseness);
-    if (has('call')) weights.set('call', clamp(1 - Math.abs(edge) * 2, 0.05, 1) * looseness);
-    if (has('raise')) weights.set('raise', clamp(edge * 3 - 0.1) * aggression);
+    if (has('fold')) {
+      weights.set('fold', clamp(TUNING.FOLD_BASE - TUNING.FOLD_EDGE * edge) / looseness);
+    }
+    if (has('call')) {
+      weights.set('call', clamp(TUNING.CALL_BASE + TUNING.CALL_EDGE * edge, 0, 1) * looseness);
+    }
+    if (has('raise')) {
+      weights.set(
+        'raise',
+        (clamp(edge - TUNING.RAISE_GATE) * TUNING.RAISE_GAIN * aggression) / (1 + priorRaises),
+      );
+    }
   } else {
     if (has('check')) weights.set('check', clamp(1 - strength, 0.1, 1));
-    if (has('bet')) weights.set('bet', clamp(strength * 1.6 - 0.3) * aggression);
+    if (has('bet')) {
+      weights.set(
+        'bet',
+        (clamp(strength * TUNING.BET_GAIN - TUNING.BET_GATE) * aggression) / (1 + priorRaises),
+      );
+    }
   }
 
   /**
-   * All-in is aggression of last resort, and it scales with how little is left
-   * behind rather than with strength alone. At an SPR of 1 a strong hand has
-   * nothing to gain by betting small; at an SPR of 20 shoving is a way to be
-   * called only when beaten.
+   * All-in is aggression of last resort. It needs both a hand that is genuinely
+   * ahead of the price and a stack short enough that shoving is the bet rather
+   * than a way to be called only when beaten.
    */
-  if (has('allin') && stackToPot > 0) {
-    weights.set('allin', clamp(strength - 0.55) * (1 / (1 + stackToPot)) * aggression);
+  if (has('allin') && stackToPot > 0 && stackToPot <= TUNING.ALLIN_SPR) {
+    weights.set(
+      'allin',
+      clamp(edge - TUNING.ALLIN_GATE) * TUNING.ALLIN_GAIN * aggression * (1 / (1 + stackToPot)),
+    );
   }
 
   return weights;

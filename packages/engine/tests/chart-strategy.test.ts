@@ -294,4 +294,54 @@ describe('honest failures', () => {
 
     expect(() => strategy.recommend(short, 'BTN')).toThrow(/6-max|100bb/);
   });
+
+  /**
+   * The gate that was nominal until 12c.
+   *
+   * `state.stackDepth` is the table's *declared* depth. 12b's `finishTableHand`
+   * topped losers up and never took a chip off a winner, so a table climbed to
+   * an average stack of 1,700bb while `stackDepth` sat at 100 — and every hand
+   * of it was graded against 100bb charts. The declared depth said the spot was
+   * covered; the chips said it was a game nobody has authored a chart for.
+   *
+   * 12c squares the stacks up every hand, so in normal play this never fires.
+   * That is the point of having it: it makes "never grade a spot no chart
+   * covers" true structurally rather than by coincidence.
+   */
+  /** UTG, first to act, holding aces with `stacks` behind every seat. */
+  const utgFirstIn = (stacks: Record<string, number>): HandState =>
+    createHandState({ hole: { UTG: combo('AsAh') }, stacks });
+
+  it('refuses a spot far deeper than the charts describe', () => {
+    const deep = utgFirstIn({ UTG: 900, HJ: 900, CO: 900, BTN: 900, SB: 900, BB: 900 });
+
+    expect(() => strategy.recommend(deep, 'UTG')).toThrow(/100bb|deep|stack/i);
+  });
+
+  it('refuses a spot far shorter than the charts describe', () => {
+    const shallow = utgFirstIn({ UTG: 12, HJ: 12, CO: 12, BTN: 12, SB: 12, BB: 12 });
+
+    expect(() => strategy.recommend(shallow, 'UTG')).toThrow(/100bb|short|stack/i);
+  });
+
+  it('measures the effective stack, so one deep seat does not void the spot', () => {
+    // Effective stacks are what matter: nobody can win more than the shorter
+    // stack, so a single 900bb seat at an otherwise 100bb table is still a
+    // 100bb spot for everyone it is playing against.
+    const lopsided = utgFirstIn({ UTG: 100, HJ: 100, CO: 100, BTN: 100, SB: 100, BB: 900 });
+
+    expect(strategy.recommend(lopsided, 'UTG').source).toBe('chart');
+  });
+
+  it('still answers once the blinds are posted, which is not a short stack', () => {
+    // The big blind has 99bb in front of it the moment the cards are dealt.
+    // Reading the *current* stack rather than the stack at the deal would make
+    // every blind-defence spot uncharted, which is half the seeded content.
+    let state = createHandState({ hole: { BTN: combo('AsKs'), BB: combo('AcAd') } });
+    for (let i = 0; i < 3; i++) state = applyAction(state, 'fold'); // UTG, HJ, CO
+    state = applyAction(state, 'raise', 2.5); // BTN
+    state = applyAction(state, 'fold'); // SB
+
+    expect(strategy.recommend(state, 'BB').source).toBe('chart');
+  });
 });
