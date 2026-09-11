@@ -66,6 +66,12 @@ pnpm content:sync   # packages/content -> Supabase
 `pnpm test:e2e` needs both Docker and a seeded database.
 Get credentials with `supabase status -o env` after `pnpm db:start`.
 
+It also needs **port 3000 to be this app**. `reuseExistingServer` attaches to
+whatever already answers there, and 3000 is every Next project's default — Phase
+13 ran the whole suite against an unrelated app for two hours before noticing.
+`e2e/global-setup.ts` now refuses to start against a stranger; when the port is
+taken, run `E2E_PORT=3100 pnpm test:e2e`.
+
 ## Deployed
 
 Vercel builds from `main`. **Migrations and content do not deploy with it** —
@@ -179,7 +185,11 @@ Work proceeds in numbered phases (`docs/02-roadmap.md`). For each phase:
    until the human approves the file list.
 3. Implement only what the approved plan lists.
 4. Run `pnpm typecheck && pnpm test && pnpm lint`.
-5. Stop at the phase exit criteria and report. Do not roll into the next phase.
+5. Push, then **confirm the CI run for that commit is green** — all three jobs.
+   A phase is not finished while its own CI is red. Phase 12b's run failed on a
+   real e2e bug and sat unnoticed for three days, because nothing in this list
+   said to look. `gh run list`, or the Actions tab.
+6. Stop at the phase exit criteria and report. Do not roll into the next phase.
 
 If a phase turns out to need files the plan didn't list, stop and ask rather
 than expanding scope mid-phase.

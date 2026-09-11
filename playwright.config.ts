@@ -28,21 +28,37 @@ function loadRootEnv(): void {
 
 loadRootEnv();
 
+/**
+ * Port 3000 is the Next default, which means it is also every *other* Next
+ * project's default. `E2E_PORT` moves this suite out of the way when something
+ * else already has it — `global-setup.ts` is what refuses to run against that
+ * something else, and says to set this.
+ */
+const PORT = Number(process.env.E2E_PORT ?? 3000);
+const BASE_URL = `http://localhost:${PORT}`;
+
+// Read back by `global-setup.ts`, which Playwright gives no access to `use`.
+process.env.E2E_BASE_URL = BASE_URL;
+
 export default defineConfig({
   testDir: './apps/web/e2e',
+  globalSetup: './apps/web/e2e/global-setup.ts',
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 2 : 0,
   workers: CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     command: 'pnpm --filter @poker/web dev',
-    url: 'http://localhost:3000',
+    // Next reads PORT, so the dev server follows E2E_PORT without the command
+    // needing to know how to pass a flag through pnpm's filter.
+    env: { PORT: String(PORT) },
+    url: BASE_URL,
     reuseExistingServer: !CI,
     timeout: 120_000,
   },

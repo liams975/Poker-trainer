@@ -75,8 +75,24 @@ jobs:
       # asks that policies be tested "as part of the suite, not by eyeballing
       # them". This job is what makes that true on every push rather than once
       # on somebody's laptop.
+      #
+      # Retried once, because this step failed here on 36607d3 while the
+      # identical step in the `e2e` job below succeeded in the same run, on the
+      # same commit and the same pinned CLI — a dozen containers have to come
+      # up healthy and occasionally one does not. A shell retry rather than a
+      # retry *action*: CLAUDE.md wants a reason for every dependency, and a
+      # third-party action inside the job that guards the number one attack
+      # surface is a supply-chain surface bought for a convenience.
+      #
+      # Deliberately not `supabase start -x <services>` to trim the startup.
+      # Excluding containers would make this faster by making it prove less.
       - name: start local stack
-        run: supabase start
+        run: |
+          supabase start || {
+            echo "::warning::the stack did not come up; stopping and retrying once"
+            supabase stop --no-backup || true
+            supabase start
+          }
 
       # `supabase status -o env` emits API_URL / ANON_KEY / SERVICE_ROLE_KEY,
       # so the names are mapped explicitly rather than blanket-prefixed. These
@@ -122,8 +138,14 @@ jobs:
         with:
           version: 2.109.1
 
+      # Retried once, for the reason the `database` job above gives.
       - name: start local stack
-        run: supabase start
+        run: |
+          supabase start || {
+            echo "::warning::the stack did not come up; stopping and retrying once"
+            supabase stop --no-backup || true
+            supabase start
+          }
 
       - name: export stack credentials
         run: |

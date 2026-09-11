@@ -138,9 +138,46 @@ The e2e suite runs against a local stack, not production — it signs up real
 users and would fill the production database with them. After a deploy, the
 manual check is the exit criterion itself:
 
-landing → sign up → confirmation email → onboarding → placement → lesson →
-drill → review.
+landing → sign up → confirmation email → onboarding → placement → **a drill
+finished to its summary** → review → **a hand at `/play`** → the Range Explorer.
 
-Two parts of that chain exist nowhere else: **Google sign-in** and the **email
-confirm route**. Both were written in Phase 5 and can only be exercised against
-a deployed URL with real credentials.
+Three parts of that chain exist nowhere else and cannot be reached by any
+suite:
+
+- **Google sign-in** and the **email confirm route**, written in Phase 5, which
+  need a deployed URL and real credentials.
+- **Finishing a scored drill**, which is the only thing that fires the award
+  path. Abandoning a drill writes attempts and awards nothing, correctly — so a
+  session left at 10 of 25 spots verifies none of Phase 9.
+
+### "It passed CI" and "it has ever run" are different claims
+
+Phase 13 checked, and found that with 34 `drill_attempts` on production there
+were **zero** rows in `xp_events`, `skill_stats` and `user_achievements`. Every
+scored session had been abandoned partway, and the one that *was* completed was
+`placement`, which `SCORED_DRILL_MODES` excludes by design.
+
+`streaks` had exactly one row, advanced by that placement completion — which is
+also correct, and is the distinction `awardSessionRewards` draws on purpose: the
+streak records **showing up**, so any completed session with an answer in it
+counts; XP and the skill rollup record **what you can do without looking**, so
+those two stop at `isScoredMode`. Nothing was broken. Almost nothing had run.
+
+`bot_hands` and `bot_sessions` were likewise empty with migration `0006`
+applied and its grants verified. So when checking a deploy, **read the tables,
+not only the screen**: the first row a table ever receives is the only real
+proof its write path works.
+
+```sql
+select 'xp_events' t, count(*) from xp_events
+union all select 'skill_stats', count(*) from skill_stats
+union all select 'streaks', count(*) from streaks
+union all select 'user_achievements', count(*) from user_achievements
+union all select 'bot_hands', count(*) from bot_hands
+union all select 'drill_attempts', count(*) from drill_attempts;
+```
+
+`skill_stats` is *recomputed* from the whole attempt history rather than
+incremented (`lib/progress/record.ts`), so the first rollup after a long gap
+absorbs every scored attempt that came before it. That is correct and looks
+alarming once.

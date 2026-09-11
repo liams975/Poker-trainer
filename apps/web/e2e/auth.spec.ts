@@ -138,7 +138,10 @@ test.describe('protected routes', () => {
   test('the root path shows the landing page when signed out', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page).toHaveURL(/localhost:3000\/$/);
+    // The path, not the whole URL: the suite runs on whatever `E2E_PORT` says,
+    // and what this pins is that an anonymous visitor stayed on the root rather
+    // than being bounced to a login wall.
+    expect(new URL(page.url()).pathname).toBe('/');
     await expect(page.getByRole('heading', { name: /Learn 6-max preflop properly/ })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Start free' })).toBeVisible();
   });
@@ -189,7 +192,10 @@ test.describe('open redirect', () => {
    * into the flow rather than merely existing. An attacker-supplied `next`
    * must not survive a real sign-in.
    */
-  test('a hostile next param cannot bounce a signed-in user off-origin', async ({ page }) => {
+  test('a hostile next param cannot bounce a signed-in user off-origin', async ({
+    page,
+    baseURL,
+  }) => {
     const email = freshEmail('redirect');
     const supabase = createClient(SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
     await supabase.auth.signUp({ email, password: PASSWORD });
@@ -213,7 +219,10 @@ test.describe('open redirect', () => {
      * wherever inside the app the user ends up.
      */
     await expect(page).toHaveURL(/\/(dashboard|onboarding)$/);
-    expect(new URL(page.url()).host).toBe('localhost:3000');
+    // The app's own host, read from the config rather than written out: the
+    // claim is "still on this origin", and hardcoding the port made it "still
+    // on port 3000", which is a different and weaker thing.
+    expect(new URL(page.url()).host).toBe(new URL(baseURL!).host);
   });
 });
 

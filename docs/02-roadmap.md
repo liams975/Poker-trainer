@@ -391,22 +391,81 @@ sitting's result and `/play` shows it. `chartRecommendation` now also checks the
 effective stack at the deal rather than the depth the table declares, so "never
 grade a spot no chart covers" holds structurally rather than by coincidence.
 
-## Phase 12d — the review screen *(next)*
+## Phase 13 — ship v2 *(current)*
 
-The half of the old 12c this phase displaced. Filters over the hands 12b
-records, a hand replayer, leaks across a sitting.
+- `.github/workflows/ci.yml` — the stack start, retried
+- `apps/web/e2e/global-setup.ts` — the suite refuses to test somebody else's app
+- `CLAUDE.md` — a phase is not finished while its own CI is red
+- `docs/07-operations.md` — the deploy check, for v2 and by table rather than by eye
 
-Replay has to gate on `bot_hands.heuristic_version`: 12c bumped it to
-`heuristic.2`, and a hand recorded under `12b.1` will not reproduce against this
-engine. That column has existed since 0006 for exactly this, and 12c is the first
-time it meant anything — the screen must say "played on an older engine" rather
-than replay it wrongly.
+**Exit:** The chain runs on production — sign up, confirm, Google sign-in,
+onboarding, placement, a drill finished to its summary, a hand at `/play` —
+Sentry reports, and the CI run for the shipping commit is green.
 
-And whether playing earns anything — no XP, streak or achievement is awarded for
-a bot hand today, deliberately, because XP for *playing* rather than for
-answering is farmable by folding.
+**What it found.** Nothing to push. Migrations `0001`–`0006` were already in
+sync, and `packages/content/src` had not changed since Phase 9, so no
+`content:sync` was owed. What was outstanding was everything nobody had watched.
+
+**CI had been red on the head of `main`** since 12c, and red on 12b before it.
+12b's failure was real — the `auth.spec.ts` count bug — and sat unnoticed for
+three days, until the same bug was found again on a laptop. The phase gate said
+run the suites; it never said look at the run. It does now.
+
+12c's failure was `supabase start` in the `migrations · RLS` job, 56 seconds in,
+while the identical step in the `e2e` job of the same run came up healthy in 92.
+A dozen containers have to start and one did not. Both jobs retry it once now —
+a shell retry, because a third-party retry action inside the job that guards the
+number one attack surface is a supply-chain surface bought for a convenience.
+
+**Two subsystems had never written a production row.** `bot_hands` and
+`bot_sessions` were empty with `0006` applied and its grants verified. And
+against 34 `drill_attempts` there were zero rows in `xp_events`, `skill_stats`
+and `user_achievements` — every scored session had been abandoned partway, and
+the one that was completed was `placement`, which `SCORED_DRILL_MODES` excludes
+by design. The single `streaks` row came from that placement completion, which
+is the distinction `awardSessionRewards` draws deliberately: the streak records
+showing up, XP and the rollup record what you can do without looking.
+
+All correct, and a whole phase's award path unexercised. "It passed CI" and "it
+has ever run" turned out to be very different claims, which
+`docs/07-operations.md` now says out loud.
+
+**The e2e suite tested the wrong application for two hours.** Its own rerun in
+this phase took 2.0 hours and reported 6 passed, with failures that read exactly
+like a routing and auth regression — a signed-out visitor not being bounced off
+`/dashboard`, the landing page's heading missing.
+
+Port 3000 was held by an unrelated Next 14 app in another directory, started two
+minutes earlier. `reuseExistingServer: !CI` asks only whether *something*
+answers, and 3000 is every Next project's default, so Playwright attached to it
+and ran 133 poker tests against a stranger. The suite cannot notice this on its
+own — every failure looks like a product bug — so `e2e/global-setup.ts` now
+fetches the base URL and refuses to start unless the response is this app, and
+`E2E_PORT` moves the suite when the port is taken. Two hours became two seconds.
+
+Worth stating plainly: a *red* run made this visible. A green one would not
+have, and nothing rules that out for a suite sharing a default port.
+
+**Sentry had never been configured.** `/monitoring` returned 404 and no DSN
+reached the client bundle, so every production error since Phase 10 went
+nowhere.
 
 ## Later
+
+**The review screen for played hands** — filters over what `/play` records, a
+hand replayer, leaks across a sitting. Displaced from 12c and deferred at the
+close of v2: `/play` records hands whether or not anything reads them yet, so
+nothing is broken without it.
+
+A replayer must gate on `bot_hands.heuristic_version`. 12c bumped it to
+`heuristic.2` and a hand recorded under `12b.1` will not reproduce against this
+engine; the column has existed since `0006` for exactly that, and
+`bot-fingerprint.test.ts` is what keeps it honest. The screen has to say "played
+on an older engine" rather than replay it wrongly.
+
+Whether playing earns anything is open. No XP, streak or achievement is awarded
+for a bot hand today, deliberately: XP for *playing* rather than for answering is
+farmable by folding.
 
 **The missing preflop charts** — cold-calls, 3-bets, vs-3-bets, squeezes. The
 highest-value content work left, and 12c made the case twice as strong: they
