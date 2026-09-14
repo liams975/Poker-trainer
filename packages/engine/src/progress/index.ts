@@ -29,6 +29,18 @@ export {
   weakSpots,
 } from './stats';
 
+export type { NextRank, PlayerRank, RankTier, RankedAttempt } from './rank';
+export { RANK_DIVISIONS, RANK_MIN_SPOTS, RANK_TIERS, evLossPerSpot, rankFor } from './rank';
+
+export type { Mastery, MasteryAttempt, NextMastery } from './mastery';
+export {
+  MASTERY_LEVELS,
+  MASTERY_THRESHOLDS,
+  MASTERY_WINDOW,
+  masteryFor,
+  totalMasteryLevels,
+} from './mastery';
+
 export type {
   DayPoint,
   HistoryAttempt,

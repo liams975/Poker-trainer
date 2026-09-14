@@ -391,7 +391,7 @@ sitting's result and `/play` shows it. `chartRecommendation` now also checks the
 effective stack at the deal rather than the depth the table declares, so "never
 grade a spot no chart covers" holds structurally rather than by coincidence.
 
-## Phase 13 — ship v2 *(current)*
+## Phase 13 — ship v2
 
 - `.github/workflows/ci.yml` — the stack start, retried
 - `apps/web/e2e/global-setup.ts` — the suite refuses to test somebody else's app
@@ -450,7 +450,60 @@ have, and nothing rules that out for a suite sharing a default port.
 reached the client bundle, so every production error since Phase 10 went
 nowhere.
 
+## Phase 14 — the v2 redesign: ground, mastery, rank *(current)*
+
+From the Claude Design project *Poker Trainer UI Redesign*
+(`c0c019af-1854-454b-a2d4-14b759fd7163`), a ten-frame v2 deck on the **Nocturne**
+system. This phase took the visual ground plus two new mechanics; the rest is
+listed under *Later*.
+
+- `apps/web/src/app/globals.css` — the ground, the accent, 8px radii
+- `apps/web/src/app/layout.tsx` — Instrument Serif / Instrument Sans / IBM Plex
+  Mono. No Inter anywhere, per the deck
+- `apps/web/tests/contrast.test.ts` — **new**: every chrome ratio, measured
+- `packages/engine/src/progress/rank.ts` — Limper → Nemesis, over the last 200
+- `packages/engine/src/progress/mastery.ts` — per-skill L0–L5
+- `supabase/migrations/0007_handles_and_weekly_board.sql` — handles, opt-in, and
+  the schema's first cross-user read
+- `apps/web/src/app/(app)/mastery/page.tsx` — **new route**: frame 2g
+
+### The palette change was one file; the audit was not
+
+Tokens are consumed as Tailwind utilities generated from `@theme` — 383 usages
+across the app — so re-grounding it was a single block. What took the time was
+proving it safe: every Okabe–Ito hue re-measured against the new ground, one
+genuine regression found and fixed (`ink-muted` at 4.48, under AA by 0.02, on
+the app's most-used token), and two pre-existing failures recorded rather than
+quietly patched.
+
+`docs/05-ui-ux.md` carries the numbers. Two things it is worth knowing here:
+the action hues did **not** move when the ground did, and a claim taken from
+Nocturne's own readme turned out to be wrong under measurement.
+
+### What was found rather than built
+
+- **`global-error.tsx` hardcodes the palette** and has to — it replaces the root
+  layout and never gets Tailwind. It had drifted; it is now pinned by a test.
+- **`action-colors.test.ts` asserted contrast against `#141a21`**, a surface the
+  app had stopped painting. It would have stayed green measuring nothing. It now
+  reads the token from the stylesheet.
+- **The disk was full** (751 MiB of 228 GiB) with `.turbo/cache` at 7.3 GB, and
+  `pnpm build` reported success while emitting `No space left on device`.
+
 ## Later
+
+**The rest of the v2 deck.** Phase 14 took frames 2a–2e, 2g and 2j's ground plus
+mastery and rank. Still outstanding, in the deck's own numbering:
+
+- **2c/2d/2f — the combo multiplier.** An in-session run of in-mix answers,
+  multiplying XP, breaking on an answer outside the mix and half-stepping on a
+  thin one. Touches the award path, which is the reason it waited: as of Phase
+  13 that path had never written a row in production.
+- **2h — the achievements gallery**, where locked badges show their own
+  progress. The tables exist; the surface does not.
+- **2i — session review with replay.** This is 12d by another name; see below.
+- **2e — the stakes ladder.** "Table 2 unlocks Table 3 at +60bb lifetime."
+
 
 **The review screen for played hands** — filters over what `/play` records, a
 hand replayer, leaks across a sitting. Displaced from 12c and deferred at the

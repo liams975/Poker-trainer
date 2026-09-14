@@ -47,8 +47,8 @@ test('the design tokens reach the page', async ({ page }) => {
     };
   });
 
-  // #0b0f14 — the canvas. If Tailwind failed to build, this is white.
-  expect(applied.background).toBe('rgb(11, 15, 20)');
+  // #161826 — the canvas. If Tailwind failed to build, this is white.
+  expect(applied.background).toBe('rgb(22, 24, 38)');
   expect(applied.numeric).toContain('tabular-nums');
 });
 

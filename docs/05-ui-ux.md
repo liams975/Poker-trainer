@@ -15,23 +15,37 @@ scientific tool than to an online casino.
 
 ### Color
 
-One governing rule, and it is the whole system:
+One governing rule, and it is the whole system. **Phase 14 restated it** — see
+"What Phase 14 decided" below for why:
 
-> **Saturated color is reserved exclusively for strategy data.**
-> Chrome, nav, cards, and text are monochrome. The only thing glowing on the
-> screen is information.
+> **The game layer owns the accent. Strategy data owns the five hues.**
+> Nothing borrows across that line. Chrome, nav and cards stay monochrome apart
+> from the one accent, and the only thing glowing on the screen is information.
 
-This is why the app will look unlike a generic dashboard: everywhere else
-teams spend color on branding, here it is spent on meaning.
+v1 stated this as "saturated color is reserved exclusively for strategy data",
+then spent a gold accent on the streak rail anyway. The rule and the code had
+diverged from Phase 9 onward; the wording above is what was always actually
+true.
+
+This is why the app looks unlike a generic dashboard: everywhere else teams
+spend color on branding, here it is spent on meaning.
+
+Ground, as of Phase 14 (v1's cool near-black in brackets):
 
 ```
-Base            #0B0F14   cool near-black
-Surface         #141A21
-Surface raised  #1C242D
-Border          #2A3540
-Text primary    #E6EDF3
-Text secondary  #8B9AA8
+Canvas          #161826   (was #0B0F14)
+Surface         #1D2030   (was #141A21)
+Surface raised  #232532   (was #1C242D)
+Border          #3F424D   (was #2A3540)
+Text primary    #E9E9ED   (was #E6EDF3)
+Text secondary  #909199   (was #8B9AA8)
 ```
+
+`Text secondary` is **not** the deck's literal `rgba(233,233,237,.55)`. That
+composites to `#8A8B93` and measures 4.48:1 against `Surface raised` — under AA
+by 0.02, on the token carrying 170 of the app's body-text usages. It is lifted
+to the 58% step. `apps/web/tests/contrast.test.ts` holds every ratio on this
+page, so none of them can drift back.
 
 Action colors are the **Okabe–Ito** palette, which is designed to be
 distinguishable under all common forms of color vision deficiency. Given a
@@ -47,9 +61,15 @@ Fold            #55606B   desaturated gray — folding is the absence of action
 ```
 
 ```
-Accent (chrome) #E8B04B   muted amber — streak and XP rail ONLY.
-                          Never appears in a range grid.
+Accent (game)   #9184D9   blurple — streak, XP, rank, mastery.
+                          Never appears in a range grid.  (was #E8B04B amber)
+Accent high     #D2CEFD   the emphasis step, for figures that come forward.
 ```
+
+The action hues above are **unchanged by Phase 14**, deliberately. The ground
+moved and they did not, because the hue is what survives colour-vision
+deficiency — a hex changed to win a contrast ratio against a new background
+would trade the real property for the measurable one.
 
 Grade tiers reuse action hues rather than introducing a red/green pass-fail
 axis: optimal reads as confident, blunder as alarming, without implying that
@@ -857,3 +877,91 @@ looked at. Scoring them would mean grading against the bot's invented postflop
 logic, which is the one thing this whole line of work is built not to do. Saying
 it has a third benefit: it makes the missing preflop charts visible as a hole in
 the product rather than a line in the roadmap.
+
+## What Phase 14 decided
+
+The v2 redesign, from the Claude Design project *Poker Trainer UI Redesign*
+(`c0c019af-1854-454b-a2d4-14b759fd7163`), built on the **Nocturne** system. Ten
+frames; this phase took the ground, the type, per-skill mastery and rank.
+
+### The governing rule was already broken, so it got rewritten
+
+v1's rule — "saturated colour is reserved exclusively for strategy data" — had a
+gold accent on the streak rail from Phase 9 onward. The rule never caught up, so
+for four phases the document described a system the code had stopped
+implementing.
+
+The v2 wording (**the game layer owns the accent, strategy data owns the five
+hues**) is not a relaxation. It names the line that was already being held and
+makes the second half enforceable: the accent never enters a range grid, and an
+action hue never styles chrome.
+
+### The action hues did not move when the ground did
+
+`#161826` is a materially lighter ground than `#0B0F14`, so every Okabe–Ito
+ratio fell. Measured, worst case across all three surfaces:
+
+| | v1 ground | v2 ground | 3:1 |
+|---|---|---|---|
+| Raise `#D55E00` | 4.05 | 3.93 | pass |
+| Call `#0072B2` | 3.02 | **2.93** | fail |
+| Check `#009E73` | 4.58 | 4.44 | pass |
+| All-in `#CC79A7` | 5.12 | 4.96 | pass |
+| Fold `#55606B` | 2.44 | **2.37** | fail (also failed in v1) |
+
+Neither hex changed. The cells are stacked bars that fill their cell, so what
+identifies an action is hue, proportion, fixed left-to-right order and the
+accessible name — four encodings, of which the contrast ratio against a
+separator is none. Changing an Okabe–Ito hex to win a number would trade a real
+CVD property for a measurable one.
+
+`Fold` failing is inherited from v1, not introduced here, and is recorded rather
+than quietly fixed: it is grey because folding is the absence of action.
+
+### A design system's prose is not a measurement
+
+Nocturne's readme says the accent pair is "tuned to at least 3:1 — enough for
+icons, large text and interface chrome, **not for body copy**". This phase
+initially took that literally and added `--color-accent-hi` as a contrast
+rescue, with a test asserting the accent *failed* AA.
+
+The test failed. Measured against these grounds the accent is **4.71** and
+clears AA for body text outright — the readme's line is a conservative floor for
+the system in general, not a fact about this pair. `--color-accent-hi` kept its
+place as the deck's emphasis step, which is what it always was.
+
+### Rank divisions are derived, not specified
+
+The deck shows `REG III` and `Grinder I` and, in frame 2f, "Grinder I — up from
+Reg III". So **III is the top of a tier and I is its entry**: the step above Reg
+III is Grinder I, not Reg II. That direction is the deck's.
+
+Where the boundaries fall is not. `rank.ts` splits each tier's EV band into even
+thirds. The deck's own sample figure (Reg III at 0.47) does not land where even
+thirds put it, which is what illustrative mock data does — the structural claim
+is the real one, and this is recorded as a derivation so a future phase knows it
+was chosen here rather than specified there.
+
+### Mastery is gated on EV loss and displayed with accuracy
+
+The deck's mock data pairs each level with an accuracy percentage; its prose
+says the gate is EV lost. The prose wins, because docs/03 is unambiguous: two of
+the four tiers are correct answers to a mixed spot, so accuracy does not measure
+skill here.
+
+L1–L4 are exactly the rank ladder's four thresholds, so "L3 in a skill" means
+"you play that skill to Crusher standard". Two ladders measuring one quantity
+with different boundaries would be two answers to one question, and the one
+nobody was looking at would drift.
+
+### The weekly board is the schema's first cross-user read
+
+Every table before `0007` answers "your own rows only". A leaderboard cannot,
+so the exception is deliberately narrow: opt-in and off by default, a chosen
+handle rather than any real identity, reachable only through a security-definer
+function that returns aggregates, and no policy on `profiles` changed. A user
+who never opts in is absent from the board and unreadable through it.
+
+`supabase/tests/database/05_handles_and_board.sql` proves the negative cases,
+and was checked by mutation — removing the opt-in join makes three named
+assertions fail.

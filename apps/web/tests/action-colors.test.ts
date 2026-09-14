@@ -87,6 +87,18 @@ function distance(a: RGB, b: RGB): number {
 /** The colours that carry strategy meaning, deduplicated. bet and raise share a hue. */
 const STRATEGY_HEXES = [...new Set(ACTIONS.map((a) => ACTION_STYLES[a].hex))];
 
+const GLOBALS_CSS = readFileSync(
+  resolve(import.meta.dirname, '..', 'src', 'app', 'globals.css'),
+  'utf8',
+);
+
+/** Read one `--token: #hex;` out of globals.css, so no ground is ever pasted here. */
+function token(name: string): string {
+  const match = new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`).exec(GLOBALS_CSS);
+  if (!match?.[1]) throw new Error(`${name} is not defined in globals.css`);
+  return match[1];
+}
+
 describe('the action palette survives colour vision deficiency', () => {
   it.each(Object.keys(CVD_MATRICES))('stays distinguishable under %s', (kind) => {
     const matrix = CVD_MATRICES[kind]!;
@@ -115,9 +127,15 @@ describe('the action palette survives colour vision deficiency', () => {
   });
 
   it('keeps every action legible against the surface it is drawn on', () => {
-    // Cells sit on --color-surface. A segment the same luminance as its
-    // background is invisible regardless of hue.
-    const surface = luminance(toLinear(hexToRgb('#141a21')));
+    /**
+     * Cells sit on --color-surface. A segment the same luminance as its
+     * background is invisible regardless of hue.
+     *
+     * Read from the stylesheet, never pasted. Phase 14 moved the ground from
+     * #141a21 to #1d2030 and this assertion would have stayed green measuring
+     * a colour the app had stopped painting — green, and checking nothing.
+     */
+    const surface = luminance(toLinear(hexToRgb(token('--color-surface'))));
 
     for (const hex of STRATEGY_HEXES) {
       const contrast =
@@ -156,10 +174,7 @@ describe('the palette matches the stylesheet', () => {
    * verifies a palette the app does not actually use.
    */
   it('every action hex appears in globals.css', () => {
-    const css = readFileSync(
-      resolve(import.meta.dirname, '..', 'src', 'app', 'globals.css'),
-      'utf8',
-    ).toLowerCase();
+    const css = GLOBALS_CSS.toLowerCase();
 
     for (const action of ACTIONS as readonly Action[]) {
       const { hex } = ACTION_STYLES[action];

@@ -1,4 +1,11 @@
-import type { Achievement, LevelProgress, SkillStat, StreakStatus } from '@poker/engine';
+import type {
+  Achievement,
+  LevelProgress,
+  Mastery,
+  PlayerRank,
+  SkillStat,
+  StreakStatus,
+} from '@poker/engine';
 
 /**
  * The shape of a finished session's payout, shared by both ends of the wire.
@@ -43,4 +50,35 @@ export interface SessionRewards {
   /** Achievements this call was the first to record. */
   unlocked: readonly Achievement[];
   weakSpots: readonly SkillStat[];
+}
+
+/** One skill on the mastery map: the engine's verdict, plus what to call it. */
+export interface SkillMastery extends Mastery {
+  skillTag: string;
+  label: string;
+  /** Recent accuracy, for display only — the level is gated on EV loss. */
+  accuracy: number | null;
+}
+
+/** One row of the weekly board, as `public.weekly_leaderboard()` returns it. */
+export interface BoardRow {
+  position: number;
+  handle: string;
+  evLossPerSpot: number;
+  spots: number;
+  /** The only identity the board resolves, and only for the caller. */
+  isYou: boolean;
+}
+
+export interface MasterySnapshot {
+  skills: readonly SkillMastery[];
+  /** Levels earned over levels available — "29 of 50". */
+  levelsEarned: number;
+  levelsAvailable: number;
+  /** `undefined` below the 200-spot minimum, where no rank has been earned. */
+  rank: PlayerRank | undefined;
+  /** Empty when nobody qualifies, which is the normal state of a new week. */
+  board: readonly BoardRow[];
+  /** Whether this reader has opted into the board, and under what handle. */
+  participation: { optedIn: boolean; handle: string | null };
 }

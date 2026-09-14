@@ -18,9 +18,21 @@ export function AppNav({ email }: { email: string }) {
         aria-label="Main"
         className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-6"
       >
-        <Link href="/dashboard" className="font-display text-sm font-semibold tracking-tight">
-          Poker Trainer
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard" className="font-display text-base tracking-tight">
+            Poker Trainer
+          </Link>
+
+          {/* Mastery is a whole surface, and ⌘K only finds what you already
+              know is there. Monochrome like the rest of the chrome — the accent
+              belongs to the game layer, not to navigation. */}
+          <Link
+            href="/mastery"
+            className="text-sm text-ink-muted transition-colors hover:text-ink"
+          >
+            Mastery
+          </Link>
+        </div>
 
         <div className="flex items-center gap-4">
           {/* Discoverability, for the same reason the drill has a "Shortcuts (?)"

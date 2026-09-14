@@ -373,3 +373,55 @@ be believed about.
 Nothing is paid out for playing in 12b: no XP, no streak, no achievement. The
 integrity property is there before it is needed, because these are the rows 12c
 recomputes from.
+
+## Phase 14: `profiles.handle` and the weekly board
+
+`0007` adds two columns to `profiles` and one security-definer function. It is
+the first place in this schema where one user's data reaches another, so the
+shape matters more than the size.
+
+```
+profiles.handle                text, unique, nullable
+                               ^[a-z0-9_]{3,20}$  (CHECK)
+profiles.leaderboard_opted_in  boolean not null default false
+                               CHECK (not opted_in or handle is not null)
+```
+
+Lowercase is enforced rather than normalised, so case can never be the only
+difference between two handles — which is how impersonation starts. A plain
+unique index is therefore sufficient and `citext` is not a dependency this takes
+on for one column.
+
+### Why the board is a function and not a view
+
+`public.weekly_leaderboard(row_limit int)` is `security definer` with
+`set search_path = ''` and every reference schema-qualified. It returns
+aggregates — position, handle, EV lost per spot, spot count, and an `is_you`
+flag — for opted-in players with at least 200 graded spots in the current
+week.
+
+Four properties, in the order they matter:
+
+1. **No policy on `profiles` changed.** "Read own" is still literally true of
+   the table, which is what the RLS suite asserts and what a reader gets if
+   they query it directly.
+2. **Opting out is the default state**, and the `opted_in_needs_handle`
+   constraint means there is no way to be on the board without having chosen a
+   name for it.
+3. **The opt-in check is an inner join**, not a `where` clause. A profile that
+   has not opted in produces no row at any stage, so there is no filter for a
+   later edit to drop and no ordering that can leak one past it.
+4. **`execute` is revoked from `public` first**, then granted to
+   `authenticated` and `service_role`. New functions are executable by the
+   world by default; `anon` is deliberately absent, because a signed-out
+   visitor has no row to be highlighted and no reason to enumerate handles.
+
+The week is Monday **UTC**, unlike the streak, which uses the reader's own
+timezone. A streak is a private statement about one person's days; a
+leaderboard is a comparison, and comparing people across different week
+boundaries would let one row sit in two weeks at once.
+
+`supabase/tests/database/05_handles_and_board.sql` tests the negative cases —
+the strongest player on the fixture table never opted in and never appears —
+and was verified by mutation: deleting the opt-in condition from the join makes
+three named assertions fail.

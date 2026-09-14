@@ -24,6 +24,13 @@ export interface Destination {
 const FIXED: readonly Destination[] = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', section: 'Go to', keywords: ['home', 'today'] },
   { id: 'learn', label: 'Track overview', href: '/learn', section: 'Go to', keywords: ['course', 'lessons'] },
+  {
+    id: 'mastery',
+    label: 'Mastery',
+    href: '/mastery',
+    section: 'Go to',
+    keywords: ['rank', 'level', 'skills', 'leaderboard', 'board'],
+  },
 ];
 
 export interface LessonLink {

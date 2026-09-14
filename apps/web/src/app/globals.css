@@ -4,17 +4,19 @@
 /**
  * Design tokens — docs/05-ui-ux.md.
  *
- * The governing rule of the whole system:
+ * The governing rule of the whole system, as Phase 14 restates it:
  *
- *   Saturated colour is reserved exclusively for strategy data. Chrome, nav,
- *   cards and text are monochrome. The only thing glowing on the screen is
- *   information.
+ *   The game layer owns the accent. Strategy data owns the five hues.
  *
- * Which is why the surface ramp below is six shades of near-black and the only
- * saturated values are the five action colours and one accent. If you are
- * reaching for `--color-action-*` to style a button, stop: that colour means
- * "raise" everywhere else in the product, and spending it on chrome is what
- * makes the range grid stop reading as data.
+ * v1 said "saturated colour is reserved exclusively for strategy data", then
+ * spent a gold accent on the streak rail anyway — the rule and the code had
+ * already diverged. v2 names what was actually true: one accent for progress,
+ * five Okabe–Ito hues for actions, and nothing borrowing across that line.
+ *
+ * So if you are reaching for `--color-action-*` to style a button, stop: that
+ * colour means "raise" everywhere else in the product, and spending it on
+ * chrome is what makes the range grid stop reading as data. The reverse holds
+ * too — the accent never enters a range grid.
  *
  * Dark only. docs/05 specifies one palette and there is no light variant to
  * design, so there is no theme toggle and no `prefers-color-scheme` block.
@@ -34,12 +36,18 @@
    * Before adding a token here, check the name against Tailwind's built-in
    * scales. `text-*` is the dangerous namespace: it is both colour and size.
    */
-  --color-canvas: #0b0f14;
-  --color-surface: #141a21;
-  --color-surface-raised: #1c242d;
-  --color-line: #2a3540;
-  --color-ink: #e6edf3;
-  --color-ink-muted: #8b9aa8;
+  --color-canvas: #161826;
+  --color-surface: #1d2030;
+  --color-surface-raised: #232532;
+  --color-line: #3f424d;
+  --color-ink: #e9e9ed;
+  /**
+   * The deck paints muted text as `rgba(233,233,237,.55)`. Taken literally that
+   * composites to #8a8b93, which measures **4.48:1** on `surface-raised` — under
+   * AA by 0.02, on the most-used token in the app (170 usages). Lifted to the
+   * 58% step instead. Phase 14 measured it; `tests/contrast.test.ts` holds it.
+   */
+  --color-ink-muted: #909199;
 
   /**
    * Action colours are the Okabe–Ito palette, chosen because it stays
@@ -57,8 +65,20 @@
   --color-action-allin: #cc79a7; /* reddish purple */
   --color-action-fold: #55606b; /* grey — folding is the absence of action */
 
-  /* Streak and XP rail ONLY. Never appears in a range grid. */
-  --color-accent: #e8b04b;
+  /**
+   * The game layer's accent. Streak, XP, rank, mastery — never a range grid.
+   *
+   * Nocturne's readme calls this pair "at least 3:1 — not for body copy". That
+   * is a floor for the system in general, not a measurement of these two: on
+   * this ground the accent is **4.71**, which clears AA for body text. Measured
+   * in `tests/contrast.test.ts`, which is the authority here rather than the
+   * prose.
+   *
+   * `--color-accent-hi` is therefore the deck's emphasis step, not a contrast
+   * rescue — brighter accent for figures that need to come forward.
+   */
+  --color-accent: #9184d9;
+  --color-accent-hi: #d2cefd;
 
   /**
    * The 13×13 matrix is the organising geometry of the product, so the
@@ -69,11 +89,18 @@
   --size-cell: 2.75rem; /* 44px */
   --size-grid: calc(13 * var(--size-cell) + 12 * 2px);
 
-  --font-display: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  /**
+   * v2 pairing: Instrument Serif for statements, Instrument Sans for interface,
+   * IBM Plex Mono for every figure. The deck is explicit that no Inter appears
+   * anywhere, and `display` moves from sans to serif — a heading that used to
+   * read as chrome now reads as a statement, which is the point.
+   */
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
-  --radius: 0.375rem;
+  /* Nocturne's --radius-md. 8px, applied throughout. */
+  --radius: 0.5rem;
 }
 
 /**

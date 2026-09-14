@@ -174,6 +174,17 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   because it read plausibly, and every suite stayed green for two phases while
   the table raised 41% facing a bet and put the stacks in every third hand.
   Changing a constant means re-running that measurement, not reasoning about it.
+- Never take a design system's prose for a measurement. Nocturne's readme says
+  its accent is "at least 3:1 — not for body copy"; measured against these
+  grounds it is 4.71 and clears AA outright. Phase 14 encoded the sentence as a
+  test and the test failed, which is the only reason it was caught. Colour
+  claims get measured: `apps/web/tests/contrast.test.ts` is the authority, and
+  it reads every value from `globals.css` so it cannot outlive the palette.
+- Never change an Okabe–Ito hex to win a contrast ratio. The hue is what
+  survives colour vision deficiency; the ratio against a background is not what
+  identifies an action — hue, proportion, fixed order and the accessible name
+  are, and all four are redundant by design. If a ratio is wrong, move the
+  ground.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol
@@ -206,7 +217,12 @@ than expanding scope mid-phase.
 
 - Client holds only the Supabase anon key. Anything privileged runs in an
   Edge Function with the service role key.
-- Every user-data table: users read and write **their own rows only**.
+- Every user-data table: users read and write **their own rows only**. The one
+  exception is the weekly board (`0007`), and it is not a precedent: opt-in and
+  off by default, a chosen handle rather than any real identity, reachable only
+  through a security-definer function returning aggregates, and **no policy on
+  `profiles` changed**. Anything else that wants to cross users gets the same
+  four properties or does not ship.
 - Content tables: authenticated read, service-role write.
 - Validate all user input at the DB boundary with constraints, not just in TS.
 - Every `security definer` function pins `set search_path = ''` and

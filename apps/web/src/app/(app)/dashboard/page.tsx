@@ -1,6 +1,7 @@
 import { trackProgress } from '@poker/engine';
 import { redirect } from 'next/navigation';
 
+import { MasterySummary } from '@/components/dashboard/mastery-summary';
 import { ModeGrid } from '@/components/dashboard/mode-grid';
 import { ProgressRail, type ProgressRailProps } from '@/components/dashboard/progress-rail';
 import { TodayStrip } from '@/components/dashboard/today-strip';
@@ -10,7 +11,9 @@ import {
   fetchReaderState,
   fetchTrack,
 } from '@/lib/lessons/queries';
+import { fetchMasterySnapshot } from '@/lib/progress/mastery-queries';
 import { fetchTodaySnapshot, type TodaySnapshot } from '@/lib/progress/queries';
+import type { MasterySnapshot } from '@/lib/progress/types';
 import { skillLabel } from '@/lib/progress/skill-label';
 
 export const metadata = { title: 'Dashboard · Poker Trainer' };
@@ -39,6 +42,7 @@ export default async function DashboardPage() {
   let rail: ProgressRailProps['track'];
   let snapshot: TodaySnapshot | null;
   let progress: ProgressRailProps['progress'];
+  let mastery: MasterySnapshot | null;
 
   try {
     const { track, lessonIds } = await fetchTrack();
@@ -76,6 +80,16 @@ export default async function DashboardPage() {
     progress = undefined;
   }
 
+  // A fourth independent read, and a fourth independent failure. Rank and
+  // mastery are derived from the whole attempt log rather than from the day's
+  // snapshot, so this is genuinely a different query and gets its own guard.
+  try {
+    const { registry } = await getCharts();
+    mastery = await fetchMasterySnapshot(registry);
+  } catch {
+    mastery = null;
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <h1 className="sr-only">Dashboard</h1>
@@ -83,7 +97,10 @@ export default async function DashboardPage() {
       <TodayStrip snapshot={snapshot} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_18rem]">
-        <ModeGrid />
+        <div className="flex flex-col gap-8">
+          <ModeGrid />
+          <MasterySummary snapshot={mastery} />
+        </div>
         <ProgressRail track={rail} progress={progress} />
       </div>
     </div>

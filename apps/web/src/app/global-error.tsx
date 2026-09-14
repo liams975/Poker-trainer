@@ -23,8 +23,8 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
     <html lang="en">
       <body
         style={{
-          background: '#0b0f14',
-          color: '#e6edf3',
+          background: '#161826',
+          color: '#e9e9ed',
           fontFamily: 'ui-sans-serif, system-ui, sans-serif',
           display: 'flex',
           minHeight: '100dvh',
@@ -37,11 +37,11 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
         }}
       >
         <h1 style={{ fontSize: '1.125rem', fontWeight: 600 }}>The app failed to start.</h1>
-        <p style={{ color: '#8b9aa8', maxWidth: '28rem', fontSize: '0.875rem' }}>
+        <p style={{ color: '#909199', maxWidth: '28rem', fontSize: '0.875rem' }}>
           Reload the page. If it keeps happening, the reference below will help us find it.
         </p>
         {error.digest ? (
-          <p style={{ color: '#8b9aa8', fontFamily: 'ui-monospace, monospace', fontSize: '0.75rem' }}>
+          <p style={{ color: '#909199', fontFamily: 'ui-monospace, monospace', fontSize: '0.75rem' }}>
             Reference {error.digest}
           </p>
         ) : null}
