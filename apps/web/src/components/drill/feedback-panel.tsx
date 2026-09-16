@@ -170,11 +170,21 @@ export function FeedbackPanel({
             >
               {tier.glyph}
             </span>
-            <h2
-              className="font-display text-base font-semibold"
-              style={{ color: tier.hex }}
-              data-tier={grade.tier}
-            >
+            {/*
+              The glyph beside this carries the tier's hue; the words do not.
+              Phase 14 moved the ground to #161826 and three of the four tier
+              hues stopped clearing 4.5:1 as text on it — `axe` caught
+              `blunder` at 3.93. The hues themselves are Okabe–Ito and must not
+              be retuned to win a ratio (CLAUDE.md), so the text moved to ink
+              instead.
+
+              Nothing is lost by it. Every *other* action-coloured element in
+              this app is already either an aria-hidden glyph or a background
+              fill — this heading was the only place a strategy hue coloured
+              readable prose, and the glyph plus the label still encode the tier
+              twice over.
+            */}
+            <h2 className="font-display text-base font-semibold text-ink" data-tier={grade.tier}>
               {tier.label}
             </h2>
           </div>

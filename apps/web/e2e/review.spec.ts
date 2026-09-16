@@ -227,13 +227,13 @@ test.describe('the review surface', () => {
     await ready(page);
     await page.goto('/review');
 
-    await expect(page.getByTestId('accuracy-chart-empty')).toBeVisible();
+    await expect(page.getByTestId('ev-loss-chart-empty')).toBeVisible();
     await expect(page.getByText(/No answers recorded yet/)).toBeVisible();
     await expect(page.getByText(/No sessions yet/)).toBeVisible();
   });
 });
 
-test.describe('the accuracy chart', () => {
+test.describe('the EV-loss chart', () => {
   test('draws the days you played and carries a table for screen readers', async ({ page }) => {
     test.setTimeout(120_000);
 
@@ -241,7 +241,7 @@ test.describe('the accuracy chart', () => {
     await playSession(page, 10);
     await page.goto('/review');
 
-    const chart = page.getByTestId('accuracy-chart');
+    const chart = page.getByTestId('ev-loss-chart');
     await expect(chart).toBeVisible();
 
     // The accessible equivalent is real data, not a sentence describing a shape.

@@ -83,6 +83,26 @@ users get the browser default in the tab and nothing else is affected. A
 `favicon.ico` fallback would fix it and needs a binary asset generated outside
 the repo, which is why it has not been done rather than because it was missed.
 
+**Two action colours sit under 3:1 on the v2 ground.** Measured across canvas,
+surface and surface-raised, worst case:
+
+```
+action-call  #0072b2   2.93    (was 3.02 on the v1 ground — this one regressed)
+action-fold  #55606b   2.37    (was 2.44 — already failed before v2)
+```
+
+Left as they are, deliberately. These are stacked-bar segments filling a cell,
+and what identifies an action is hue, proportion, fixed left-to-right order and
+the accessible name — four encodings, of which the ratio against a separator is
+none. The hues are Okabe–Ito, chosen because they survive colour vision
+deficiency, and changing a hex to win a number would trade that real property
+for a measurable one. If this ever has to be fixed, **move the ground, not the
+hue** — CLAUDE.md states it as a rule.
+
+`apps/web/tests/contrast.test.ts` holds every chrome ratio and reads each value
+from `globals.css`, so a future palette edit cannot quietly make this worse
+without failing.
+
 **XP is honour-system.** `authenticated` holds `insert` on `xp_events`, so a
 determined user can award themselves XP. `docs/04-data-model.md` accepts this
 explicitly. `drill_attempts` and `skill_stats` are the ones that matter and are
@@ -149,6 +169,32 @@ suite:
 - **Finishing a scored drill**, which is the only thing that fires the award
   path. Abandoning a drill writes attempts and awards nothing, correctly — so a
   session left at 10 of 25 spots verifies none of Phase 9.
+
+### Checking Sentry: `/monitoring` 404s on purpose
+
+`tunnelRoute: '/monitoring'` is **not a page**. It is a Next rewrite matched as
+`[tunnelPath]?o=[orgId]&p=[projectId]`, so a bare request to `/monitoring`
+cannot match it and correctly returns 404.
+
+Phase 13 and Phase 15 both read that 404 as "Sentry is not configured" and
+reported a working tunnel as broken. The right check sends the parameters, which
+are parsed out of the DSN already in the client bundle:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -X POST --data 'x' \
+  "$URL/monitoring?o=<orgId>&p=<projectId>"
+```
+
+**401 is a pass** — the request was proxied to Sentry, which rejected the junk
+payload. 401/400/200 all prove the route exists; only a 404 *with* the
+parameters means it does not.
+
+Whether **source maps** were uploaded is a separate question, and the bundle
+answers it: a real upload injects `_sentryDebugIds[…]="<uuid>"` into the chunks.
+Matching the bare identifier is not enough — the SDK's own code references that
+global in every build whether or not anything was ever uploaded. When in doubt,
+the Vercel build log is authoritative: `silent` is `!process.env.CI` and Vercel
+sets `CI=1`, so the plugin says there whether it uploaded and why not.
 
 ### "It passed CI" and "it has ever run" are different claims
 

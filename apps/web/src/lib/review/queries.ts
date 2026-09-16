@@ -260,14 +260,32 @@ export async function fetchSessionDetail(sessionId: string): Promise<SessionDeta
   };
 }
 
+/** One skill's share of the chips given up over the window. */
+export interface TagCost {
+  skillTag: string;
+  /** Big blinds lost across the window, not per spot — the deck asks where the
+   *  chips went, and a skill drilled twice badly has not cost much. */
+  totalEvLoss: number;
+  attempts: number;
+}
+
 export interface HistoryView {
   points: readonly DayPoint[];
+  /** Worst first. Empty when nothing in the window carried a skill tag. */
+  byTag: readonly TagCost[];
   from: Day;
   to: Day;
 }
 
-/** Accuracy per day over the last `days`, ending today in the reader's zone. */
-export async function fetchAccuracyHistory(days = DEFAULT_HISTORY_DAYS): Promise<HistoryView> {
+/**
+ * EV lost per day over the last `days`, ending today in the reader's zone, plus
+ * where those chips went by skill.
+ *
+ * Renamed from `fetchAccuracyHistory` in Phase 15 along with the chart it
+ * feeds: it was never returning an accuracy figure that the review screen used,
+ * and docs/03 is clear that EV loss is the measure here.
+ */
+export async function fetchReviewHistory(days = DEFAULT_HISTORY_DAYS): Promise<HistoryView> {
   const supabase = await createClient();
   const timeZone = await readTimezone();
 
@@ -294,5 +312,21 @@ export async function fetchAccuracyHistory(days = DEFAULT_HISTORY_DAYS): Promise
     skillTags: (row.skill_tags ?? []) as string[],
   }));
 
-  return { points: accuracyOverTime(attempts, { from, to }), from, to };
+  /**
+   * `sessionDigest` already buckets attempts by tag and it is fed the same
+   * shape, so this reuses it rather than writing a second aggregation that
+   * would drift from it. Its own ordering is accuracy-first, which is right for
+   * "what should I revisit" and wrong for "where did the chips go" — so the
+   * total is derived here and sorted on.
+   */
+  const byTag: TagCost[] = sessionDigest(attempts)
+    .byTag.map((tag) => ({
+      skillTag: tag.skillTag,
+      totalEvLoss: Math.round(tag.avgEvLoss * tag.attempts * 100) / 100,
+      attempts: tag.attempts,
+    }))
+    .filter((tag) => tag.totalEvLoss > 0)
+    .sort((a, b) => b.totalEvLoss - a.totalEvLoss);
+
+  return { points: accuracyOverTime(attempts, { from, to }), byTag, from, to };
 }

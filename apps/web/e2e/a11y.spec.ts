@@ -95,6 +95,10 @@ test.describe('signed in', () => {
     '/drill/quick',
     '/drill/weak-spots',
     '/review',
+    // Phase 14 and 15. Both carry progress bars and a table, which is exactly
+    // the shape that ships a contrast or a missing-label problem quietly.
+    '/mastery',
+    '/achievements',
   ]) {
     test(`${path} has no accessibility violations`, async ({ page }) => {
       test.setTimeout(120_000);

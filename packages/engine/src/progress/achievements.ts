@@ -191,6 +191,61 @@ function met(criteria: AchievementCriteria, snapshot: ProgressSnapshot): boolean
   }
 }
 
+export interface AchievementProgress {
+  /** Never above `target`, so a progress bar cannot overflow. */
+  current: number;
+  target: number;
+}
+
+/**
+ * How far along a locked achievement is.
+ *
+ * The v2 deck, frame 2h: *"Locked badges say what they need and how far along
+ * you are — a badge you cannot see the shape of is not a goal."*
+ *
+ * Deliberately shares `met`'s reading of each criteria rather than
+ * re-interpreting it. `progress-achievement-progress.test.ts` asserts the
+ * invariant that keeps the gallery honest: `current >= target` if and only if
+ * `evaluateAchievements` would award the badge. Two functions reading one
+ * criteria object is the shape that drifts, and a full bar beside a locked
+ * badge is worse than no bar at all.
+ */
+export function achievementProgress(
+  criteria: AchievementCriteria,
+  snapshot: ProgressSnapshot,
+): AchievementProgress {
+  switch (criteria.kind) {
+    case 'spots':
+      return clamp(snapshot.spots, criteria.count);
+    case 'streak':
+      return clamp(snapshot.streak, criteria.days);
+    case 'lessons':
+      return clamp(snapshot.lessonsCompleted, criteria.count);
+    case 'mastery': {
+      /**
+       * Two bars on one tag, so progress is measured on the tag best placed to
+       * clear them — attempts, among the tags already accurate enough.
+       *
+       * Attempts is the right axis of the two because it is the one that only
+       * moves forward with work. Showing progress on accuracy would produce a
+       * bar that slides backwards after a bad session, on a badge nobody has
+       * lost, which reads as a bug rather than as feedback.
+       */
+      let best = 0;
+      for (const stat of snapshot.stats) {
+        if (stat.ewmaAccuracy >= criteria.accuracy && stat.attempts > best) {
+          best = stat.attempts;
+        }
+      }
+      return clamp(best, criteria.minAttempts);
+    }
+  }
+}
+
+function clamp(current: number, target: number): AchievementProgress {
+  return { current: Math.min(current, target), target };
+}
+
 /**
  * Every achievement this snapshot has earned.
  *

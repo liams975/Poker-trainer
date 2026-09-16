@@ -1,5 +1,6 @@
 import type {
   Achievement,
+  AchievementProgress,
   LevelProgress,
   Mastery,
   PlayerRank,
@@ -50,6 +51,18 @@ export interface SessionRewards {
   /** Achievements this call was the first to record. */
   unlocked: readonly Achievement[];
   weakSpots: readonly SkillStat[];
+}
+
+/** One badge in the gallery — frame 2h. Locked ones carry their own progress. */
+export interface GalleryBadge {
+  achievement: Achievement;
+  unlocked: boolean;
+  progress: AchievementProgress;
+}
+
+export interface AchievementGallery {
+  badges: readonly GalleryBadge[];
+  unlockedCount: number;
 }
 
 /** One skill on the mastery map: the engine's verdict, plus what to call it. */

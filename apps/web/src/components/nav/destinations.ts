@@ -25,6 +25,13 @@ const FIXED: readonly Destination[] = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', section: 'Go to', keywords: ['home', 'today'] },
   { id: 'learn', label: 'Track overview', href: '/learn', section: 'Go to', keywords: ['course', 'lessons'] },
   {
+    id: 'achievements',
+    label: 'Achievements',
+    href: '/achievements',
+    section: 'Go to',
+    keywords: ['badges', 'unlocked', 'goals'],
+  },
+  {
     id: 'mastery',
     label: 'Mastery',
     href: '/mastery',

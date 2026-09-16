@@ -2,7 +2,8 @@ import { GRADE_TIERS, type GradeTier } from '@poker/engine';
 import { Suspense } from 'react';
 
 import { TrackEvent } from '@/components/analytics/track-event';
-import { AccuracyChart } from '@/components/review/accuracy-chart';
+import { EvLossChart } from '@/components/review/ev-loss-chart';
+import { TagCosts } from '@/components/review/tag-costs';
 import { FilterBar } from '@/components/review/filter-bar';
 import { MistakeLog } from '@/components/review/mistake-log';
 import { SessionList } from '@/components/review/session-list';
@@ -11,7 +12,7 @@ import { getCharts } from '@/lib/charts/registry';
 import {
   DEFAULT_HISTORY_DAYS,
   REVIEW_MODES,
-  fetchAccuracyHistory,
+  fetchReviewHistory,
   fetchAttempts,
   fetchSessions,
   type ReviewFilters,
@@ -49,8 +50,20 @@ function parseFilters(params: Record<string, string | string[] | undefined>): Re
 }
 
 async function History() {
-  const { points } = await fetchAccuracyHistory();
-  return <AccuracyChart points={points} />;
+  // One read feeds both: the trend and the per-skill cost are two readings of
+  // the same window, and fetching them separately is how a chart and a table
+  // beneath it end up describing different fortnights.
+  const [{ points, byTag }, { registry }] = await Promise.all([
+    fetchReviewHistory(),
+    getCharts(),
+  ]);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <EvLossChart points={points} />
+      <TagCosts costs={byTag} registry={registry} />
+    </div>
+  );
 }
 
 async function Log({ filters }: { filters: ReviewFilters }) {

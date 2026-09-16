@@ -450,7 +450,7 @@ have, and nothing rules that out for a suite sharing a default port.
 reached the client bundle, so every production error since Phase 10 went
 nowhere.
 
-## Phase 14 — the v2 redesign: ground, mastery, rank *(current)*
+## Phase 14 — the v2 redesign: ground, mastery, rank
 
 From the Claude Design project *Poker Trainer UI Redesign*
 (`c0c019af-1854-454b-a2d4-14b759fd7163`), a ten-frame v2 deck on the **Nocturne**
@@ -490,19 +490,85 @@ Nocturne's own readme turned out to be wrong under measurement.
 - **The disk was full** (751 MiB of 228 GiB) with `.turbo/cache` at 7.3 GB, and
   `pnpm build` reported success while emitting `No space left on device`.
 
+## Phase 15 — close v2, and the screens that don't grade *(current)*
+
+- `packages/engine/src/progress/achievements.ts` — `achievementProgress()`
+- `apps/web/src/app/(app)/achievements/page.tsx` — **new route**: frame 2h
+- `apps/web/src/components/review/ev-loss-chart.tsx` — replaces the accuracy
+  chart. Frame 2i, and docs/03's own rule
+- `apps/web/src/components/review/tag-costs.tsx` — where the chips went
+
+### 2i was never 12d, and Phase 14's roadmap said it was
+
+Phase 14 recorded *"2i — session review with replay. This is 12d by another
+name."* Wrong, and it would have cost a phase. `rebuildSpot` has existed since
+Phase 10 and `attempt-row.tsx` already replays a drill spot from its stored
+scenario, so **2i was mostly built**. What it actually lacked was the right
+measure on its chart. 12d — replaying a *bot hand* — is the surface that does
+not exist, and it is still Later.
+
+### The review chart was plotting the wrong thing
+
+`accuracyOverTime` has always returned `avgEvLoss` on every point; the chart
+drew `accuracy` beside it. So the fix needed no engine change at all — and the
+old reading contradicted docs/03, which says score by EV loss because two of the
+four tiers are correct answers to a mixed spot.
+
+The axis is inverted against the old one: zero at the top, so a falling line is
+somebody improving. That makes the gap-not-zero rule matter more than before —
+interpolating a rest day would now read as a flawless session rather than as an
+absence.
+
+### Phase 14 shipped a contrast regression, and axe caught it
+
+The e2e accessibility sweep failed on `h2[data-tier="blunder"]`: *"Elements must
+meet minimum color contrast ratio thresholds."*
+
+Phase 14 measured every Okabe–Ito hue against the new ground **as a graphical
+object**, needing 3:1, because that is what a stacked-bar segment is. It never
+checked where those hues colour *text*, which needs 4.5:1. On `#1d2030` three of
+the four grade tiers fail that bar — `blunder` at 3.93, `optimal` at 4.44 and
+`acceptable` at 2.93.
+
+The fix is not the hue. CLAUDE.md forbids retuning an Okabe–Ito hex to win a
+ratio, and rightly. The tier heading moved to `--color-ink` and the hue stayed
+on the glyph beside it.
+
+What made this a one-line fix rather than a redesign is that the codebase was
+already consistent: **every other** action-coloured element in the app is either
+an `aria-hidden` glyph or a background fill. That single `<h2>` was the only
+place a strategy hue coloured readable prose, and it had been carrying a
+redundant encoding anyway — the glyph and the label both say which tier it is.
+
+`/mastery` and `/achievements` joined the a11y route sweep at the same time.
+They carry progress bars and a table, which is the shape that ships this class
+of problem quietly.
+
+### Progress and the award must agree, or the gallery lies
+
+`achievementProgress` shares `met`'s reading of each criteria rather than
+re-deriving it, and the engine test asserts the invariant directly: a bar reads
+as complete if and only if `evaluateAchievements` would award the badge. Two
+functions interpreting one criteria object is the shape that drifts, and a full
+bar beside a locked badge reads as a bug in the award rather than in the bar.
+
+For the `mastery` kind, progress is measured on **attempts among tags already
+accurate enough** — attempts being the axis that only moves forward with work. A
+bar tracking accuracy would slide backwards after a bad session on a badge
+nobody had lost.
+
 ## Later
 
-**The rest of the v2 deck.** Phase 14 took frames 2a–2e, 2g and 2j's ground plus
-mastery and rank. Still outstanding, in the deck's own numbering:
+**The rest of the v2 deck.** Phase 14 took the ground, mastery and rank; Phase
+15 took 2h and 2i. Still outstanding, in the deck's own numbering:
 
 - **2c/2d/2f — the combo multiplier.** An in-session run of in-mix answers,
   multiplying XP, breaking on an answer outside the mix and half-stepping on a
   thin one. Touches the award path, which is the reason it waited: as of Phase
   13 that path had never written a row in production.
-- **2h — the achievements gallery**, where locked badges show their own
-  progress. The tables exist; the surface does not.
-- **2i — session review with replay.** This is 12d by another name; see below.
 - **2e — the stakes ladder.** "Table 2 unlocks Table 3 at +60bb lifetime."
+  Derived server-side from lifetime bb won, so folding cannot farm it — which
+  is also the answer to the open question below about XP for playing.
 
 
 **The review screen for played hands** — filters over what `/play` records, a

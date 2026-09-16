@@ -55,11 +55,13 @@ export type {
   AchievementCriteria,
   AchievementError,
   AchievementKind,
+  AchievementProgress,
   AchievementValidation,
   ProgressSnapshot,
 } from './achievements';
 export {
   ACHIEVEMENT_KINDS,
+  achievementProgress,
   evaluateAchievements,
   parseAchievements,
   validateAchievements,

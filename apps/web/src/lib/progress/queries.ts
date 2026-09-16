@@ -1,7 +1,14 @@
-import type { Achievement, LevelProgress, SkillStat, StreakStatus } from '@poker/engine';
+import type {
+  Achievement,
+  LevelProgress,
+  ProgressSnapshot,
+  SkillStat,
+  StreakStatus,
+} from '@poker/engine';
 import {
   DAILY_GOAL_SPOTS,
   SCORED_DRILL_MODES,
+  achievementProgress,
   effectiveStreak,
   levelFor,
   parseAchievements,
@@ -14,6 +21,7 @@ import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 
 import { localDay } from './timezone';
+import type { AchievementGallery } from './types';
 
 /**
  * Reading progress for the dashboard.
@@ -139,6 +147,82 @@ export async function fetchTodaySnapshot(): Promise<TodaySnapshot> {
     weakSpots: weakSpots(stats),
     recent,
     unlocked,
+  };
+}
+
+/**
+ * The achievement gallery — frame 2h.
+ *
+ * Every badge, unlocked or not, each carrying how far along it is. The deck's
+ * rule is that a badge whose shape you cannot see is not a goal, which means
+ * the locked ones are the point of the screen rather than a greyed-out
+ * afterthought.
+ *
+ * The snapshot assembled here is the same one `record.ts` evaluates against on
+ * the write path — scored spots, the effective streak, completed lessons and
+ * the skill rollup. It has to be: `achievementProgress` and
+ * `evaluateAchievements` agreeing is what stops this screen showing a full bar
+ * beside a locked badge, and they can only agree if they are fed the same
+ * facts.
+ */
+export async function fetchAchievementGallery(): Promise<AchievementGallery> {
+  const supabase = await createClient();
+
+  const [profileResult, streakResult, statsResult, spotsResult, lessonsResult] = await Promise.all([
+    supabase.from('profiles').select('timezone').maybeSingle(),
+    supabase.from('streaks').select('current_streak, last_active_date').maybeSingle(),
+    supabase.from('skill_stats').select('skill_tag, attempts, correct, ewma_accuracy, avg_ev_loss'),
+    // Same join and the same mode filter `readScoredAttempts` uses — a count
+    // over a different set would make the bar disagree with the award.
+    supabase
+      .from('drill_attempts')
+      .select('id, drill_sessions!inner(mode)', { count: 'exact', head: true })
+      .in('drill_sessions.mode', [...SCORED_DRILL_MODES]),
+    supabase
+      .from('lesson_progress')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'completed'),
+  ]);
+
+  const timeZone = (profileResult.data?.timezone as string | undefined) ?? 'UTC';
+  const today = localDay(timeZone);
+
+  const snapshot: ProgressSnapshot = {
+    spots: spotsResult.count ?? 0,
+    // The effective streak, not the stored counter — a streak that lapsed
+    // yesterday must not keep a streak badge looking one day away forever.
+    streak: effectiveStreak(
+      {
+        current: (streakResult.data?.current_streak as number | undefined) ?? 0,
+        longest: 0,
+        lastActiveDate: (streakResult.data?.last_active_date as string | null | undefined) ?? null,
+      },
+      today,
+    ),
+    lessonsCompleted: lessonsResult.count ?? 0,
+    stats: (statsResult.data ?? []).map((row) => ({
+      skillTag: String(row.skill_tag),
+      attempts: Number(row.attempts),
+      correct: Number(row.correct),
+      ewmaAccuracy: Number(row.ewma_accuracy),
+      avgEvLoss: Number(row.avg_ev_loss),
+    })),
+  };
+
+  const [catalogue, unlocked] = await Promise.all([
+    fetchAchievements(),
+    fetchUnlockedAchievements(supabase),
+  ]);
+
+  const unlockedIds = new Set(unlocked.map((entry) => entry.id));
+
+  return {
+    badges: catalogue.map((achievement) => ({
+      achievement,
+      unlocked: unlockedIds.has(achievement.id),
+      progress: achievementProgress(achievement.criteria, snapshot),
+    })),
+    unlockedCount: unlockedIds.size,
   };
 }
 
