@@ -136,6 +136,15 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [recordingError, setRecordingError] = useState<string | null>(null);
   const [handNo, setHandNo] = useState(0);
+  /**
+   * The previous-hands rail — frame 2e.
+   *
+   * Kept here rather than read back from `bot_hands`: the rail is a record of
+   * *this sitting*, and a fetch would show hands from a previous one after a
+   * reload while the chips on screen had reset. What the server stored is the
+   * durable history; this is what just happened.
+   */
+  const [played, setPlayed] = useState<readonly { no: number; hand: string; net: number }[]>([]);
 
   /** This hand's rng and opponents. Mutable, so never state. */
   const engine = useRef<ReturnType<typeof botStrategies> | null>(null);
@@ -317,6 +326,31 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
       );
       setTable(finished.table);
       setPhase('complete');
+
+      {
+        /**
+         * `SeatPayout.net` is "what the hand was worth to this seat" — already
+         * per-hand. Diffing the table's running `net` across the hand would
+         * give the same number while making this callback depend on `table`,
+         * which is a staleness bug waiting to happen; the engine hands it over
+         * directly.
+         */
+        const heroHole = step.progress.state.seats.find(
+          (seat) => seat.position === current.heroPosition,
+        )?.hole;
+        const net =
+          finished.hand.result.payouts.find((p) => p.position === current.heroPosition)?.net ?? 0;
+
+        setPlayed((rows) => [
+          {
+            no: handNo + 1,
+            hand: heroHole ? handNotationOf(heroHole[0], heroHole[1]) : '—',
+            net,
+          },
+          ...rows,
+        ]);
+      }
+
       record(current, heroActions.current, handNo);
       return;
     }
@@ -379,10 +413,11 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
     phase === 'hero' ? buildChoices(legalActions(state), potBetSizes(state)) : [];
 
   return (
-    <div className="flex flex-col gap-6 2xl:flex-row 2xl:items-start">
+    // Frame 2e: the table, and a 300px rail of what has happened so far.
+    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div className="flex flex-1 flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5">
         <header className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="font-display text-sm font-semibold">
+          <h2 className="text-sm font-medium">
             You are {hand.heroPosition} · {heroSeat.stack}bb
           </h2>
           <span className="flex items-baseline gap-3 font-mono text-xs text-ink-muted">
@@ -454,6 +489,45 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
           <p className="text-xs text-ink-muted" data-testid="waiting">
             Waiting on the other seats…
           </p>
+        ) : null}
+
+        {/*
+          Previous hands — frame 2e.
+
+          Chips, and only chips. The deck is explicit that "chips are not a
+          score — the graded decisions are", so this rail deliberately carries
+          no tier and no verdict: a hand you played well can lose, and marking
+          it here would say otherwise.
+        */}
+        {played.length > 0 ? (
+          <section
+            aria-labelledby="played-heading"
+            className="flex flex-col gap-2 rounded-[var(--radius)] border border-line bg-surface p-4"
+            data-testid="previous-hands"
+          >
+            <h3
+              id="played-heading"
+              className="text-xs font-medium uppercase tracking-[0.12em] text-ink-muted"
+            >
+              Previous hands
+            </h3>
+
+            <ul className="flex flex-col">
+              {played.slice(0, 8).map((row) => (
+                <li
+                  key={row.no}
+                  className="flex items-baseline justify-between gap-3 border-b border-line py-1.5 text-sm last:border-b-0"
+                >
+                  <span className="font-mono text-xs text-ink-muted">#{row.no}</span>
+                  <span className="font-mono">{row.hand}</span>
+                  <span className="font-mono text-xs text-ink-muted">
+                    {row.net >= 0 ? '+' : '−'}
+                    {Math.abs(row.net).toFixed(1)}bb
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
       </aside>
     </div>

@@ -35,7 +35,7 @@ export function MasterySummary({ snapshot }: { snapshot: MasterySnapshot | null 
       className="flex flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5"
     >
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="mastery-summary-heading" className="font-display text-xl">
+        <h2 id="mastery-summary-heading" className="text-xl">
           Mastery
         </h2>
         <p className="font-mono text-xs text-ink-muted">

@@ -37,6 +37,7 @@ import { SessionConfigForm, type SessionConfig } from './session-config';
 import { SessionSummary } from './session-summary';
 import { actionForKey, isShortcutTarget } from './shortcuts';
 import { ShortcutsOverlay } from './shortcuts-overlay';
+import { SpotPips } from './spot-pips';
 import { SpotView } from './spot-view';
 
 /**
@@ -578,7 +579,7 @@ export function DrillRunner({
 
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="font-display text-lg font-semibold">
+          <h1 className="text-lg font-medium">
             {studyMode ? 'Study' : 'Drill'}
           </h1>
           <span className="font-mono text-xs text-ink-muted" data-testid="progress">
@@ -586,6 +587,22 @@ export function DrillRunner({
               ? `Spot ${results.length + (reveal ? 0 : 1)}`
               : `Spot ${index + 1} of ${planned}`}
           </span>
+
+          {/* Frame 2c: how much is left, without making anyone subtract. */}
+          {planned == null ? null : <SpotPips done={results.length} total={planned} />}
+
+          {/*
+            The session's running cost, in the measure the whole product scores
+            by. Deliberately not an accuracy percentage: two of the four tiers
+            are correct answers to a mixed spot, so a "% right" here would be
+            the one number on screen that contradicts the grading model.
+          */}
+          {results.length > 0 ? (
+            <span className="font-mono text-xs text-ink-muted" data-testid="running-ev">
+              {(results.reduce((sum, r) => sum + r.evLoss, 0) / results.length).toFixed(2)}bb lost
+              / spot
+            </span>
+          ) : null}
           {config?.timed && !studyMode && reveal === null ? (
             <SpotTimer key={startedAt} startedAt={startedAt} />
           ) : null}
@@ -609,7 +626,7 @@ export function DrillRunner({
 
       {/* Side by side, per docs/05's first desktop advantage: the spot stays on
           screen while the feedback appears beside it. Never a modal. */}
-      <div className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_520px]">
         <SpotView spot={current.spot} deal>
           <DecisionControls
             state={current.spot.state}

@@ -9,11 +9,23 @@ import { cn } from '@/lib/utils';
  * the shape reads as a climb before any of the text is parsed. The tier name is
  * printed under every bar, so neither height nor colour is load-bearing alone.
  */
-export function RankLadder({ rank }: { rank: PlayerRank | undefined }) {
+export function RankLadder({
+  rank,
+  heading = 'Your rank',
+  caption,
+  headingClassName = 'font-display text-2xl',
+}: {
+  rank: PlayerRank | undefined;
+  /** The landing page shows the same ladder as "The climb", with no reader. */
+  heading?: string;
+  /** Overrides the standing-specific sentence below the bars. */
+  caption?: string;
+  headingClassName?: string;
+}) {
   return (
     <section aria-labelledby="rank-heading" className="flex flex-col gap-4">
-      <h2 id="rank-heading" className="font-display text-2xl">
-        Your rank
+      <h2 id="rank-heading" className={headingClassName}>
+        {heading}
       </h2>
 
       <ol className="flex items-end gap-2">
@@ -46,7 +58,7 @@ export function RankLadder({ rank }: { rank: PlayerRank | undefined }) {
         })}
       </ol>
 
-      <p className="text-sm text-ink-muted">{describe(rank)}</p>
+      <p className="text-sm text-ink-muted">{caption ?? describe(rank)}</p>
     </section>
   );
 }

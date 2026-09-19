@@ -104,7 +104,7 @@ test.describe('a session runs end to end', () => {
       await page.keyboard.press(' ');
     }
 
-    await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
+    await expect(page.getByTestId('session-summary')).toBeVisible();
 
     const userId = await userIdFor(email);
     const { data: attempts } = await admin()
@@ -144,7 +144,7 @@ test.describe('a session runs end to end', () => {
       await page.keyboard.press(' ');
     }
 
-    await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
+    await expect(page.getByTestId('session-summary')).toBeVisible();
 
     const userId = await userIdFor(email);
     const { data } = await admin()

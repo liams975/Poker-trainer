@@ -184,7 +184,7 @@ export function FeedbackPanel({
               readable prose, and the glyph plus the label still encode the tier
               twice over.
             */}
-            <h2 className="font-display text-base font-semibold text-ink" data-tier={grade.tier}>
+            <h2 className="text-base font-medium text-ink" data-tier={grade.tier}>
               {tier.label}
             </h2>
           </div>

@@ -88,7 +88,7 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
     return (
       <div className="flex max-w-2xl flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-6">
         <header className="flex flex-col gap-2">
-          <h1 className="font-display text-lg font-semibold">Let&rsquo;s find your level</h1>
+          <h1 className="text-lg font-medium">Let&rsquo;s find your level</h1>
           <p className="text-sm text-ink-muted">
             {DIAGNOSTIC_SPOTS} preflop spots, a couple of minutes. Nothing here counts against
             you — it only decides which lesson you start on, and you can read any lesson you
@@ -141,11 +141,14 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
 
   return (
     <div
-      className="flex max-w-2xl flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-6"
+      className="flex max-w-[780px] flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-6"
       data-testid="placement-result"
     >
       <header className="flex flex-col gap-2">
-        <h1 className="font-display text-lg font-semibold">You&rsquo;re set</h1>
+        <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-muted">Placed</p>
+        {/* Frame 2j gives the result a serif statement, the same treatment 2f
+            gives a milestone. Finishing the placement is one. */}
+        <h1 className="font-display text-3xl">You&rsquo;re set</h1>
         <p className="text-sm text-ink-muted" data-placement={outcome?.skillTag ?? 'none'}>
           {outcome?.skillTag === null
             ? 'You answered everything the diagnostic covers, so the whole track is open. Start anywhere.'
@@ -154,7 +157,10 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
       </header>
 
       {outcome && outcome.byTag.length > 0 ? (
-        <ul className="flex flex-col gap-1.5 text-sm" data-testid="placement-evidence">
+        <ul
+          className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2"
+          data-testid="placement-evidence"
+        >
           {outcome.byTag.map((entry) => (
             <li key={entry.skillTag} className="flex items-baseline gap-2">
               <span aria-hidden="true" className="w-4 text-ink-muted">

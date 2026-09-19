@@ -46,7 +46,7 @@ export function SpotView({
           the table, and a second copy in the corner of the header read as a
           timer — `54s` is a suited five-four, and looked exactly like fifty-four
           seconds next to a drill that has an optional clock. */}
-      <h2 className="font-display text-sm font-semibold">
+      <h2 className="text-sm font-medium">
         You are {hero} · {scenario.stackDepth}bb
       </h2>
 

@@ -2,6 +2,7 @@ import { trackProgress } from '@poker/engine';
 import { redirect } from 'next/navigation';
 
 import { MasterySummary } from '@/components/dashboard/mastery-summary';
+import { NextUp } from '@/components/dashboard/next-up';
 import { ModeGrid } from '@/components/dashboard/mode-grid';
 import { ProgressRail, type ProgressRailProps } from '@/components/dashboard/progress-rail';
 import { TodayStrip } from '@/components/dashboard/today-strip';
@@ -96,8 +97,11 @@ export default async function DashboardPage() {
 
       <TodayStrip snapshot={snapshot} />
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_18rem]">
-        <div className="flex flex-col gap-8">
+      {/* Frame 2b's grid. 330px is the deck's rail width, and the left column
+          leads with one obvious next action rather than six equal ones. */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_330px]">
+        <div className="flex flex-col gap-6">
+          <NextUp track={rail?.summary} />
           <ModeGrid />
           <MasterySummary snapshot={mastery} />
         </div>

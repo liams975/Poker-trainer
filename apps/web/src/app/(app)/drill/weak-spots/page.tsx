@@ -41,7 +41,7 @@ export default async function Page({
   if (focusTags.length === 0) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="font-display text-lg font-semibold">Weak spots</h1>
+        <h1 className="text-lg font-medium">Weak spots</h1>
 
         <EmptyState>
           Nothing to work on yet. A skill needs {WEAK_SPOT_MIN_ATTEMPTS} answers before a low

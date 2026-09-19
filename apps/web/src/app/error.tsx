@@ -29,7 +29,7 @@ export default function Error({
 
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-      <h1 className="font-display text-lg font-semibold">This page did not load.</h1>
+      <h1 className="text-lg font-medium">This page did not load.</h1>
       <p className="max-w-sm text-sm text-ink-muted">
         Something broke on our side. Try again — if it keeps happening, the reference below will
         help us find it.

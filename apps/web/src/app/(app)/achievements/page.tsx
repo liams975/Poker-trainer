@@ -28,7 +28,7 @@ export default async function AchievementsPage() {
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-8 p-8">
+    <div className="flex flex-col gap-8">
       <h1 className="sr-only">Achievements</h1>
 
       {gallery === null ? (
@@ -39,6 +39,6 @@ export default async function AchievementsPage() {
       ) : (
         <BadgeGallery badges={gallery.badges} unlockedCount={gallery.unlockedCount} />
       )}
-    </main>
+    </div>
   );
 }

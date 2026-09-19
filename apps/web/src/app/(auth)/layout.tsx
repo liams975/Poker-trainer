@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-8 px-4 py-12">
-      <Link href="/" className="font-display text-lg font-semibold tracking-tight">
+      <Link href="/" className="text-lg font-medium tracking-tight">
         Poker Trainer
       </Link>
       <div className="w-full max-w-sm">{children}</div>

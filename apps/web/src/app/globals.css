@@ -42,12 +42,27 @@
   --color-line: #3f424d;
   --color-ink: #e9e9ed;
   /**
-   * The deck paints muted text as `rgba(233,233,237,.55)`. Taken literally that
-   * composites to #8a8b93, which measures **4.48:1** on `surface-raised` — under
-   * AA by 0.02, on the most-used token in the app (170 usages). Lifted to the
-   * 58% step instead. Phase 14 measured it; `tests/contrast.test.ts` holds it.
+   * Secondary text. One step, not four.
+   *
+   * The deck paints muted text at four different opacities, and **four of its
+   * five fail AA** against these grounds:
+   *
+   *     .62 -> #999aa1  5.42  pass
+   *     .55 -> #8a8b93  4.48  fail   (Phase 14 caught this one)
+   *     .50 -> #80818a  3.92  fail
+   *     .45 -> #757680  3.37  fail   — the deck uses this 40 times
+   *     .25 -> #4b4c58  1.79  fail
+   *
+   * So the deck's opacities are read as intents rather than literals, and every
+   * one of them that carries text resolves here, at its brightest passing step.
+   * That flattens a four-step tonal hierarchy to one. It is a deliberate trade:
+   * AA leaves no room for four legible greys on this ground, and the
+   * alternative is text nobody can read.
+   *
+   * The dim values keep their jobs where 4.5:1 does not apply — rules, bar
+   * tracks, decorative marks. `--color-line` is that colour.
    */
-  --color-ink-muted: #909199;
+  --color-ink-muted: #999aa1;
 
   /**
    * Action colours are the Okabe–Ito palette, chosen because it stays
@@ -99,8 +114,75 @@
   --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
+  /**
+   * The type scale, at the deck's density.
+   *
+   * Nocturne's readme: "Density 0.70× — this system is dense on purpose." The
+   * deck bears that out: Instrument Sans runs 10.5–15px and IBM Plex Mono
+   * 9–17px, where Tailwind's defaults start at 12 and centre on 16.
+   *
+   * These override the built-in steps rather than adding new names, so the
+   * ~400 existing `text-sm` / `text-xs` usages take the new density for free —
+   * the same leverage the colour tokens gave in Phase 14. Redefining a *size*
+   * step is safe; adding a *colour* token whose name collides with one is what
+   * broke Phase 5 (see the note at the top of this block).
+   *
+   * Line heights are paired explicitly. Tailwind's defaults are tuned for 16px
+   * body text and read cramped at 11px.
+   */
+  --text-2xs: 0.5625rem; /* 9px  — the smallest figure the deck prints */
+  --text-2xs--line-height: 1.4;
+  --text-xs: 0.6875rem; /* 11px — labels, table headers, meta */
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.78125rem; /* 12.5px — the deck's workhorse body size */
+  --text-sm--line-height: 1.6;
+  --text-base: 0.875rem; /* 14px — emphasis body, control labels */
+  --text-base--line-height: 1.55;
+  --text-lg: 0.9375rem; /* 15px — the largest sans in the deck */
+  --text-lg--line-height: 1.45;
+  --text-xl: 1.0625rem; /* 17px — mono figures that carry a panel */
+  --text-xl--line-height: 1.3;
+
+  /**
+   * Statement sizes. Serif only, weight 400 only.
+   *
+   * The deck never sets Instrument Serif below 26px and never above weight 400
+   * — it ships no other weight, so `font-semibold` on it synthesises a fake
+   * bold. Phase 14 left 38 headings doing exactly that.
+   */
+  --text-2xl: 1.625rem; /* 26px */
+  --text-2xl--line-height: 1.15;
+  --text-3xl: 1.8125rem; /* 29px */
+  --text-3xl--line-height: 1.1;
+  --text-4xl: 2.0625rem; /* 33px */
+  --text-4xl--line-height: 1.08;
+  --text-5xl: 2.75rem; /* 44px */
+  --text-5xl--line-height: 1.04;
+  --text-6xl: 3.375rem; /* 54px — the landing statement */
+  --text-6xl--line-height: 1.02;
+
   /* Nocturne's --radius-md. 8px, applied throughout. */
   --radius: 0.5rem;
+}
+
+/**
+ * A Nocturne signature: freestanding rules fade out at both ends rather than
+ * stopping cleanly, over 48px a side — one deck baseline unit.
+ *
+ * Only *freestanding* rules. Box outlines, borders inside a control and short
+ * accent marks stay solid; a faded border reads as a rendering fault rather
+ * than as a choice. Nocturne's readme is explicit about that split.
+ */
+@utility rule-fade {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-line) 48px,
+    var(--color-line) calc(100% - 48px),
+    transparent
+  );
 }
 
 /**

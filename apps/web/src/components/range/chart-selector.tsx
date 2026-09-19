@@ -34,7 +34,7 @@ export function ChartSelector({ charts, selectedId, onSelect, label }: ChartSele
       {/* Visible, not just an aria-label: in compare mode two identical-looking
           selector blocks sit above each other, and which one drives which grid
           is not guessable from position alone. */}
-      <p className="font-display text-xs font-semibold text-ink">{label}</p>
+      <p className="text-xs font-medium text-ink">{label}</p>
       {families
         .filter((group) => group.charts.length > 0)
         .map((group) => (

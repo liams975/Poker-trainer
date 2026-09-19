@@ -142,8 +142,8 @@ test.describe('protected routes', () => {
     // and what this pins is that an anonymous visitor stayed on the root rather
     // than being bounced to a login wall.
     expect(new URL(page.url()).pathname).toBe('/');
-    await expect(page.getByRole('heading', { name: /Learn 6-max preflop properly/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Start free' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /A range is a frequency/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Start free/ })).toBeVisible();
   });
 });
 

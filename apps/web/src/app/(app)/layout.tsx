@@ -41,7 +41,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <AppNav email={user.email ?? ''} />
       <IdentifyUser userId={user.id} />
       <CommandPalette destinations={buildDestinations(lessons)} />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-[1180px] flex-1 px-6 py-8">{children}</main>
     </div>
   );
 }

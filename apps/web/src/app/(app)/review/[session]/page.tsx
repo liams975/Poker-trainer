@@ -43,7 +43,7 @@ export default async function SessionPage({
         >
           ← All sessions
         </Link>
-        <h1 className="font-display text-lg font-semibold">
+        <h1 className="text-lg font-medium">
           {session.mode.replace(/_/g, ' ')} session
         </h1>
         {/* Deliberately no single accuracy percentage — docs/03: "Score by EV

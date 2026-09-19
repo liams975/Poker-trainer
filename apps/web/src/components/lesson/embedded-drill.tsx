@@ -60,7 +60,7 @@ export function EmbeddedDrill({ chartSet, templates, templateSlug, spots }: Embe
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h3 className="font-display text-sm font-semibold">Practice</h3>
+          <h3 className="text-sm font-medium">Practice</h3>
           <p className="text-sm text-ink-muted">
             {spots} spots from {template.template.title.toLowerCase()}.
           </p>

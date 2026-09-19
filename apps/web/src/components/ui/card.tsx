@@ -21,7 +21,7 @@ function CardHeader({ className, ...props }: ComponentProps<'div'>) {
 function CardTitle({ className, ...props }: ComponentProps<'h3'>) {
   return (
     <h3
-      className={cn('font-display text-[1rem] font-semibold leading-none tracking-tight', className)}
+      className={cn('text-[1rem] font-medium leading-none tracking-tight', className)}
       {...props}
     />
   );

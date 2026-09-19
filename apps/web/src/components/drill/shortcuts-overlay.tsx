@@ -30,7 +30,7 @@ export function ShortcutsOverlay({ open, onClose }: { open: boolean; onClose: ()
       aria-label="Keyboard shortcuts"
     >
       <div className="flex w-full max-w-md flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-6">
-        <h2 className="font-display text-base font-semibold">Keyboard shortcuts</h2>
+        <h2 className="text-base font-medium">Keyboard shortcuts</h2>
 
         <dl className="flex flex-col gap-2">
           {SHORTCUTS.map((shortcut) => (

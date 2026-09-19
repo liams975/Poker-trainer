@@ -77,7 +77,7 @@ export function SessionConfigForm({
   return (
     <div className="flex flex-col gap-6 rounded-[var(--radius)] border border-line bg-surface p-6">
       <fieldset className="flex flex-col gap-2">
-        <legend className="font-display text-xs font-semibold text-ink">Mode</legend>
+        <legend className="text-xs font-medium text-ink">Mode</legend>
         {/* docs/05's Study/Drill toggle is a pedagogy switch, not a difficulty
             setting, so the description says what actually changes. */}
         <div className="flex flex-wrap gap-2">
@@ -106,7 +106,7 @@ export function SessionConfigForm({
       </fieldset>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="font-display text-xs font-semibold text-ink">Length</legend>
+        <legend className="text-xs font-medium text-ink">Length</legend>
         <div className="flex flex-wrap gap-2">
           {LENGTHS.map((option) => (
             <button
@@ -126,7 +126,7 @@ export function SessionConfigForm({
           exists where it can mean something. */}
       {studyMode ? null : (
         <fieldset className="flex flex-col gap-2">
-          <legend className="font-display text-xs font-semibold text-ink">Timer</legend>
+          <legend className="text-xs font-medium text-ink">Timer</legend>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -153,7 +153,7 @@ export function SessionConfigForm({
 
       {allowFilters ? (
         <fieldset className="flex flex-col gap-2">
-          <legend className="font-display text-xs font-semibold text-ink">Spots</legend>
+          <legend className="text-xs font-medium text-ink">Spots</legend>
           <div className="flex flex-wrap gap-2">
             {templates.map((template) => (
               <button

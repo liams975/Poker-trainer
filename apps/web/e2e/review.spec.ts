@@ -71,7 +71,7 @@ async function playSession(page: Page, spots: number): Promise<void> {
     await page.keyboard.press(' ');
   }
 
-  await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
+  await expect(page.getByTestId('session-summary')).toBeVisible();
 }
 
 test.describe('the review surface', () => {
@@ -323,13 +323,13 @@ test.describe('the landing page', () => {
     await page.context().clearCookies();
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /Learn 6-max preflop properly/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /A range is a frequency/ })).toBeVisible();
 
     // The grid is rendered from bundled content, because RLS correctly refuses
     // an anonymous visitor every `range_charts` row. A landing page that 500s
     // for logged-out visitors is not a landing page.
     await expect(page.getByRole('grid')).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Start free' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Start free/ })).toBeVisible();
   });
 
   test('shows a genuinely mixed hand, which is the point it is making', async ({ page }) => {

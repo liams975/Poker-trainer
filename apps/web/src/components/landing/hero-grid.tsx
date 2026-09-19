@@ -27,12 +27,17 @@ export function HeroGrid({ chart, label }: { chart: RangeChart; label: string })
   const mix = orderedMix(frequencies);
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
+    /**
+     * Stacked, not side by side. Frame 2a gives this a 500px column, and the
+     * 13×13 grid at its natural cell size is most of that width — the mix has
+     * to sit underneath it rather than beside.
+     */
+    <div className="flex flex-col gap-5">
       <RangeGrid chart={chart} selected={selected} onSelect={setSelected} label={label} />
 
       <div className="flex flex-col gap-3">
-        <h3 className="font-display text-sm font-semibold">
-          {label} · {selected}
+        <h3 className="text-sm font-medium">
+          {selected} — what it actually does
         </h3>
 
         <p className="text-sm text-ink-muted">{describeMix(selected, frequencies)}</p>

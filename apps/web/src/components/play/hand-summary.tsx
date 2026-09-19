@@ -128,7 +128,7 @@ export function HandSummary({
   return (
     <section className="flex flex-col gap-4" data-testid="hand-summary">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-sm font-semibold">Hand over</h2>
+        <h2 className="text-sm font-medium">Hand over</h2>
         <p className="font-mono text-2xl text-ink" data-testid="hero-net">
           {net > 0 ? '+' : ''}
           {net.toFixed(2)}bb

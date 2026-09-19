@@ -100,7 +100,7 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="font-display text-lg font-semibold">Range Explorer</h1>
+          <h1 className="text-lg font-medium">Range Explorer</h1>
           <p className="text-sm text-ink-muted">
             Every cell shows the full mix, not one action. Chart set {chartSet.version}.
           </p>

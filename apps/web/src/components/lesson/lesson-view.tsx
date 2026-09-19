@@ -114,7 +114,7 @@ export function LessonView({
         <p className="text-xs uppercase tracking-wider text-ink-muted">
           {track.title} · {position} of {total}
         </p>
-        <h1 className="font-display text-xl font-semibold">{lesson.title}</h1>
+        <h1 className="text-xl font-medium">{lesson.title}</h1>
         <p className="max-w-[62ch] text-sm text-ink-muted">{lesson.summary}</p>
       </header>
 

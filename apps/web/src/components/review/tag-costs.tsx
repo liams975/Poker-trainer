@@ -35,7 +35,7 @@ export function TagCosts({
 
   return (
     <section aria-labelledby="tag-costs-heading" className="flex flex-col gap-3">
-      <h2 id="tag-costs-heading" className="font-display text-lg">
+      <h2 id="tag-costs-heading" className="text-lg">
         Where the chips went
       </h2>
 

@@ -100,7 +100,7 @@ async function playSession(page: Page, spots: number): Promise<void> {
   }
 
   await page.keyboard.press(' ');
-  await expect(page.getByRole('heading', { name: 'Session complete' })).toBeVisible();
+  await expect(page.getByTestId('session-summary')).toBeVisible();
 }
 
 /**

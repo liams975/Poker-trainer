@@ -196,7 +196,7 @@ function Seat({
           <span className="flex items-baseline gap-1">
             <span
               className={cn(
-                'font-display text-xs font-semibold @md:text-sm',
+                'text-xs font-medium @md:text-sm',
                 folded ? 'text-ink-muted' : 'text-ink',
               )}
             >

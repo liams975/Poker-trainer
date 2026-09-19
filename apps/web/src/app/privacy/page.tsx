@@ -24,14 +24,14 @@ export default function PrivacyPage() {
         >
           ← Poker Trainer
         </Link>
-        <h1 className="font-display text-2xl font-semibold">Privacy</h1>
+        <h1 className="font-display text-2xl">Privacy</h1>
         <p className="text-sm text-ink-muted">
           Short, because there is not much to say.
         </p>
       </header>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-sm font-semibold">What the app stores about you</h2>
+        <h2 className="text-sm font-medium">What the app stores about you</h2>
         <ul className="flex list-disc flex-col gap-2 pl-5 text-sm text-ink-muted">
           <li>
             Your email address and, if you sign in with Google, whatever name Google supplies.
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-sm font-semibold">Third parties</h2>
+        <h2 className="text-sm font-medium">Third parties</h2>
         <ul className="flex list-disc flex-col gap-2 pl-5 text-sm text-ink-muted">
           <li>
             <strong className="text-ink">PostHog</strong> — product analytics. It records which
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-sm font-semibold">What it does not do</h2>
+        <h2 className="text-sm font-medium">What it does not do</h2>
         <p className="text-sm text-ink-muted">
           No advertising, no third-party ad or marketing trackers, and nothing is sold or shared
           with anyone beyond the services listed above. There is no payment of any kind, so no
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-sm font-semibold">Deleting your account</h2>
+        <h2 className="text-sm font-medium">Deleting your account</h2>
         <p className="text-sm text-ink-muted">
           Ask, and it goes. Deleting the account removes every row above with it — the database
           cascades from your user record, so nothing is left behind under a different key.

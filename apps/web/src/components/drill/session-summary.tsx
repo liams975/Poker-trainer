@@ -12,6 +12,7 @@ import { percent } from '@/components/range/mix-format';
 import type { SessionRewards } from '@/lib/progress/types';
 
 import { TIER_STYLES } from './grade-tiers';
+import { headline } from './session-headline';
 
 /**
  * The end of a session.
@@ -46,6 +47,7 @@ function tierNote(tier: GradeTier): string {
  * over one schedule is how a summary ends up congratulating somebody on XP the
  * ledger never received, and the ledger is the thing every later screen reads.
  */
+
 /**
  * The milestone moments.
  *
@@ -192,13 +194,30 @@ export function SessionSummary({
   onRestart: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-6 rounded-[var(--radius)] border border-line bg-surface p-6">
-      <header className="flex flex-col gap-1">
-        <h2 className="font-display text-lg font-semibold">Session complete</h2>
+    <div
+      className="flex flex-col gap-6 rounded-[var(--radius)] border border-line bg-surface p-6"
+      data-testid="session-summary"
+    >
+      <header className="flex flex-col gap-2">
+        <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-muted">
+          Session complete · {summary.spots} {summary.spots === 1 ? 'spot' : 'spots'}
+        </p>
+
+        {/*
+          Frame 2f is "the one loud moment in the app", and this line is the
+          loud part: Instrument Serif at 44px, weight 400.
+
+          `headline` only ever names a **milestone** — a level, an achievement, a
+          streak record. Never the session's answers. Two of the four grade
+          tiers are correct answers to a mixed spot, so a headline praising how
+          the spots went would assert a verdict the engine does not hold, which
+          is the rule `tests/feedback-motion.test.ts` enforces one layer down.
+        */}
+        <h2 className="font-display text-5xl">{headline(rewards)}</h2>
+
         <p className="text-sm text-ink-muted">
-          {summary.spots} {summary.spots === 1 ? 'spot' : 'spots'} ·{' '}
-          <span className="font-mono">{summary.totalEvLoss}bb</span> total EV lost ·{' '}
-          <span className="font-mono">{summary.avgEvLoss}bb</span> per spot
+          <span className="font-mono">{summary.avgEvLoss}bb</span> lost per spot ·{' '}
+          <span className="font-mono">{summary.totalEvLoss}bb</span> across the session
         </p>
       </header>
 

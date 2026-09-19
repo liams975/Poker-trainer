@@ -32,7 +32,7 @@ export default async function Page() {
     <div className="flex flex-col gap-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="font-display text-lg font-semibold">{track.title}</h1>
+          <h1 className="text-lg font-medium">{track.title}</h1>
           <p className="text-sm text-ink-muted">
             {track.description} · {summary.completed} of {summary.total} lessons complete
           </p>

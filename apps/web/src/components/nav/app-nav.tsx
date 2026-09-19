@@ -16,10 +16,10 @@ export function AppNav({ email }: { email: string }) {
     <header className="border-b border-line bg-surface">
       <nav
         aria-label="Main"
-        className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-6"
+        className="mx-auto flex h-14 max-w-[1180px] items-center justify-between gap-6 px-6"
       >
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="font-display text-base tracking-tight">
+          <Link href="/dashboard" className="text-base tracking-tight">
             Poker Trainer
           </Link>
 

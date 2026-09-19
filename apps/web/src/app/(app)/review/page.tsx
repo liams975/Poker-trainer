@@ -94,7 +94,7 @@ export default async function ReviewPage({
       <TrackEvent event="review_opened" />
 
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-lg font-semibold">Session review</h1>
+        <h1 className="text-lg font-medium">Session review</h1>
         <p className="text-sm text-ink-muted">
           Every spot you have answered, and the mix it was graded against at the time.
         </p>
