@@ -23,8 +23,9 @@ export function WeeklyBoard({
 }) {
   return (
     <section aria-labelledby="board-heading" className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="board-heading" className="font-display text-2xl">
+      <header className="flex flex-wrap items-baseline gap-x-5 gap-y-2 border-b border-line pb-4">
+        <span className="font-mono text-sm text-ink-muted">§3</span>
+        <h2 id="board-heading" className="flex-1 font-display text-4xl">
           Weekly board
         </h2>
         <p className="font-mono text-xs text-ink-muted">resets Monday</p>
@@ -41,7 +42,7 @@ export function WeeklyBoard({
             Players ranked by EV lost per spot this week, lowest first
           </caption>
           <thead>
-            <tr className="border-b border-line text-left font-mono text-[0.625rem] uppercase tracking-wider text-ink-muted">
+            <tr className="border-b border-line text-left label-caps text-2xs text-ink-muted">
               <th scope="col" className="py-2 font-normal">
                 #
               </th>
@@ -67,7 +68,7 @@ export function WeeklyBoard({
                 )}
               >
                 <td className="py-2 font-mono text-xs text-ink-muted">{row.position}</td>
-                <td className={cn('py-2', row.isYou && 'text-accent-hi')}>
+                <td className={cn('py-2', row.isYou && 'text-accent')}>
                   {row.handle}
                   {row.isYou ? <span className="ml-2 text-xs text-ink-muted">you</span> : null}
                 </td>

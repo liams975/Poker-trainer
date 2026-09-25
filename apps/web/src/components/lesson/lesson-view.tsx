@@ -41,6 +41,17 @@ export interface LessonViewProps {
   nextLessonSlug: string | null;
 }
 
+/** "2.2" for the second lesson of the second module, by the track's own order. */
+function sectionOf(track: Track, slug: string): { number: string; module: string } | null {
+  const modules = [...track.modules].sort((a, b) => a.sortOrder - b.sortOrder);
+  for (const [m, module] of modules.entries()) {
+    const lessons = [...module.lessons].sort((a, b) => a.sortOrder - b.sortOrder);
+    const l = lessons.findIndex((entry) => entry.slug === slug);
+    if (l !== -1) return { number: `${m + 1}.${l + 1}`, module: module.title };
+  }
+  return null;
+}
+
 export function LessonView({
   track,
   lesson,
@@ -68,6 +79,39 @@ export function LessonView({
 
   const position = orderedLessons(track).findIndex((l) => l.slug === lesson.slug) + 1;
   const total = orderedLessons(track).length;
+
+  /**
+   * The lesson's section number, as a textbook numbers one: module, then the
+   * lesson within it — "§2.2". Derived from the track's own ordering, so it
+   * cannot disagree with the contents list beside it.
+   */
+  const section = sectionOf(track, lesson.slug);
+
+  /**
+   * Per-block furniture: the first paragraph opens with a drop cap, each range
+   * figure is lettered in order ("Fig. 2.2a", "2.2b"), and the drill that
+   * closes the lesson is its exercise. Each letter is counted from the blocks
+   * before it rather than by a running counter, which would be a mutation
+   * escaping the render — the same thing `nearestCharts` below avoids.
+   */
+  const firstProse = lesson.blocks.findIndex((block) => block.kind === 'prose');
+  const furniture = lesson.blocks.map((block, index) => {
+    if (block.kind === 'range') {
+      const before = lesson.blocks.slice(0, index).filter((b) => b.kind === 'range').length;
+      return {
+        figure: section ? `Fig. ${section.number}${String.fromCharCode(97 + before)}` : undefined,
+      };
+    }
+    if (block.kind === 'drill') {
+      return { exercise: section ? `Exercise ${section.number}` : undefined };
+    }
+    return { lead: index === firstProse };
+  });
+
+  /** The last two words of the title in italic, the way statements are set. */
+  const words = lesson.title.split(' ');
+  const titleHead = words.length > 2 ? words.slice(0, -2).join(' ') : '';
+  const titleTail = words.length > 2 ? words.slice(-2).join(' ') : lesson.title;
 
   async function complete(): Promise<void> {
     setSaving(true);
@@ -109,16 +153,24 @@ export function LessonView({
   );
 
   return (
-    <article className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <p className="text-xs uppercase tracking-wider text-ink-muted">
-          {track.title} · {position} of {total}
+    <article className="flex flex-col">
+      <header className="flex flex-col border-b border-line pb-12">
+        <p className="flex flex-wrap items-baseline gap-x-5 gap-y-2">
+          {section ? <span className="label-caps text-ink">§{section.number}</span> : null}
+          <span className="label-caps text-ink-muted">
+            {section ? `${section.module} · ` : ''}lesson {position} of {total}
+          </span>
         </p>
-        <h1 className="text-xl font-medium">{lesson.title}</h1>
-        <p className="max-w-[62ch] text-sm text-ink-muted">{lesson.summary}</p>
+        <h1 className="mt-7 font-display text-6xl tracking-[-0.02em]">
+          {titleHead ? `${titleHead} ` : null}
+          <i>{titleTail}</i>
+        </h1>
+        <p className="mt-6 max-w-[40rem] text-xl text-ink-muted">{lesson.summary}</p>
       </header>
 
-      <div className="flex flex-col gap-6">
+      {/* Block layout, not flex: the margin notes float into the right-hand
+          padding, and a flex item cannot float. `flow-root` contains them. */}
+      <div className="relative flow-root space-y-10 pt-12 xl:pr-[19rem]">
         {lesson.blocks.map((block, index) => (
           <LessonBlockView
             key={`${block.kind}-${index}`}
@@ -127,33 +179,40 @@ export function LessonView({
             nearestChart={nearestCharts[index]}
             registry={registry}
             drill={{ chartSet, templates }}
+            {...furniture[index]}
           />
         ))}
       </div>
 
-      <footer className="flex flex-wrap items-center gap-3 border-t border-line pt-6">
+      <footer className="mt-14 flex flex-wrap items-center gap-6 border-t border-line pt-8 xl:mr-[19rem]">
         {completed ? (
           <>
-            <p className="text-sm text-ink-muted" data-testid="lesson-completed">
+            <p className="label-caps text-ink" data-testid="lesson-completed">
               Completed.
             </p>
             {nextLessonSlug ? (
-              <Button asChild size="sm">
-                <Link href={`/learn/${nextLessonSlug}`}>Next lesson</Link>
+              <Button asChild>
+                <Link href={`/learn/${nextLessonSlug}`}>Next lesson →</Link>
               </Button>
             ) : (
-              <Button asChild size="sm" variant="outline">
+              <Button asChild variant="outline">
                 <Link href="/learn">Back to the track</Link>
               </Button>
             )}
           </>
         ) : (
-          <Button type="button" onClick={() => void complete()} disabled={saving}>
+          // The page's yellow key: the one act only the reader can perform.
+          <Button
+            type="button"
+            className="h-13 px-6"
+            onClick={() => void complete()}
+            disabled={saving}
+          >
             {saving ? 'Saving…' : 'Mark as complete'}
           </Button>
         )}
 
-        {error ? <p className="text-sm text-ink">{error}</p> : null}
+        {error ? <p className="font-mono text-sm text-ink">{error}</p> : null}
       </footer>
     </article>
   );

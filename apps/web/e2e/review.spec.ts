@@ -336,10 +336,17 @@ test.describe('the landing page', () => {
     await page.context().clearCookies();
     await page.goto('/');
 
-    // AJo opens some of the time and folds the rest. A pure hand would
-    // illustrate the opposite of the sentence above it.
-    const panel = page.getByText(/AJo/).first();
-    await expect(panel).toBeVisible();
+    // A pure hand would illustrate the opposite of the sentence above it.
+    //
+    // This used to find the text "AJo" and stop — which every visit passes,
+    // because AJo is printed in its own grid cell whether or not it mixes. It
+    // does not: the button chart has AJo as a pure raise, and the page said
+    // "64%" about it for five phases while this test stayed green. What the
+    // point needs is two actions in the opening hand's own mix, so that is
+    // what is counted.
+    const mix = page.getByTestId('hero-mix').getByRole('listitem');
+    await expect(mix.first()).toBeVisible();
+    expect(await mix.count(), 'the opening hand is pure, so it shows no mix').toBeGreaterThan(1);
   });
 
   test('sends a signed-in visitor to the dashboard instead', async ({ page }) => {

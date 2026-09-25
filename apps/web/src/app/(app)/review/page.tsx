@@ -7,6 +7,7 @@ import { TagCosts } from '@/components/review/tag-costs';
 import { FilterBar } from '@/components/review/filter-bar';
 import { MistakeLog } from '@/components/review/mistake-log';
 import { SessionList } from '@/components/review/session-list';
+import { SectionHead } from '@/components/ui/section-head';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getCharts } from '@/lib/charts/registry';
 import {
@@ -59,8 +60,14 @@ async function History() {
   ]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <EvLossChart points={points} />
+    <div className="flex flex-col gap-14">
+      <EvLossChart
+        points={points}
+        caption={{
+          figure: 'Fig. 1',
+          text: 'bb lost per spot, one dot a day, the seven-day mean behind it. Zero is at the top. Hatched columns are days with no practice — a gap, never a zero.',
+        }}
+      />
       <TagCosts costs={byTag} registry={registry} />
     </div>
   );
@@ -90,20 +97,25 @@ export default async function ReviewPage({
   const filters = parseFilters(await searchParams);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-20">
       <TrackEvent event="review_opened" />
 
-      <header className="flex flex-col gap-1">
-        <h1 className="text-lg font-medium">Session review</h1>
-        <p className="text-sm text-ink-muted">
+      <header className="flex flex-col gap-6">
+        <h1 className="font-display text-6xl tracking-[-0.02em]">
+          Session <i>review</i>
+        </h1>
+        <p className="max-w-[40rem] text-lg text-ink-muted">
           Every spot you have answered, and the mix it was graded against at the time.
         </p>
       </header>
 
-      <section aria-labelledby="trend-heading" className="flex flex-col gap-3">
-        <h2 id="trend-heading" className="text-xs uppercase tracking-wider text-ink-muted">
-          Last {DEFAULT_HISTORY_DAYS} days
-        </h2>
+      <section aria-labelledby="trend-heading" className="flex flex-col gap-8">
+        <SectionHead
+          n={1}
+          id="trend-heading"
+          title="The record"
+          caption={`last ${DEFAULT_HISTORY_DAYS} days`}
+        />
         {/* Three independent reads, streamed independently: a slow history query
             should not hold up the log, and neither should take the page down. */}
         <Suspense fallback={<Skeleton className="h-44 w-full" />}>
@@ -111,23 +123,18 @@ export default async function ReviewPage({
         </Suspense>
       </section>
 
-      <Suspense fallback={<Skeleton className="h-8 w-full" />}>
-        <FilterBar />
-      </Suspense>
-
-      <section aria-labelledby="log-heading" className="flex flex-col gap-3">
-        <h2 id="log-heading" className="text-xs uppercase tracking-wider text-ink-muted">
-          Answers
-        </h2>
+      <section aria-labelledby="log-heading" className="flex flex-col gap-6">
+        <SectionHead n={2} id="log-heading" title="Answers" caption="replayed from the stored spot" />
+        <Suspense fallback={<Skeleton className="h-8 w-full" />}>
+          <FilterBar />
+        </Suspense>
         <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <Log filters={filters} />
         </Suspense>
       </section>
 
-      <section aria-labelledby="sessions-heading" className="flex flex-col gap-3">
-        <h2 id="sessions-heading" className="text-xs uppercase tracking-wider text-ink-muted">
-          Sessions
-        </h2>
+      <section aria-labelledby="sessions-heading" className="flex flex-col gap-6">
+        <SectionHead n={3} id="sessions-heading" title="Sessions" />
         <Suspense fallback={<Skeleton className="h-40 w-full" />}>
           <Sessions filters={filters} />
         </Suspense>

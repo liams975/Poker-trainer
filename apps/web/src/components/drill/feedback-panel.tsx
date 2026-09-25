@@ -40,60 +40,81 @@ export interface FeedbackPanelProps {
 }
 
 /**
- * One row of the distribution: label, proportional bar, exact frequency.
+ * The mix as one bar, the same stacked bar a grid cell draws, at the size of a
+ * statement: passive on the left, aggressive on the right, and a marker over
+ * the part you chose.
  *
- * The bar grows to its frequency rather than appearing at it. docs/05 calls
- * this "where retention is won or lost", and the difference between a mix that
- * *arrives* and one that is simply there is most of the felt quality of the
- * whole app.
+ * The segments grow to their frequency rather than appearing at it. docs/05
+ * calls this "where retention is won or lost", and the difference between a
+ * mix that *arrives* and one that is simply there is most of the felt quality
+ * of the whole app.
  *
  * **`index` drives the stagger; the grade does not reach this component at
  * all.** That is deliberate and enforced by `tests/feedback-motion.test.ts`: a
  * flourish on `optimal` that did not also fire on `acceptable` would re-assert
- * the right/wrong framing the four tiers exist to reject. Two of the four are
- * defensible answers to a mixed spot, so there is nothing here to celebrate
- * and nothing to commiserate.
+ * the right/wrong framing the four tiers exist to reject.
+ */
+function MixBar({
+  hand,
+  mix,
+  chosenKey,
+}: {
+  hand: HandNotation;
+  mix: readonly ActionFreq[];
+  chosenKey: string | null;
+}) {
+  return (
+    <div className="relative flex h-11 w-full bg-canvas" aria-hidden="true">
+      {mix.map((entry, index) => {
+        const key = `${entry.action}-${entry.size ?? ''}`;
+        return (
+          <m.span
+            // Keyed on the hand too: moving to the next spot must re-grow the
+            // bar rather than sliding the previous hand's widths across.
+            key={`${hand}-${key}`}
+            className="relative block h-full"
+            style={{ backgroundColor: actionStyle(entry.action).hex }}
+            initial={{ width: 0 }}
+            animate={{ width: `${entry.freq * 100}%` }}
+            transition={{ duration: 0.45, delay: 0.05 + index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {chosenKey === key ? (
+              // Marks what the user actually chose, without implying a verdict.
+              <span className="label-caps absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-2xs text-ink">
+                you ▾
+              </span>
+            ) : null}
+          </m.span>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * One row of the distribution: glyph, label, a dot leader, the exact frequency.
+ * The hue lives in the bar above; the row is where the mix is named in words.
  */
 function MixRow({
   entry,
   chosen,
-  index,
 }: {
   entry: ActionFreq;
   chosen: boolean;
-  index: number;
 }) {
   const style = actionStyle(entry.action);
 
   return (
-    <li className="flex items-center gap-3 text-sm">
-      <span className="flex w-32 shrink-0 items-center gap-2">
-        <span aria-hidden="true" style={{ color: style.hex }}>
-          {style.glyph}
-        </span>
-        <span className={cn(chosen && 'font-semibold text-ink')}>
-          {actionLabel(entry.action, entry.size)}
-        </span>
+    <li className="flex items-baseline gap-3 font-mono text-sm">
+      <span aria-hidden="true" className="w-3 text-ink-muted">
+        {style.glyph}
       </span>
-
-      <span className="h-2 flex-1 overflow-hidden rounded-full bg-surface-raised">
-        <m.span
-          className="block h-full"
-          style={{ backgroundColor: style.hex }}
-          initial={{ width: 0 }}
-          animate={{ width: `${entry.freq * 100}%` }}
-          transition={{ duration: 0.4, delay: 0.05 + index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-        />
+      <span className={cn(chosen ? 'text-ink' : 'text-ink-muted')}>
+        {actionLabel(entry.action, entry.size)}
       </span>
-
-      <span className="w-14 shrink-0 text-right font-mono text-xs text-ink-muted">
-        {percent(entry.freq)}
-      </span>
-
-      {/* Marks what the user actually chose, without implying a verdict. */}
-      <span className="w-16 shrink-0 text-right text-[0.6875rem] uppercase tracking-wider text-ink-muted">
-        {chosen ? 'you' : ''}
-      </span>
+      {chosen ? <span className="label-caps text-2xs text-ink">you</span> : null}
+      <span className="leader" aria-hidden="true" />
+      <span className="font-display text-2xl leading-none text-ink">{percent(entry.freq)}</span>
     </li>
   );
 }
@@ -114,6 +135,7 @@ export function FeedbackPanel({
 
   const tier = grade ? tierStyle(grade.tier) : null;
   const sizeNote = grade ? sizeMessage(grade) : null;
+  const mix = orderedMix(frequencies);
 
   /**
    * Which row to mark as the user's.
@@ -127,7 +149,7 @@ export function FeedbackPanel({
   const chosenKey = (() => {
     if (answer === undefined) return null;
 
-    const forAction = orderedMix(frequencies).filter((e) => e.action === answer.action);
+    const forAction = mix.filter((e) => e.action === answer.action);
     if (forAction.length === 0) return null;
 
     const exact = forAction.find((e) => e.size === answer.size);
@@ -136,7 +158,16 @@ export function FeedbackPanel({
   })();
 
   return (
-    <div className="flex flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-5">
+    // The solution, set beside the problem: docs/05's first desktop advantage
+    // is that the spot stays on screen while this appears.
+    <div className="flex flex-col gap-9 border border-line bg-surface p-8">
+      <div className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+        <span className="label-caps text-ink">{grade ? 'Solution' : 'The chart'}</span>
+        {grade ? (
+          <span className="font-mono text-xs text-ink-muted">EV lost {grade.evLoss}bb</span>
+        ) : null}
+      </div>
+
       {grade && answer && tier ? (
         /**
          * One entrance, identical for all four tiers.
@@ -148,68 +179,63 @@ export function FeedbackPanel({
          * **It slides; it does not fade.** The first version animated opacity
          * too, and `e2e/a11y.spec.ts` immediately failed it for contrast:
          * axe scans the moment the element appears and read the tier heading
-         * mid-fade. That is not a scanner artefact to wait out — docs/05
-         * requires the grade to land "immediately, under 100ms, no spinner",
-         * and fading in the one piece of text the user is waiting for is the
-         * opposite of that. Transform only, so the words are at full contrast
-         * on the first frame.
+         * mid-fade. docs/05 requires the grade to land "immediately, under
+         * 100ms, no spinner", and fading in the one piece of text the user is
+         * waiting for is the opposite of that. Transform only, so the words are
+         * at full contrast on the first frame.
          */
         <m.section
-          className="flex flex-col gap-2"
+          className="-mt-3 flex flex-col gap-3"
           aria-live="polite"
           data-testid="grade"
           initial={{ y: -6 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline gap-4">
             <span
               aria-hidden="true"
-              className="text-lg leading-none"
+              className="text-3xl leading-none"
               style={{ color: tier.hex }}
             >
               {tier.glyph}
             </span>
             {/*
               The glyph beside this carries the tier's hue; the words do not.
-              Phase 14 moved the ground to #161826 and three of the four tier
-              hues stopped clearing 4.5:1 as text on it — `axe` caught
-              `blunder` at 3.93. The hues themselves are Okabe–Ito and must not
-              be retuned to win a ratio (CLAUDE.md), so the text moved to ink
-              instead.
+              Phase 14 found three of the four tier hues under 4.5:1 as text,
+              and the hues are Okabe–Ito and must not be retuned to win a ratio
+              (CLAUDE.md) — so the heading is ink, and the glyph plus the label
+              encode the tier twice over.
 
-              Nothing is lost by it. Every *other* action-coloured element in
-              this app is already either an aria-hidden glyph or a background
-              fill — this heading was the only place a strategy hue coloured
-              readable prose, and the glyph plus the label still encode the tier
-              twice over.
+              Set in the display face at the size of a statement: this is the
+              line the whole spot was for. The same size for all four tiers,
+              for the reason the motion is the same — two of them are correct
+              answers to a mixed spot.
             */}
-            <h2 className="text-base font-medium text-ink" data-tier={grade.tier}>
+            <h2 className="font-display text-5xl text-ink" data-tier={grade.tier}>
               {tier.label}
             </h2>
           </div>
 
-          <p className="text-sm text-ink">{tierMessage(grade, answer)}</p>
-          {sizeNote ? <p className="text-sm text-ink-muted">{sizeNote}</p> : null}
-          <p className="font-mono text-xs text-ink-muted">
-            EV loss {grade.evLoss}bb
-          </p>
+          <p className="max-w-[34rem] text-lg text-ink">{tierMessage(grade, answer)}</p>
+          {sizeNote ? <p className="font-mono text-sm text-ink-muted">{sizeNote}</p> : null}
         </m.section>
       ) : null}
 
-      <section className="flex flex-col gap-2" aria-labelledby="mix-heading">
-        <h3 id="mix-heading" className="text-xs uppercase tracking-wider text-ink-muted">
-          <span className="font-mono text-ink">{hand}</span> plays
+      <section className="flex flex-col gap-4 pt-3" aria-labelledby="mix-heading">
+        <h3 id="mix-heading" className="sr-only">
+          What {hand} plays
         </h3>
-
-        <ul className="flex flex-col gap-1.5" data-testid="distribution" data-mix={describeMix(hand, frequencies)}>
-          {orderedMix(frequencies).map((entry, index) => (
+        <MixBar hand={hand} mix={mix} chosenKey={chosenKey} />
+        <ul
+          className="flex flex-col gap-1.5"
+          data-testid="distribution"
+          data-mix={describeMix(hand, frequencies)}
+        >
+          {mix.map((entry) => (
             <MixRow
-              // Keyed on the hand too: moving to the next spot must re-grow the
-              // bars rather than sliding the previous hand's widths across.
               key={`${hand}-${entry.action}-${entry.size ?? ''}`}
               entry={entry}
-              index={index}
               chosen={chosenKey === `${entry.action}-${entry.size ?? ''}`}
             />
           ))}
@@ -217,15 +243,15 @@ export function FeedbackPanel({
       </section>
 
       {rationale ? (
-        <section className="flex flex-col gap-2" aria-labelledby="why-heading">
-          <h3 id="why-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+        <section className="flex flex-col gap-3" aria-labelledby="why-heading">
+          <h3 id="why-heading" className="label-caps text-ink-muted">
             Why
           </h3>
           <RationaleChips rationale={rationale} verbose={verbose} />
         </section>
       ) : null}
 
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col gap-3">
         <RangeGrid
           chart={chart}
           label={`${chartLabel} — ${hand} in context`}

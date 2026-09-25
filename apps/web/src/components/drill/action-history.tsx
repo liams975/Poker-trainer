@@ -3,7 +3,8 @@ import type { HandState } from '@poker/engine';
 import { actionLabel } from '@/components/range/action-colors';
 
 /**
- * What has happened so far, in words.
+ * What has happened so far, in words — set as a hand history, the one piece of
+ * typography poker already had: a position, then what it did, in mono.
  *
  * Read from `state.history`, which the engine built by replaying real
  * `applyAction` calls — never from the scenario's `actionSequence` string. The
@@ -16,20 +17,20 @@ export function ActionHistory({ state }: { state: HandState }) {
   const preflop = state.history.filter((entry) => entry.street === 'preflop');
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <h3 className="text-xs uppercase tracking-wider text-ink-muted">Action</h3>
+    <div className="flex flex-col gap-3">
+      <h3 className="label-caps text-ink-muted">The hand</h3>
 
       {preflop.length === 0 ? (
-        <p className="text-sm text-ink-muted">Folded to you.</p>
+        <p className="font-mono text-sm text-ink-muted">Folded to you.</p>
       ) : (
-        <ol className="flex flex-col gap-0.5">
+        <ol className="flex flex-col">
           {preflop.map((entry, index) => (
             <li
               key={`${entry.position}-${index}`}
-              className="flex items-baseline gap-2 font-mono text-sm"
+              className="grid grid-cols-[3.5rem_1fr] items-baseline border-b border-dotted border-line-soft py-1.5 font-mono text-sm"
             >
-              <span className="w-10 shrink-0 text-ink-muted">{entry.position}</span>
-              <span className="text-ink">
+              <span className="text-ink">{entry.position}</span>
+              <span className="text-ink-muted">
                 {entry.size === undefined
                   ? actionLabel(entry.action)
                   : `${actionLabel(entry.action)} to ${entry.size}bb`}

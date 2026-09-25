@@ -18,8 +18,16 @@ function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? 'Working…' : label}
+    // The yellow key: the one thing on this page to press. Enter does it too,
+    // and the key says so — aria-hidden, so the button's name stays the label.
+    <Button type="submit" className="mt-2 h-13 w-full justify-between px-5" disabled={pending}>
+      <span>{pending ? 'Working…' : label}</span>
+      <kbd
+        aria-hidden="true"
+        className="border border-accent-ink/40 px-1.5 py-0.5 font-mono text-2xs font-normal leading-none"
+      >
+        ⏎
+      </kbd>
     </Button>
   );
 }
@@ -42,7 +50,7 @@ export function AuthForm({
   const isSignUp = mode === 'sign-up';
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="next" value={next} />
 
       {/*
@@ -99,7 +107,7 @@ export function AuthForm({
           required
         />
         {isSignUp ? (
-          <p className="text-xs text-ink-muted">At least 8 characters.</p>
+          <p className="font-mono text-xs text-ink-muted">At least 8 characters.</p>
         ) : null}
       </div>
 

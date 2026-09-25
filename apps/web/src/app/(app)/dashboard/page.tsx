@@ -1,11 +1,15 @@
 import { trackProgress } from '@poker/engine';
 import { redirect } from 'next/navigation';
 
+import type { DayPoint } from '@poker/engine';
+
 import { MasterySummary } from '@/components/dashboard/mastery-summary';
 import { NextUp } from '@/components/dashboard/next-up';
 import { ModeGrid } from '@/components/dashboard/mode-grid';
 import { ProgressRail, type ProgressRailProps } from '@/components/dashboard/progress-rail';
 import { TodayStrip } from '@/components/dashboard/today-strip';
+import { EvLossChart } from '@/components/review/ev-loss-chart';
+import { SectionHead } from '@/components/ui/section-head';
 import { getCharts } from '@/lib/charts/registry';
 import {
   fetchOnboardingCompleted,
@@ -13,6 +17,7 @@ import {
   fetchTrack,
 } from '@/lib/lessons/queries';
 import { fetchMasterySnapshot } from '@/lib/progress/mastery-queries';
+import { fetchReviewHistory } from '@/lib/review/queries';
 import { fetchTodaySnapshot, type TodaySnapshot } from '@/lib/progress/queries';
 import type { MasterySnapshot } from '@/lib/progress/types';
 import { skillLabel } from '@/lib/progress/skill-label';
@@ -44,6 +49,7 @@ export default async function DashboardPage() {
   let snapshot: TodaySnapshot | null;
   let progress: ProgressRailProps['progress'];
   let mastery: MasterySnapshot | null;
+  let history: readonly DayPoint[] | null;
 
   try {
     const { track, lessonIds } = await fetchTrack();
@@ -91,22 +97,58 @@ export default async function DashboardPage() {
     mastery = null;
   }
 
+  // A fifth, for the record. The same query and chart Session Review uses —
+  // one reading of EV lost over time, drawn twice, rather than a second one
+  // that could come to disagree with it.
+  try {
+    history = (await fetchReviewHistory()).points;
+  } catch {
+    history = null;
+  }
+
+  // The contents list's figures, where the Desk has the real number.
+  const figures: Record<string, string> = {};
+  if (rail) figures['continue-learning'] = `${rail.summary.completed} / ${rail.summary.total}`;
+  if (progress && progress.weakSpots.length > 0) {
+    figures['weak-spots'] = `${progress.weakSpots.length} ${progress.weakSpots.length === 1 ? 'skill' : 'skills'}`;
+  }
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-24">
       <h1 className="sr-only">Dashboard</h1>
 
-      <TodayStrip snapshot={snapshot} />
-
-      {/* Frame 2b's grid. 330px is the deck's rail width, and the left column
-          leads with one obvious next action rather than six equal ones. */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_330px]">
-        <div className="flex flex-col gap-6">
-          <NextUp track={rail?.summary} />
-          <ModeGrid />
-          <MasterySummary snapshot={mastery} />
-        </div>
-        <ProgressRail track={rail} progress={progress} />
+      {/* The masthead: one obvious next action, set large, with the day's
+          readings beside it like an instrument panel. */}
+      <div className="grid grid-cols-1 gap-16 xl:grid-cols-[minmax(0,1fr)_28rem]">
+        <NextUp track={rail?.summary} />
+        <TodayStrip snapshot={snapshot} />
       </div>
+
+      <div className="grid grid-cols-1 gap-16 xl:grid-cols-[minmax(0,1fr)_28rem]">
+        <section aria-labelledby="practice-heading" className="flex flex-col">
+          <SectionHead n={1} id="practice-heading" title="Practice" caption="seven ways in" />
+          <ModeGrid figures={figures} />
+        </section>
+        <div className="pt-3">
+          <ProgressRail track={rail} progress={progress} />
+        </div>
+      </div>
+
+      {history === null ? null : (
+        <section aria-labelledby="record-heading" className="flex flex-col gap-8">
+          <SectionHead n={2} id="record-heading" title="The record" caption="last 30 days" />
+          <EvLossChart
+            points={history}
+            id="desk-ev"
+            caption={{
+              figure: 'Fig. 1',
+              text: 'bb lost per spot, one dot a day, the seven-day mean behind it. Zero is at the top, so a higher dot is a better day. Hatched columns are days with no practice — a gap, never a zero.',
+            }}
+          />
+        </section>
+      )}
+
+      <MasterySummary snapshot={mastery} />
     </div>
   );
 }

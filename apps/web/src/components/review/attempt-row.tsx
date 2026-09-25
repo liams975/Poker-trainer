@@ -3,7 +3,7 @@
 import { rebuildSpot } from '@poker/engine';
 import { useState } from 'react';
 
-import { actionLabel } from '@/components/range/action-colors';
+import { actionLabel, actionStyle } from '@/components/range/action-colors';
 import { orderedMix, percent } from '@/components/range/mix-format';
 import { TIER_STYLES } from '@/components/drill/grade-tiers';
 import { SpotView } from '@/components/drill/spot-view';
@@ -73,12 +73,12 @@ export function AttemptRow({ attempt, currentChartVersion }: {
   }
 
   return (
-    <li className="rounded-[var(--radius)] border border-line bg-surface" data-testid="attempt-row">
+    <li className="border-b border-line" data-testid="attempt-row">
       <button
         type="button"
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-expanded={open}
-        className="flex w-full items-center gap-4 px-4 py-3 text-left"
+        className="flex w-full items-center gap-6 px-2 py-4 text-left transition-colors hover:bg-surface"
         disabled={spot === null}
       >
         <span
@@ -91,7 +91,7 @@ export function AttemptRow({ attempt, currentChartVersion }: {
           <span>{style.label}</span>
         </span>
 
-        <span className="w-16 shrink-0 font-mono text-sm">{attempt.hand}</span>
+        <span className="w-16 shrink-0 font-mono text-base">{attempt.hand}</span>
 
         <span className="w-40 shrink-0 text-sm text-ink-muted">
           {attempt.scenario.heroPosition} · {attempt.scenario.actionSequence}
@@ -111,23 +111,31 @@ export function AttemptRow({ attempt, currentChartVersion }: {
       </button>
 
       {open && spot ? (
-        <div className="border-t border-line p-4">
+        <div className="border-t border-line-soft bg-surface p-6">
           <div className="grid grid-cols-1 gap-4 2xl:grid-cols-2">
             <SpotView spot={spot} />
 
             <div className="flex flex-col gap-3">
-              <h3 className="text-xs uppercase tracking-wider text-ink-muted">
+              <h3 className="label-caps text-ink-muted">
                 The mix, as it was graded
               </h3>
 
               <ul className="flex flex-col gap-1.5" data-testid="stored-mix">
                 {mix.map((entry) => (
                   <li key={`${entry.action}-${entry.size ?? ''}`} className="flex items-center gap-3 text-sm">
+                    <span aria-hidden="true" className="w-3 font-mono text-ink-muted">
+                      {actionStyle(entry.action).glyph}
+                    </span>
                     <span className="w-32 shrink-0">{actionLabel(entry.action, entry.size)}</span>
-                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-surface-raised">
+                    {/* The stored mix is strategy data, so it wears the action
+                        hues — glyph and label beside it, never hue alone. */}
+                    <span className="h-2 flex-1 overflow-hidden bg-line-soft">
                       <span
-                        className="block h-full bg-ink-muted"
-                        style={{ width: `${entry.freq * 100}%` }}
+                        className="block h-full"
+                        style={{
+                          width: `${entry.freq * 100}%`,
+                          backgroundColor: actionStyle(entry.action).hex,
+                        }}
                       />
                     </span>
                     <span className="w-14 shrink-0 text-right font-mono text-xs text-ink-muted">

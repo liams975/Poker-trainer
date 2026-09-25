@@ -471,24 +471,41 @@ test.describe('the spot above the grid', () => {
 
 test.describe('the grid never borrows the accent colour', () => {
   /**
-   * docs/05-ui-ux.md: "Accent (chrome) #E8B04B — streak and XP rail ONLY.
-   * Never appears in a range grid."
+   * docs/05-ui-ux.md: the game layer owns the accent — streak, XP, rank — and
+   * it never appears in a range grid.
    *
    * The first version of compare mode washed every changed cell in amber,
    * which put a sixth colour into a grid whose whole premise is that hue means
    * action. Nothing failed; it just quietly broke the palette's meaning. This
    * is the guard.
    *
+   * **The accent is read from the live stylesheet, never pasted.** This test
+   * used to hold `rgb(232, 176, 75)` — v1's amber — and Phase 14 moved the
+   * accent to a blurple without anyone updating it. For three phases it
+   * searched every grid for a colour the app no longer painted, so it could not
+   * fail. Resolving `--color-accent` in the page means the guard follows the
+   * token wherever it goes.
+   *
    * The keyboard focus ring is the one deliberate exception — it is transient,
    * app-wide, and follows the caret rather than encoding anything about a hand
    * — so focus is parked outside the grid before measuring.
    */
-  const ACCENT = 'rgb(232, 176, 75)';
-
   async function accentInsideGrids(page: Page): Promise<string[]> {
     await page.getByRole('link', { name: 'Poker Trainer' }).focus();
 
-    return page.evaluate((accent) => {
+    return page.evaluate(() => {
+      // Paint the token and read it back, so the comparison is against the
+      // exact computed form the grid's own styles resolve to.
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--color-accent)';
+      document.body.appendChild(probe);
+      const accent = getComputedStyle(probe).color;
+      probe.remove();
+
+      if (!accent || accent === 'rgba(0, 0, 0, 0)') {
+        return ['--color-accent did not resolve, so this guard would measure nothing'];
+      }
+
       const found: string[] = [];
       for (const grid of document.querySelectorAll('[role="grid"]')) {
         // Include the grid element itself, not only its descendants.
@@ -513,7 +530,7 @@ test.describe('the grid never borrows the accent colour', () => {
         }
       }
       return found;
-    }, ACCENT);
+    });
   }
 
   test('not while browsing a single chart', async ({ page }) => {

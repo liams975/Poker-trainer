@@ -34,7 +34,7 @@ export function MistakeLog({
   }
 
   return (
-    <ul className="flex flex-col gap-2" data-testid="mistake-log">
+    <ul className="flex flex-col border-t border-line" data-testid="mistake-log">
       {attempts.map((attempt) => (
         <AttemptRow
           key={attempt.id}

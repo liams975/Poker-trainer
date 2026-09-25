@@ -3,7 +3,7 @@
 import type { HandResult, HeroDecision, Position } from '@poker/engine';
 
 import { TIER_STYLES, tierMessage } from '@/components/drill/grade-tiers';
-import { actionLabel } from '@/components/range/action-colors';
+import { actionLabel, actionStyle } from '@/components/range/action-colors';
 import { orderedMix, percent } from '@/components/range/mix-format';
 
 /**
@@ -46,13 +46,13 @@ function Decision({ decision }: { decision: HeroDecision }) {
 
   return (
     <li
-      className="flex flex-col gap-2 rounded-[var(--radius)] border border-line bg-surface p-3"
+      className="flex flex-col gap-2 border border-line bg-surface p-3"
       data-testid="hand-decision"
       data-street={decision.street}
       data-graded={grade === undefined ? undefined : ''}
     >
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="font-mono text-xs uppercase tracking-wider text-ink-muted">
+        <span className="font-mono label-caps text-ink-muted">
           {decision.street}
         </span>
         <span className="text-sm text-ink">
@@ -62,7 +62,7 @@ function Decision({ decision }: { decision: HeroDecision }) {
       </div>
 
       {style === null || grade === undefined ? (
-        <p className="text-xs text-ink-muted" data-testid="uncharted">
+        <p className="text-sm text-ink-muted" data-testid="uncharted">
           {UNCHARTED_COPY[decision.uncharted ?? 'no-chart']}
         </p>
       ) : (
@@ -73,7 +73,7 @@ function Decision({ decision }: { decision: HeroDecision }) {
             </span>
             <span>{style.label}</span>
           </p>
-          <p className="text-xs text-ink-muted">
+          <p className="text-sm text-ink-muted">
             {tierMessage(grade, {
               action: decision.action.action,
               ...(decision.action.size === undefined ? {} : { size: decision.action.size }),
@@ -82,24 +82,32 @@ function Decision({ decision }: { decision: HeroDecision }) {
 
           {/* The whole mix, always. "Teaching someone that AJo *is a fold* when
               it opens 40% of the time actively makes them a worse player." */}
+          {/* The mix as the grid cell draws it — one stacked bar in the action
+              hues, passive to aggressive — then named row by row, so hue is
+              never the only encoding. */}
+          <span className="flex h-2.5 w-full" aria-hidden="true">
+            {orderedMix(frequencies ?? []).map((entry) => (
+              <span
+                key={`${entry.action}-${entry.size ?? ''}`}
+                style={{
+                  width: `${entry.freq * 100}%`,
+                  backgroundColor: actionStyle(entry.action).hex,
+                }}
+              />
+            ))}
+          </span>
           <ul className="flex flex-col gap-1">
             {orderedMix(frequencies ?? []).map((entry) => (
               <li
                 key={`${entry.action}-${entry.size ?? ''}`}
-                className="flex items-center gap-2 text-xs"
+                className="flex items-baseline gap-2.5 font-mono text-xs"
               >
-                <span className="w-28 shrink-0 text-ink-muted">
-                  {actionLabel(entry.action, entry.size)}
+                <span aria-hidden="true" className="w-3 text-ink-muted">
+                  {actionStyle(entry.action).glyph}
                 </span>
-                <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-raised">
-                  <span
-                    className="block h-full bg-ink-muted"
-                    style={{ width: `${entry.freq * 100}%` }}
-                  />
-                </span>
-                <span className="w-10 shrink-0 text-right font-mono text-ink-muted">
-                  {percent(entry.freq)}
-                </span>
+                <span className="text-ink-muted">{actionLabel(entry.action, entry.size)}</span>
+                <span className="leader" aria-hidden="true" />
+                <span className="text-ink">{percent(entry.freq)}</span>
               </li>
             ))}
           </ul>
@@ -127,13 +135,16 @@ export function HandSummary({
 
   return (
     <section className="flex flex-col gap-4" data-testid="hand-summary">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-medium">Hand over</h2>
-        <p className="font-mono text-2xl text-ink" data-testid="hero-net">
+      <div className="flex flex-col gap-3 border-t-2 border-ink pt-3">
+        <h2 className="label-caps text-ink">Hand over</h2>
+        {/* A number and nothing else: winning a pot is not playing well, so
+            the hand gets no framing — only the chips. */}
+        <p className="font-display text-5xl leading-none text-ink" data-testid="hero-net">
           {net > 0 ? '+' : ''}
-          {net.toFixed(2)}bb
+          {net.toFixed(2)}
+          <i className="text-2xl text-ink-muted">bb</i>
         </p>
-        <p className="text-xs text-ink-muted">
+        <p className="text-sm text-ink-muted">
           {showdown
             ? 'Showdown — the cards that had to be shown are face up on the table.'
             : 'Everyone folded, so no cards were shown.'}
@@ -142,7 +153,7 @@ export function HandSummary({
 
       {recordingError === null || recordingError === undefined ? null : (
         <p
-          className="rounded-[var(--radius)] border border-line bg-surface p-3 text-xs text-ink-muted"
+          className="border border-line bg-surface p-3 text-xs text-ink-muted"
           data-testid="recording-error"
         >
           This hand was played but not saved — {recordingError}
@@ -155,7 +166,7 @@ export function HandSummary({
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          <h3 className="text-xs uppercase tracking-wider text-ink-muted">Your decisions</h3>
+          <h3 className="label-caps border-b border-line pb-3 text-ink">Your decisions</h3>
           <ul className="flex flex-col gap-2">
             {decisions.map((decision, index) => (
               <Decision key={`${decision.street}-${index}`} decision={decision} />

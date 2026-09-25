@@ -2,67 +2,73 @@
 @import 'tw-animate-css';
 
 /**
- * Design tokens — docs/05-ui-ux.md.
+ * Design tokens — docs/05-ui-ux.md, "What Phase 17 decided".
  *
- * The governing rule of the whole system, as Phase 14 restates it:
+ * The governing rule is unchanged from Phase 14:
  *
  *   The game layer owns the accent. Strategy data owns the five hues.
  *
- * v1 said "saturated colour is reserved exclusively for strategy data", then
- * spent a gold accent on the streak rail anyway — the rule and the code had
- * already diverged. v2 names what was actually true: one accent for progress,
- * five Okabe–Ito hues for actions, and nothing borrowing across that line.
+ * Phase 17 kept the rule and changed both sides of the ground under it. The
+ * app now reads as a problem book for a card game — a warm instrument-black
+ * page, statements in a 19th-century scientific serif, every figure in mono —
+ * and the accent is the yellow key of a Braun ET66: one per screen, on the
+ * thing you press next.
  *
  * So if you are reaching for `--color-action-*` to style a button, stop: that
  * colour means "raise" everywhere else in the product, and spending it on
  * chrome is what makes the range grid stop reading as data. The reverse holds
- * too — the accent never enters a range grid.
+ * too — the accent never enters a range grid, and never the table.
  *
  * Dark only. docs/05 specifies one palette and there is no light variant to
  * design, so there is no theme toggle and no `prefers-color-scheme` block.
  */
 @theme {
   /**
-   * Chrome. Monochrome by rule.
+   * The ground. Warm, near-black, monochrome by rule.
    *
-   * `canvas`, not `base`, even though docs/05 calls this colour "Base".
+   * `canvas`, not `base`, even though docs/05 once called this colour "Base".
    * A `--color-base` token makes Tailwind generate a *colour* utility named
    * `text-base`, which collides head-on with the built-in `text-base` font-size
    * utility — and the collision is silent. Every element carrying `text-base`
-   * (shadcn's CardTitle, for one) rendered at #0b0f14: background-coloured text
-   * on the background. Caught by looking at the page, not by any test, which is
-   * why there is now a regression test for it in e2e/smoke.spec.ts.
+   * rendered in background-coloured text on the background. Caught by looking
+   * at the page, not by any test, which is why there is now a regression test
+   * for it in e2e/smoke.spec.ts.
    *
    * Before adding a token here, check the name against Tailwind's built-in
    * scales. `text-*` is the dangerous namespace: it is both colour and size.
+   *
+   * **Phase 17 moved the ground, not the hues.** CLAUDE.md: "If a ratio is
+   * wrong, move the ground." Against these three surfaces every Okabe–Ito hue
+   * reads better than it did on Phase 14's navy, worst case across all three:
+   *
+   *     raise  3.93 -> 4.19      call   2.93 -> 3.13   (clears 3:1 at last)
+   *     check  4.44 -> 4.74      all-in 4.96 -> 5.30
+   *     fold   2.37 -> 2.53      (grey: the absence of action, still under)
    */
-  --color-canvas: #161826;
-  --color-surface: #1d2030;
-  --color-surface-raised: #232532;
-  --color-line: #3f424d;
-  --color-ink: #e9e9ed;
+  --color-canvas: #12110f;
+  --color-surface: #1a1815;
+  --color-surface-raised: #23201c;
+  --color-line: #3a3630;
   /**
-   * Secondary text. One step, not four.
-   *
-   * The deck paints muted text at four different opacities, and **four of its
-   * five fail AA** against these grounds:
-   *
-   *     .62 -> #999aa1  5.42  pass
-   *     .55 -> #8a8b93  4.48  fail   (Phase 14 caught this one)
-   *     .50 -> #80818a  3.92  fail
-   *     .45 -> #757680  3.37  fail   — the deck uses this 40 times
-   *     .25 -> #4b4c58  1.79  fail
-   *
-   * So the deck's opacities are read as intents rather than literals, and every
-   * one of them that carries text resolves here, at its brightest passing step.
-   * That flattens a four-step tonal hierarchy to one. It is a deliberate trade:
-   * AA leaves no room for four legible greys on this ground, and the
-   * alternative is text nobody can read.
-   *
-   * The dim values keep their jobs where 4.5:1 does not apply — rules, bar
-   * tracks, decorative marks. `--color-line` is that colour.
+   * Decorative only: bar tracks, dotted leaders, hatching, a rule inside a
+   * list. Never text, never a control's only edge — it sits at 1.2:1 and is
+   * meant to be felt rather than read.
    */
-  --color-ink-muted: #999aa1;
+  --color-line-soft: #2a2723;
+  --color-ink: #eeeae1;
+  /**
+   * Secondary text. One step, measured: 6.08 against the brightest ground.
+   *
+   * Phase 16 had to flatten a four-step grey hierarchy to one because only
+   * one step cleared AA on the navy. This ground is darker, so the one step
+   * that remains has margin rather than a 0.02 escape.
+   */
+  --color-ink-muted: #a39e94;
+  /**
+   * Playing-card faces. The only light surface in the app, because a card is
+   * an object on the table rather than a piece of interface.
+   */
+  --color-paper: #e8e1d1;
 
   /**
    * Action colours are the Okabe–Ito palette, chosen because it stays
@@ -71,8 +77,7 @@
    * is a functional requirement, not a nicety.
    *
    * Never used alone: CLAUDE.md requires every action to carry a glyph or
-   * label as well. Phase 6 enforces that in the grid; the tokens exist here
-   * so the two phases cannot drift apart.
+   * label as well. Never changed to win a ratio: see the ground note above.
    */
   --color-action-raise: #d55e00; /* vermilion */
   --color-action-call: #0072b2; /* blue */
@@ -81,108 +86,117 @@
   --color-action-fold: #55606b; /* grey — folding is the absence of action */
 
   /**
-   * The game layer's accent. Streak, XP, rank, mastery — never a range grid.
+   * The game layer's accent: Okabe–Ito's own yellow.
    *
-   * Nocturne's readme calls this pair "at least 3:1 — not for body copy". That
-   * is a floor for the system in general, not a measurement of these two: on
-   * this ground the accent is **4.71**, which clears AA for body text. Measured
-   * in `tests/contrast.test.ts`, which is the authority here rather than the
-   * prose.
+   * It is the one hue in that set no action uses, so it is distinct from all
+   * five by the same construction that makes them distinct from each other.
+   * Measured, the nearest action under any dichromacy is 66 apart; Phase 14's
+   * blurple sat 28 from call, because it was a lighter blue beside a blue.
+   * `tests/action-colors.test.ts` holds that distance.
    *
-   * `--color-accent-hi` is therefore the deck's emphasis step, not a contrast
-   * rescue — brighter accent for figures that need to come forward.
+   * Streak, XP, rank, mastery, spot pips, the focus ring — and the one yellow
+   * key per screen. Never a range grid, never the table.
+   *
+   * 12.26:1 on the brightest ground, so it needs no brighter emphasis step;
+   * Phase 14's `accent-hi` is gone. Text *on* the accent is `accent-ink`.
    */
-  --color-accent: #9184d9;
-  --color-accent-hi: #d2cefd;
+  --color-accent: #f0e442;
+  --color-accent-ink: #12110f;
 
   /**
    * The 13×13 matrix is the organising geometry of the product, so the
-   * spacing scale is derived from a grid cell rather than picked freehand and
-   * the dashboard columns are multiples of it. Phase 6 builds the grid itself
-   * and owns any tuning of this number.
+   * spacing scale is derived from a grid cell rather than picked freehand.
    */
   --size-cell: 2.75rem; /* 44px */
-  --size-grid: calc(13 * var(--size-cell) + 12 * 2px);
+  --size-grid: calc(13 * var(--size-cell) + 12 * 1px);
 
   /**
-   * v2 pairing: Instrument Serif for statements, Instrument Sans for interface,
-   * IBM Plex Mono for every figure. The deck is explicit that no Inter appears
-   * anywhere, and `display` moves from sans to serif — a heading that used to
-   * read as chrome now reads as a statement, which is the point.
+   * Three faces, each with one job:
+   *
+   *   display — Old Standard TT. A revival of the Modern face of 19th-century
+   *             scientific books, the lineage Computer Modern comes from.
+   *             Statements and big figures, 24px and up, weight 400 only.
+   *   sans    — Schibsted Grotesk. Interface and prose.
+   *   mono    — Fragment Mono. Every figure, hand, label and log line. It
+   *             ships one weight, so emphasis in mono is ink against muted,
+   *             never bold.
    */
-  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
-  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  --font-display: var(--font-old-standard), ui-serif, Georgia, serif;
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-fragment-mono), ui-monospace, monospace;
 
   /**
-   * The type scale, at the deck's density.
+   * The type scale. Overrides Tailwind's built-in steps rather than adding
+   * names, so every existing `text-sm` takes the new scale for free.
    *
-   * Nocturne's readme: "Density 0.70× — this system is dense on purpose." The
-   * deck bears that out: Instrument Sans runs 10.5–15px and IBM Plex Mono
-   * 9–17px, where Tailwind's defaults start at 12 and centre on 16.
-   *
-   * These override the built-in steps rather than adding new names, so the
-   * ~400 existing `text-sm` / `text-xs` usages take the new density for free —
-   * the same leverage the colour tokens gave in Phase 14. Redefining a *size*
-   * step is safe; adding a *colour* token whose name collides with one is what
-   * broke Phase 5 (see the note at the top of this block).
-   *
-   * Line heights are paired explicitly. Tailwind's defaults are tuned for 16px
-   * body text and read cramped at 11px.
+   * Roomier than Phase 16's 0.70× density: the problem book reads at 13–17px
+   * and states things at 44–96px. The two ends are further apart on purpose.
    */
-  --text-2xs: 0.5625rem; /* 9px  — the smallest figure the deck prints */
+  --text-2xs: 0.625rem; /* 10px — the smallest label */
   --text-2xs--line-height: 1.4;
-  --text-xs: 0.6875rem; /* 11px — labels, table headers, meta */
+  --text-xs: 0.6875rem; /* 11px — caps labels, table heads */
   --text-xs--line-height: 1.45;
-  --text-sm: 0.78125rem; /* 12.5px — the deck's workhorse body size */
+  --text-sm: 0.8125rem; /* 13px — the workhorse */
   --text-sm--line-height: 1.6;
-  --text-base: 0.875rem; /* 14px — emphasis body, control labels */
+  --text-base: 0.9375rem; /* 15px — control labels, rail rows */
   --text-base--line-height: 1.55;
-  --text-lg: 0.9375rem; /* 15px — the largest sans in the deck */
-  --text-lg--line-height: 1.45;
-  --text-xl: 1.0625rem; /* 17px — mono figures that carry a panel */
+  --text-lg: 1.0625rem; /* 17px — prose */
+  --text-lg--line-height: 1.7;
+  --text-xl: 1.25rem; /* 20px — mono figures that carry a panel */
   --text-xl--line-height: 1.3;
 
-  /**
-   * Statement sizes. Serif only, weight 400 only.
-   *
-   * The deck never sets Instrument Serif below 26px and never above weight 400
-   * — it ships no other weight, so `font-semibold` on it synthesises a fake
-   * bold. Phase 14 left 38 headings doing exactly that.
-   */
+  /* Statement sizes. Serif, weight 400. */
   --text-2xl: 1.625rem; /* 26px */
-  --text-2xl--line-height: 1.15;
-  --text-3xl: 1.8125rem; /* 29px */
-  --text-3xl--line-height: 1.1;
-  --text-4xl: 2.0625rem; /* 33px */
-  --text-4xl--line-height: 1.08;
-  --text-5xl: 2.75rem; /* 44px */
-  --text-5xl--line-height: 1.04;
-  --text-6xl: 3.375rem; /* 54px — the landing statement */
-  --text-6xl--line-height: 1.02;
+  --text-2xl--line-height: 1.12;
+  --text-3xl: 2rem; /* 32px */
+  --text-3xl--line-height: 1.05;
+  --text-4xl: 2.75rem; /* 44px — section heads */
+  --text-4xl--line-height: 1;
+  --text-5xl: 3.5rem; /* 56px */
+  --text-5xl--line-height: 0.98;
+  --text-6xl: 4.5rem; /* 72px — page statements */
+  --text-6xl--line-height: 0.96;
+  --text-7xl: 5.5rem; /* 88px — the landing and the Desk */
+  --text-7xl--line-height: 0.94;
 
-  /* Nocturne's --radius-md. 8px, applied throughout. */
-  --radius: 0.5rem;
+  /**
+   * Square. Interface is square; only physical objects are round — a card
+   * (4px, set where it is drawn), a chip, the dealer button.
+   */
+  --radius: 0;
 }
 
 /**
- * A Nocturne signature: freestanding rules fade out at both ends rather than
- * stopping cleanly, over 48px a side — one deck baseline unit.
- *
- * Only *freestanding* rules. Box outlines, borders inside a control and short
- * accent marks stay solid; a faded border reads as a rendering fault rather
- * than as a choice. Nocturne's readme is explicit about that split.
+ * Hidden or absent, drawn the same way: a face-down card, a day with no
+ * practice. Hatching means *unknown*. It never stands in for a zero.
  */
-@utility rule-fade {
-  height: 1px;
-  border: 0;
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--color-line) 48px,
-    var(--color-line) calc(100% - 48px),
-    transparent
-  );
+@utility hatch {
+  background-image: repeating-linear-gradient(135deg, var(--color-line) 0 1px, transparent 1px 6px);
+}
+
+/**
+ * The small-caps label: mono, tracked, muted. The voice of every caption,
+ * table head and section tag in the app.
+ */
+@utility label-caps {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/**
+ * A dot leader, as in a book's contents: the space between a title and its
+ * figure. Put it in a flex row between the two.
+ */
+@utility leader {
+  flex: 1 1 0%;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted var(--color-ink-muted);
+  opacity: 0.45;
+  align-self: baseline;
+  transform: translateY(-0.3em);
 }
 
 /**
@@ -201,16 +215,21 @@
     --card-foreground: var(--color-ink);
     --popover: var(--color-surface-raised);
     --popover-foreground: var(--color-ink);
-    --primary: var(--color-ink);
-    --primary-foreground: var(--color-canvas);
+    --primary: var(--color-accent);
+    --primary-foreground: var(--color-accent-ink);
     --secondary: var(--color-surface-raised);
     --secondary-foreground: var(--color-ink);
     --muted: var(--color-surface-raised);
     --muted-foreground: var(--color-ink-muted);
     --accent: var(--color-surface-raised);
     --accent-foreground: var(--color-ink);
-    --destructive: var(--color-action-raise);
-    --destructive-foreground: var(--color-ink);
+    /**
+     * Not an action hue. v2 aliased this to raise-vermilion, which is an
+     * action colour styling chrome — the one crossing the governing rule
+     * forbids. A destructive control is ink, and says what it does in words.
+     */
+    --destructive: var(--color-ink);
+    --destructive-foreground: var(--color-canvas);
     --border: var(--color-line);
     --input: var(--color-line);
     --ring: var(--color-accent);
@@ -226,29 +245,38 @@
     font-family: var(--font-sans);
 
     /**
-     * Tabular numerals globally. docs/05: "non-negotiable" — frequency columns
-     * must align vertically or the grid becomes unreadable. A functional
-     * typographic constraint, not a stylistic one, so it lives on body rather
-     * than being opted into per component and forgotten somewhere.
+     * Tabular numerals are still non-negotiable — docs/05: frequency columns
+     * must align or the grid is unreadable. Phase 17 meets that with the face
+     * rather than a feature: every figure is set in Fragment Mono, which is
+     * monospaced, so its digits align by construction.
+     *
+     * The feature itself came *off* body, deliberately. Schibsted Grotesk's
+     * `tnum` set includes tabular punctuation — a comma measures 2.4× its
+     * normal width with it on — so switching it on globally put a gap before
+     * every comma and full stop in the prose ("Charts , graded drills"). A
+     * numeric column set in the sans takes `tabular-nums` where it is written.
+     * `e2e/smoke.spec.ts` measures the digits rather than reading a property.
      */
-    font-feature-settings: 'tnum' 1;
+  }
+
+  .font-mono {
     font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
   }
 
   /**
    * Visible keyboard focus on every interactive element — docs/05 lists it
-   * first in the quality floor and the roadmap makes it a Phase 5 exit
-   * criterion.
-   *
-   * :focus-visible rather than :focus, so a mouse click does not leave a ring
-   * behind, and applied globally rather than per component so a new control
-   * cannot be added without one. The accent colour is legible against every
-   * surface in the ramp above.
+   * first in the quality floor. :focus-visible rather than :focus, so a mouse
+   * click does not leave a ring behind, and applied globally so a new control
+   * cannot be added without one. The yellow is 12:1 against every ground.
    */
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
-    border-radius: 2px;
   }
 
   /* Never remove the ring without replacing it. */
@@ -258,11 +286,11 @@
 }
 
 /**
- * Reduced motion. The other Phase 5 exit criterion.
+ * Reduced motion, for CSS animation and transitions.
  *
- * Done in CSS rather than by threading a hook through every component: this
- * cannot be forgotten by a future component, and it covers CSS animation,
- * transitions and smooth scrolling in one place. `0.01ms` rather than `0`
+ * This does **not** reach anything Motion animates — Motion writes inline
+ * styles frame by frame. `MotionConfig reducedMotion="user"` in providers.tsx
+ * covers those, and `e2e/motion.spec.ts` proves it. `0.01ms` rather than `0`
  * because a zero-duration animation never fires its `animationend` event, and
  * code that waits for one would hang.
  */

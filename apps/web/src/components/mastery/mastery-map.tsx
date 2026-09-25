@@ -24,9 +24,10 @@ export function MasteryMap({
 }) {
   return (
     <section aria-labelledby="mastery-heading" className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="mastery-heading" className="font-display text-2xl">
-          Mastery
+      <header className="flex flex-wrap items-baseline gap-x-5 gap-y-2 border-b border-line pb-4">
+        <span className="font-mono text-sm text-ink-muted">§2</span>
+        <h2 id="mastery-heading" className="flex-1 font-display text-4xl">
+          Skills
         </h2>
         <p className="font-mono text-xs text-ink-muted">
           {levelsEarned} of {levelsAvailable} levels · {skills.length} skills
@@ -54,7 +55,7 @@ export function MasteryMap({
             <span
               className={cn(
                 'w-8 font-mono text-xs',
-                skill.level === MASTERY_LEVELS ? 'text-accent-hi' : 'text-ink',
+                skill.level === MASTERY_LEVELS ? 'text-accent' : 'text-ink',
                 skill.locked && 'text-ink-muted',
               )}
             >

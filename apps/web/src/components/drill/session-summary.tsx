@@ -87,20 +87,20 @@ function Rewards({ rewards }: { rewards: SessionRewards }) {
     rewards.level.needed === 0 ? 0 : Math.min(1, rewards.level.into / rewards.level.needed);
 
   return (
-    <section className="flex flex-col gap-3" aria-labelledby="rewards-heading">
-      <h3 id="rewards-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+    <section className="flex flex-col gap-4" aria-labelledby="rewards-heading">
+      <h3 id="rewards-heading" className="label-caps border-b border-line pb-3 text-ink">
         Banked
       </h3>
 
-      <div className="flex flex-col gap-2" data-testid="session-rewards">
-        <p className="text-sm text-ink">
+      <div className="flex flex-col gap-3" data-testid="session-rewards">
+        <p className="flex flex-wrap items-baseline gap-x-3 text-base text-ink">
           <CountUp
             to={rewards.xpAwarded}
-            className="font-mono text-accent"
+            className="font-display text-5xl leading-none text-accent"
             prefix="+"
             suffix=" XP"
           />{' '}
-          <span className="text-ink-muted">
+          <span className="text-sm text-ink-muted">
             · level {rewards.level.level} · {rewards.level.into} of {rewards.level.needed} to the
             next
           </span>
@@ -108,10 +108,7 @@ function Rewards({ rewards }: { rewards: SessionRewards }) {
 
         {/* The number above, as a bar filling. Accent is allowed here: docs/05
             reserves it for the streak and XP rail, and this is the XP rail. */}
-        <span
-          className="h-1 w-full max-w-xs overflow-hidden rounded-full bg-surface-raised"
-          aria-hidden="true"
-        >
+        <span className="h-[3px] w-full overflow-hidden bg-line-soft" aria-hidden="true">
           <m.span
             className="block h-full bg-accent"
             initial={{ width: 0 }}
@@ -132,7 +129,7 @@ function Rewards({ rewards }: { rewards: SessionRewards }) {
           {/* `inline-block`, so the badge hugs its sentence. Full width it read
               as an alert bar across the card rather than as a thing earned. */}
           <p
-            className="inline-block rounded-[var(--radius)] border border-accent/40 bg-surface-raised px-3 py-2 text-sm text-ink"
+            className="inline-block border border-accent bg-surface-raised px-4 py-3 text-base text-ink"
             data-testid="level-up"
           >
             <span aria-hidden="true" className="mr-2 text-accent">
@@ -194,18 +191,15 @@ export function SessionSummary({
   onRestart: () => void;
 }) {
   return (
-    <div
-      className="flex flex-col gap-6 rounded-[var(--radius)] border border-line bg-surface p-6"
-      data-testid="session-summary"
-    >
-      <header className="flex flex-col gap-2">
-        <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-muted">
+    <div className="flex flex-col gap-12 border-t-2 border-ink pt-6" data-testid="session-summary">
+      <header className="flex flex-col gap-5">
+        <p className="label-caps text-ink-muted">
           Session complete · {summary.spots} {summary.spots === 1 ? 'spot' : 'spots'}
         </p>
 
         {/*
           Frame 2f is "the one loud moment in the app", and this line is the
-          loud part: Instrument Serif at 44px, weight 400.
+          loud part: the display face at its statement size, weight 400.
 
           `headline` only ever names a **milestone** — a level, an achievement, a
           streak record. Never the session's answers. Two of the four grade
@@ -213,68 +207,75 @@ export function SessionSummary({
           the spots went would assert a verdict the engine does not hold, which
           is the rule `tests/feedback-motion.test.ts` enforces one layer down.
         */}
-        <h2 className="font-display text-5xl">{headline(rewards)}</h2>
+        <h2 className="max-w-[48rem] font-display text-6xl tracking-[-0.02em]">
+          {headline(rewards)}
+        </h2>
 
-        <p className="text-sm text-ink-muted">
-          <span className="font-mono">{summary.avgEvLoss}bb</span> lost per spot ·{' '}
-          <span className="font-mono">{summary.totalEvLoss}bb</span> across the session
+        <p className="text-base text-ink-muted">
+          <span className="font-mono text-ink">{summary.avgEvLoss}bb</span> lost per spot ·{' '}
+          <span className="font-mono text-ink">{summary.totalEvLoss}bb</span> across the session
         </p>
       </header>
 
-      <section className="flex flex-col gap-2" aria-labelledby="tiers-heading">
-        <h3 id="tiers-heading" className="text-xs uppercase tracking-wider text-ink-muted">
-          How your answers landed
-        </h3>
+      <div className="grid grid-cols-1 gap-16 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <section className="flex flex-col gap-4" aria-labelledby="tiers-heading">
+          <h3 id="tiers-heading" className="label-caps border-b border-line pb-3 text-ink">
+            How your answers landed
+          </h3>
 
-        <ul className="flex flex-col gap-1.5" data-testid="tier-breakdown">
-          {GRADE_TIERS.map((tier) => {
-            const count = summary.byTier[tier];
-            const style = TIER_STYLES[tier];
-            const share = summary.spots === 0 ? 0 : count / summary.spots;
+          <ul className="flex flex-col gap-3" data-testid="tier-breakdown">
+            {GRADE_TIERS.map((tier) => {
+              const count = summary.byTier[tier];
+              const style = TIER_STYLES[tier];
+              const share = summary.spots === 0 ? 0 : count / summary.spots;
 
-            return (
-              <li key={tier} className="flex items-center gap-3 text-sm" data-tier={tier}>
-                <span className="flex w-36 shrink-0 items-center gap-2">
-                  <span aria-hidden="true" style={{ color: style.hex }}>
-                    {style.glyph}
+              return (
+                <li key={tier} className="flex items-center gap-4 text-base" data-tier={tier}>
+                  <span className="flex w-36 shrink-0 items-center gap-2.5">
+                    <span aria-hidden="true" style={{ color: style.hex }}>
+                      {style.glyph}
+                    </span>
+                    <span>{style.label}</span>
                   </span>
-                  <span>{style.label}</span>
-                </span>
 
-                <span className="h-2 flex-1 overflow-hidden rounded-full bg-surface-raised">
-                  <span
-                    className="block h-full"
-                    style={{ width: `${share * 100}%`, backgroundColor: style.hex }}
-                  />
-                </span>
+                  <span className="h-2 flex-1 overflow-hidden bg-line-soft">
+                    <span
+                      className="block h-full"
+                      style={{
+                        width: `${share * 100}%`,
+                        backgroundColor: style.hex,
+                      }}
+                    />
+                  </span>
 
-                <span className="w-24 shrink-0 text-right font-mono text-xs text-ink-muted">
-                  {count} · {percent(share)}
-                </span>
+                  <span className="w-24 shrink-0 text-right font-mono text-sm text-ink">
+                    {count} · {percent(share)}
+                  </span>
 
-                <span className="hidden w-44 shrink-0 text-xs text-ink-muted lg:inline">
-                  {tierNote(tier)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+                  <span className="hidden w-44 shrink-0 text-sm text-ink-muted 2xl:inline">
+                    {tierNote(tier)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
-      {rewards ? <Rewards rewards={rewards} /> : null}
+        {rewards ? <Rewards rewards={rewards} /> : null}
+      </div>
 
       {studyMode ? (
         <p className="text-sm text-ink-muted">
-          Study session — recorded in your history, but kept out of your XP, your accuracy
-          and your weak spots. It still counts towards your streak.
+          Study session — recorded in your history, but kept out of your XP, your accuracy and your
+          weak spots. It still counts towards your streak.
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={onRestart}>
+      <div className="flex flex-wrap items-center gap-4">
+        <Button type="button" className="h-13 px-6" onClick={onRestart}>
           Drill again
         </Button>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="h-13 px-6">
           <Link href="/dashboard">Back to dashboard</Link>
         </Button>
       </div>

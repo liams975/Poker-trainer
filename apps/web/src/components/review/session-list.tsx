@@ -32,16 +32,16 @@ export function SessionList({ sessions }: { sessions: readonly SessionRow[] }) {
   }
 
   return (
-    <ul className="flex flex-col gap-2" data-testid="session-list">
+    <ul className="flex flex-col border-t border-line" data-testid="session-list">
       {sessions.map((session) => (
         <li key={session.id}>
           <Link
             href={`/review/${session.id}`}
-            className="flex items-center gap-4 rounded-[var(--radius)] border border-line bg-surface px-4 py-3 hover:border-ink-muted"
+            className="flex items-center gap-6 border-b border-line px-2 py-4 transition-colors hover:bg-surface"
             data-testid="session-row"
             data-mode={session.mode}
           >
-            <span className="w-32 shrink-0 text-sm text-ink">
+            <span className="w-40 shrink-0 text-base text-ink">
               {MODE_LABELS[session.mode] ?? session.mode}
             </span>
 

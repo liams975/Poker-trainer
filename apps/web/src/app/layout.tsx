@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, Instrument_Sans, Instrument_Serif } from 'next/font/google';
+import { Fragment_Mono, Old_Standard_TT, Schibsted_Grotesk } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from './providers';
@@ -8,34 +8,40 @@ import './globals.css';
 
 /**
  * Three faces, each with a job, per docs/05-ui-ux.md:
- *   display — statements: the landing argument, the summary headline
- *   body    — every interface surface
- *   data    — every frequency, percentage, EV figure and the range grid
+ *   display — statements and big figures: Old Standard TT, the Modern face of
+ *             19th-century scientific books
+ *   body    — every interface surface and all prose: Schibsted Grotesk
+ *   data    — every frequency, percentage, EV figure, hand and log line:
+ *             Fragment Mono
  *
  * Loaded through next/font so they self-host: no render-blocking request to
  * Google, and no layout shift from a late swap.
  *
- * Only Instrument Sans is a variable font. The other two ship discrete weights,
- * and next/font throws at build time if a non-variable family arrives without
- * an explicit `weight` — so those lists are required, not decoration.
+ * Only Schibsted Grotesk is a variable font. The other two ship discrete
+ * weights, and next/font throws at build time if a non-variable family arrives
+ * without an explicit `weight` — so those lists are required, not decoration.
+ * The italics are real: the display face's italic carries half the statements.
  */
-const instrumentSans = Instrument_Sans({
+const schibsted = Schibsted_Grotesk({
   subsets: ['latin'],
-  variable: '--font-instrument-sans',
+  style: ['normal', 'italic'],
+  variable: '--font-schibsted',
   display: 'swap',
 });
 
-const instrumentSerif = Instrument_Serif({
+const oldStandard = Old_Standard_TT({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-old-standard',
+  display: 'swap',
+});
+
+const fragmentMono = Fragment_Mono({
   subsets: ['latin'],
   weight: '400', // the only weight this family has
-  variable: '--font-instrument-serif',
-  display: 'swap',
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-ibm-plex-mono',
+  style: ['normal', 'italic'],
+  variable: '--font-fragment-mono',
   display: 'swap',
 });
 
@@ -48,10 +54,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // Dark only — docs/05 specifies one palette, so there is no toggle and no
     // flash-of-wrong-theme problem to solve.
-    <html lang="en" className="dark">
-      <body
-        className={`${instrumentSans.variable} ${instrumentSerif.variable} ${ibmPlexMono.variable} antialiased`}
-      >
+    //
+    // The font variables go on <html>, not <body>. Tailwind emits the theme at
+    // `:root`, where `--font-display: var(--font-old-standard), …` is resolved
+    // — and a custom property resolves where it is declared, not where it is
+    // used. With the next/font classes on <body>, `--font-old-standard` did not
+    // exist yet at `:root`, `--font-display` computed to nothing, and every
+    // face fell through to the system font. That is how Phases 14–16 shipped:
+    // Instrument Serif and Sans were loaded and never drawn. `e2e/smoke.spec.ts`
+    // now reads the rendered face back.
+    <html
+      lang="en"
+      className={`dark ${schibsted.variable} ${oldStandard.variable} ${fragmentMono.variable}`}
+    >
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

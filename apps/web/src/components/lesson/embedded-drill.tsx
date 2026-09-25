@@ -25,9 +25,17 @@ export interface EmbeddedDrillProps {
   templates: readonly { id: string; template: DrillTemplate }[];
   templateSlug: string;
   spots: number;
+  /** "Exercise 2.2", numbered by the lesson it closes. */
+  exercise?: string | undefined;
 }
 
-export function EmbeddedDrill({ chartSet, templates, templateSlug, spots }: EmbeddedDrillProps) {
+export function EmbeddedDrill({
+  chartSet,
+  templates,
+  templateSlug,
+  spots,
+  exercise,
+}: EmbeddedDrillProps) {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState<SessionSummary | null>(null);
 
@@ -54,20 +62,25 @@ export function EmbeddedDrill({ chartSet, templates, templateSlug, spots }: Embe
   }
 
   return (
-    <section
-      className="flex max-w-[62rem] flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5"
-      aria-label="Practice"
-    >
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-sm font-medium">Practice</h3>
+    // Set as the exercise that closes a textbook section: a heavy rule, its
+    // number, and what it asks. The region keeps the name "Practice", which is
+    // what it is and what the e2e suite finds it by.
+    <section className="flex flex-col gap-6 border-t-2 border-ink pt-5" aria-label="Practice">
+      <header className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-col gap-2">
+          <span className="label-caps text-ink-muted">{exercise ?? 'Practice'}</span>
+          <h3 className="font-display text-3xl">
+            {spots} spots, <i>{template.template.title.toLowerCase()}</i>
+          </h3>
           <p className="text-sm text-ink-muted">
-            {spots} spots from {template.template.title.toLowerCase()}.
+            Graded on four tiers, and the mix is always shown.
           </p>
         </div>
 
         {!started ? (
-          <Button type="button" size="sm" onClick={() => setStarted(true)}>
+          // Outline, not the yellow key: on a lesson page the key is "Mark as
+          // complete", and there is one per screen.
+          <Button type="button" variant="outline" onClick={() => setStarted(true)}>
             Start practice
           </Button>
         ) : null}
@@ -85,7 +98,7 @@ export function EmbeddedDrill({ chartSet, templates, templateSlug, spots }: Embe
 
       {finished !== null ? (
         <div className="flex flex-col gap-3" data-testid="embedded-drill-summary">
-          <p className="text-sm text-ink">
+          <p className="text-base text-ink">
             {finished.spots} spots ·{' '}
             <span className="font-mono">{finished.totalEvLoss}bb</span> EV lost
           </p>
@@ -107,8 +120,8 @@ export function EmbeddedDrill({ chartSet, templates, templateSlug, spots }: Embe
 
           <Button
             type="button"
-            size="sm"
             variant="outline"
+            className="self-start"
             onClick={() => {
               setFinished(null);
               setStarted(false);

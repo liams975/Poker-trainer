@@ -28,7 +28,7 @@ export function AchievementBadge({
 }) {
   return (
     <m.li
-      className="flex items-start gap-3 rounded-[var(--radius)] border border-line bg-surface-raised px-3 py-2"
+      className="flex items-start gap-3 border border-line bg-surface-raised px-3 py-2"
       data-testid="achievement"
       data-achievement={achievement.id}
       initial={{ opacity: 0, y: 10 }}

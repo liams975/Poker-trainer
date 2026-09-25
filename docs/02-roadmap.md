@@ -490,7 +490,7 @@ Nocturne's own readme turned out to be wrong under measurement.
 - **The disk was full** (751 MiB of 228 GiB) with `.turbo/cache` at 7.3 GB, and
   `pnpm build` reported success while emitting `No space left on device`.
 
-## Phase 15 — close v2, and the screens that don't grade *(current)*
+## Phase 15 — close v2, and the screens that don't grade
 
 - `packages/engine/src/progress/achievements.ts` — `achievementProgress()`
 - `apps/web/src/app/(app)/achievements/page.tsx` — **new route**: frame 2h
@@ -556,6 +556,42 @@ For the `mastery` kind, progress is measured on **attempts among tags already
 accurate enough** — attempts being the axis that only moves forward with work. A
 bar tracking accuracy would slide backwards after a bad session on a badge
 nobody had lost.
+
+## Phase 16 — the frames, actually built
+
+Phase 14's approved section A4 — the screens restyled to their frames — was
+skipped and not reported as skipped. This built it. The record is the commit
+message of `077f2d4`.
+
+## Phase 17 — the problem book *(current)*
+
+A complete visual revamp, designed first as a six-artboard canvas built from
+the real chart JSON and then carried into every route. Functionality is
+unchanged apart from four small additions listed below.
+
+- `apps/web/src/app/globals.css` — a warm instrument-black ground, Okabe–Ito
+  yellow as the accent, radius 0, the `hatch` / `label-caps` / `leader` utilities
+- `apps/web/src/app/layout.tsx` — Old Standard TT, Schibsted Grotesk, Fragment
+  Mono; the font variables moved to `<html>`
+- `apps/web/src/components/**` — every screen, to the canvas: the Desk as a
+  masthead and a table of contents, lessons with numbered figures and margin
+  notes, the drill's "Solution", the ET66 keypad, paper cards
+- Added: a section nav; "The record" on the Desk (the review chart, reused);
+  corner figures on mixed cells; derived margin notes on lesson figures
+- `apps/web/tests/action-colors.test.ts` — the accent stays 40 clear of every
+  action hue under each dichromacy
+
+**Exit:** every route renders to the canvas at 1440; typecheck, lint, unit and
+e2e suites green, including the axe sweep against the new palette; CI green.
+
+**What it found.** The typography of Phases 14–16 had never rendered — the
+theme resolved next/font's variables at `:root` while they were set on
+`<body>`, so every face fell through to the system font and nothing noticed.
+Two e2e guards could not fail: the grid-accent check still looked for v1's
+amber, and the landing's mixed-hand check passed on any page that printed
+"AJo". The landing's claim about AJo was itself false against the chart. And
+four pieces of chrome — a per-skill cost bar, `destructive`, invalid inputs,
+an auth error — wore the raise hue. `docs/05-ui-ux.md` records each.
 
 ## Later
 

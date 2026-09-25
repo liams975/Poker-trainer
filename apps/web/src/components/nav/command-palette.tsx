@@ -112,7 +112,7 @@ export function CommandPalette({ destinations }: { destinations: readonly Destin
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-canvas/80 p-6 pt-[12vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-canvas/85 p-6 pt-[14vh]"
       role="dialog"
       aria-modal="true"
       aria-label="Jump to"
@@ -130,7 +130,13 @@ export function CommandPalette({ destinations }: { destinations: readonly Destin
         className="absolute inset-0 h-full w-full cursor-default"
       />
 
-      <div className="relative flex w-full max-w-lg flex-col overflow-hidden rounded-[var(--radius)] border border-line bg-surface">
+      <div className="relative flex w-full max-w-xl flex-col overflow-hidden border border-line border-t-2 border-t-ink bg-surface">
+        {/* The book's index. Named so, because that is what ⌘K is here: every
+            destination, by section, jumped to by name. */}
+        <div className="flex items-baseline justify-between px-5 pt-4" aria-hidden="true">
+          <span className="font-display text-2xl">Index</span>
+          <span className="label-caps text-ink-muted">esc to close</span>
+        </div>
         <input
           ref={inputRef}
           type="text"
@@ -158,7 +164,7 @@ export function CommandPalette({ destinations }: { destinations: readonly Destin
           aria-label="Jump to"
           aria-controls="command-palette-list"
           aria-activedescendant={matches[clamped] ? `cmd-${matches[clamped].id}` : undefined}
-          className="border-b border-line bg-transparent px-4 py-3 text-sm text-ink outline-none placeholder:text-ink-muted"
+          className="border-b border-line bg-transparent px-5 py-4 font-mono text-base text-ink outline-none placeholder:text-ink-muted"
           data-testid="command-input"
         />
 
@@ -180,7 +186,7 @@ export function CommandPalette({ destinations }: { destinations: readonly Destin
           id="command-palette-list"
           role="listbox"
           aria-label="Destinations"
-          className="max-h-80 overflow-y-auto p-1"
+          className="max-h-96 overflow-y-auto px-2 pb-2"
           data-testid="command-list"
           // Focusable so the list can be scrolled by keyboard directly. It is
           // never focused in normal use — the input holds focus and points at
@@ -204,7 +210,7 @@ export function CommandPalette({ destinations }: { destinations: readonly Destin
                     // section, and reading it twice is worse than not styling it.
                     <p
                       aria-hidden="true"
-                      className="px-3 pb-1 pt-3 text-xs uppercase tracking-wider text-ink-muted"
+                      className="label-caps px-3 pb-1.5 pt-4 text-ink-muted"
                     >
                       {header}
                     </p>
@@ -229,8 +235,10 @@ export function CommandPalette({ destinations }: { destinations: readonly Destin
                       }
                     }}
                     onMouseEnter={() => setActive(index)}
-                    className={`cursor-pointer rounded-[calc(var(--radius)-2px)] px-3 py-2 text-sm ${
-                      index === clamped ? 'bg-surface-raised text-ink' : 'text-ink-muted'
+                    className={`cursor-pointer px-3 py-2.5 text-base ${
+                      index === clamped
+                        ? 'bg-surface-raised text-ink shadow-[inset_2px_0_0_var(--color-ink)]'
+                        : 'text-ink-muted'
                     }`}
                   >
                     {destination.label}

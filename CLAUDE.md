@@ -185,6 +185,15 @@ supabase_kong_<project>` fixes it. Nothing to do with your code.
   identifies an action — hue, proportion, fixed order and the accessible name
   are, and all four are redundant by design. If a ratio is wrong, move the
   ground.
+- Never pick an accent that sits near an action hue. It is Okabe–Ito's unused
+  yellow `#F0E442` — one yellow key per screen, never a grid or the table —
+  and `apps/web/tests/action-colors.test.ts` holds it 40 clear of every action
+  under each dichromacy. The blurple before it sat 28 from call.
+- Never put next/font's variable classes on `<body>`. Tailwind resolves
+  `--font-display: var(--font-…)` at `:root`, where a body-level variable does
+  not exist yet, so every theme face silently falls back to the system font —
+  Phases 14–16 shipped that way with every suite green. They go on `<html>`;
+  `e2e/smoke.spec.ts` reads the rendered face back.
 - Never add a dependency without saying why in the PR/commit message.
 
 ## Phase gate protocol

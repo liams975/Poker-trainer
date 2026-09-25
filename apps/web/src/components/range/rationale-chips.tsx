@@ -53,14 +53,19 @@ export function RationaleChips({ rationale, verbose = true }: RationaleChipsProp
   if (factors.length === 0) return null;
 
   return (
-    <ul className="flex flex-wrap gap-1.5">
+    // A grid of labelled factors rather than a row of pills: each is a small
+    // table cell — what kind of reason, then the reason — so they read in
+    // columns and line up with one another.
+    <ul className="grid grid-cols-1 gap-px bg-line sm:grid-cols-2 sm:[&>li:last-child:nth-child(odd)]:col-span-2">
       {factors.map((item) => (
         <li
           key={`${item.kind}-${JSON.stringify(item.detail)}`}
-          className="rounded-[var(--radius)] border border-line bg-surface-raised px-2 py-1 text-xs"
+          className="flex flex-col gap-1.5 bg-surface px-4 py-3"
         >
-          <span className="text-ink">{FACTOR_TITLES[item.kind] ?? item.kind}</span>{' '}
-          <span className="text-ink-muted">{factorText(item.detail)}</span>
+          <span className="label-caps text-2xs text-ink-muted">
+            {FACTOR_TITLES[item.kind] ?? item.kind}
+          </span>
+          <span className="text-sm text-ink">{factorText(item.detail)}</span>
         </li>
       ))}
     </ul>

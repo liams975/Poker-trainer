@@ -33,21 +33,33 @@ export interface TrackNavProps {
   states: ReadonlyMap<string, LessonStatus>;
   /** Highlighted as the current page, when one is open. */
   activeSlug?: string | undefined;
+  /** `columns` sets the modules side by side, for the course's own contents page. */
+  layout?: 'column' | 'columns';
 }
 
-export function TrackNav({ track, states, activeSlug }: TrackNavProps) {
+export function TrackNav({ track, states, activeSlug, layout = 'column' }: TrackNavProps) {
   const modules = [...track.modules].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
-    <nav className="flex flex-col gap-6" aria-label="Track contents">
-      {modules.map((module) => (
+    <nav
+      className={cn(
+        layout === 'columns' ? 'grid grid-cols-1 gap-12 lg:grid-cols-3' : 'flex flex-col gap-8',
+      )}
+      aria-label="Track contents"
+    >
+      {modules.map((module, moduleIndex) => (
         <section key={module.slug} className="flex flex-col gap-2">
-          <h2 className="text-xs uppercase tracking-wider text-ink-muted">{module.title}</h2>
+          {/* Numbered as a textbook's contents: §1, then 1.1, 1.2 — the same
+              numbers the lesson page and its figures carry. */}
+          <h2 className="flex items-baseline gap-2.5 pb-1 text-sm font-semibold text-ink">
+            <span className="font-mono text-xs font-normal text-ink-muted">§{moduleIndex + 1}</span>
+            {module.title}
+          </h2>
 
-          <ol className="flex flex-col gap-0.5">
+          <ol className="flex flex-col">
             {[...module.lessons]
               .sort((a, b) => a.sortOrder - b.sortOrder)
-              .map((lesson) => {
+              .map((lesson, lessonIndex) => {
                 const status = states.get(lesson.slug) ?? 'locked';
                 const active = lesson.slug === activeSlug;
 
@@ -55,17 +67,31 @@ export function TrackNav({ track, states, activeSlug }: TrackNavProps) {
                   <>
                     {/* Glyph and text, never colour alone — the status has to
                         survive greyscale and a screen reader. */}
-                    <span aria-hidden="true" className="w-4 shrink-0 text-ink-muted">
-                      {STATUS_GLYPH[status]}
+                    <span
+                      aria-hidden="true"
+                      className="w-8 shrink-0 font-mono text-xs text-ink-muted"
+                    >
+                      {moduleIndex + 1}.{lessonIndex + 1}
                     </span>
                     <span className="flex-1">{lesson.title}</span>
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'w-3 shrink-0 text-right text-xs',
+                        active ? 'text-accent' : 'text-ink-muted',
+                      )}
+                    >
+                      {STATUS_GLYPH[status]}
+                    </span>
                     <span className="sr-only">{STATUS_LABEL[status]}</span>
                   </>
                 );
 
                 const shared = cn(
-                  'flex items-baseline gap-2 rounded-[var(--radius)] px-2 py-1.5 text-sm',
-                  active && 'bg-surface-raised font-semibold text-ink',
+                  'flex items-baseline gap-2 py-2 pr-2.5 pl-2.5 text-base leading-snug',
+                  // The open lesson: a raised row with an accent edge. The
+                  // accent marks progress — where you are in the course.
+                  active && 'bg-surface-raised text-ink shadow-[inset_2px_0_0_var(--color-accent)]',
                 );
 
                 return (

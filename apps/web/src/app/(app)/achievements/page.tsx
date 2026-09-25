@@ -28,8 +28,14 @@ export default async function AchievementsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="sr-only">Achievements</h1>
+    <div className="flex flex-col gap-16">
+      <header className="flex flex-col gap-6">
+        <h1 className="font-display text-6xl tracking-[-0.02em]">Achievements</h1>
+        <p className="max-w-[40rem] text-lg text-ink-muted">
+          Milestones, not verdicts: the things worth marking are the ones that are unambiguously
+          yours — never a single answer.
+        </p>
+      </header>
 
       {gallery === null ? (
         <p className="text-sm text-ink-muted">

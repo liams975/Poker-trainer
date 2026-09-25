@@ -17,6 +17,13 @@ export interface Mode {
   readonly href: string;
   /** The roadmap phase that makes this real. `null` once it is live. */
   readonly availableIn: number | null;
+  /**
+   * The figure set against the title, as a book's contents sets a page number.
+   * Static text here must be true by construction — never a count that could
+   * drift from the data. The Desk overrides it where it has the real figure
+   * (lessons done, weak spots found).
+   */
+  readonly figure: string;
 }
 
 export const MODES: readonly Mode[] = [
@@ -27,14 +34,18 @@ export const MODES: readonly Mode[] = [
     href: '/learn',
     // Live from Phase 8.
     availableIn: null,
+    figure: 'the track',
   },
   {
     slug: 'quick-drill',
     title: 'Quick Drill',
-    description: '20 mixed spots from unlocked material. Low friction.',
+    // It said "20 mixed spots" until Phase 17. The runner offers 10, 25, 50 or
+    // endless and starts on 25; twenty was docs/05's first sketch.
+    description: 'Mixed spots from everything unlocked. Low friction.',
     href: '/drill/quick',
     // Live from Phase 7.
     availableIn: null,
+    figure: '10 · 25 · 50',
   },
   {
     slug: 'focused-drill',
@@ -42,6 +53,7 @@ export const MODES: readonly Mode[] = [
     description: 'Filter by position or scenario. Deliberate practice.',
     href: '/drill/focused',
     availableIn: null,
+    figure: 'by seat',
   },
   {
     slug: 'weak-spots',
@@ -50,6 +62,7 @@ export const MODES: readonly Mode[] = [
     href: '/drill/weak-spots',
     // Live from Phase 9.
     availableIn: null,
+    figure: 'adaptive',
   },
   {
     slug: 'range-explorer',
@@ -58,14 +71,16 @@ export const MODES: readonly Mode[] = [
     href: '/range-explorer',
     // The first mode to go live, Phase 6.
     availableIn: null,
+    figure: 'no grading',
   },
   {
     slug: 'session-review',
     title: 'Session Review',
-    description: 'History, mistake log, accuracy over time.',
+    description: 'History, the mistake log, EV lost over time.',
     href: '/review',
     // Live from Phase 10, the last of the six.
     availableIn: null,
+    figure: 'EV lost',
   },
   {
     slug: 'play',
@@ -76,5 +91,6 @@ export const MODES: readonly Mode[] = [
     // Phase 12b; `buildDestinations` derives ⌘K from this list, so it appeared
     // in the palette the moment this line did.
     availableIn: null,
+    figure: '6-max · 100bb',
   },
 ];

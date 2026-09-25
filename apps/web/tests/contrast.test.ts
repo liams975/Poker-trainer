@@ -12,11 +12,12 @@ import { describe, expect, it } from 'vitest';
  * asks the other question — is the text readable — for the monochrome layer and
  * the accent.
  *
- * It exists because Phase 14 changed the ground. The deck specifies muted text
- * as `rgba(233,233,237,.55)`, which composites to #8a8b93 and measures **4.48**
+ * It exists because Phase 14 changed the ground. The deck specified muted text
+ * as `rgba(233,233,237,.55)`, which composites to #8a8b93 and measured **4.48**
  * against `surface-raised`: under AA by 0.02, on the token carrying 170 of the
  * app's body-text usages. Nothing in the suite would have noticed, because
- * nothing in the suite was looking. Now something is.
+ * nothing in the suite was looking. Phase 17 moved the ground again, and this
+ * file is why that did not need an audit by eye.
  *
  * Values are read from globals.css rather than pasted, so the assertion cannot
  * outlive the palette it is describing.
@@ -69,7 +70,7 @@ describe('text is readable on every ground it can be painted on', () => {
   /** WCAG 2.1 AA, normal-size text. */
   const AA_TEXT = 4.5;
 
-  it.each([['--color-ink'], ['--color-ink-muted'], ['--color-accent-hi']])(
+  it.each([['--color-ink'], ['--color-ink-muted'], ['--color-accent']])(
     '%s clears AA for body text',
     (name) => {
       const { ratio, ground } = worstContrast(token(name));
@@ -81,9 +82,9 @@ describe('text is readable on every ground it can be painted on', () => {
 
   it('keeps ink-muted above AA rather than merely close to it', () => {
     /**
-     * Pinned deliberately tight. The deck's literal .55 alpha lands at 4.48 and
-     * a reviewer reading "about four and a half" would wave it through, so the
-     * margin is the assertion: this token is the one that was actually wrong.
+     * Pinned with a margin. Phase 14's deck put this token at 4.48 and a
+     * reviewer reading "about four and a half" would have waved it through, so
+     * the margin is the assertion: this token is the one that was once wrong.
      */
     const { ratio } = worstContrast(token('--color-ink-muted'));
     expect(ratio).toBeGreaterThan(4.6);
@@ -92,29 +93,34 @@ describe('text is readable on every ground it can be painted on', () => {
 
 describe('the accent carries its own weight', () => {
   /**
-   * Nocturne's readme says this pair is "tuned to at least 3:1 — enough for
-   * icons, large text and interface chrome, not for body copy", and Phase 14
-   * initially took that as the measurement. It is not: it is a conservative
-   * floor written for the system generally. Measured against these three
-   * grounds the accent lands at **4.71**, clearing AA for body text outright.
-   *
-   * Recorded here because the prose is the more memorable of the two, and the
-   * next person to read the readme will reach the same wrong conclusion.
+   * Phase 14's accent measured 4.71 and needed `--color-accent-hi` as a
+   * brighter emphasis step. Phase 17's is Okabe–Ito yellow at over 12:1, so
+   * the step is gone — and so that nobody reintroduces a dim accent that only
+   * *looks* bright, the margin is the assertion: comfortably past AAA.
    */
-  it('clears AA for body text, not merely 3:1 for chrome', () => {
-    expect(worstContrast(token('--color-accent')).ratio).toBeGreaterThanOrEqual(4.5);
+  it('clears AAA for body text on every ground', () => {
+    expect(worstContrast(token('--color-accent')).ratio).toBeGreaterThanOrEqual(7);
   });
 
-  it('keeps accent-hi brighter than the accent', () => {
+  it('carries readable text when it is the ground — the yellow key', () => {
     /**
-     * So --color-accent-hi earns its place as the deck's emphasis step (28 uses
-     * across the frames), not as a contrast rescue. The ordering is the whole
-     * contract: swap them and every emphasised figure recedes.
+     * The primary control is a filled yellow key with `accent-ink` on it. A
+     * pale accent under white text is the commonest way this pattern fails, so
+     * the label on the key is measured like any other text.
      */
-    const accent = worstContrast(token('--color-accent')).ratio;
-    const accentHi = worstContrast(token('--color-accent-hi')).ratio;
+    expect(contrast(token('--color-accent-ink'), token('--color-accent'))).toBeGreaterThanOrEqual(
+      4.5,
+    );
+  });
+});
 
-    expect(accentHi).toBeGreaterThan(accent);
+describe('a card is readable', () => {
+  /**
+   * Cards are the one light surface in the app. Rank and pip are drawn in the
+   * canvas colour on paper, so they are measured as text.
+   */
+  it('keeps canvas ink legible on paper', () => {
+    expect(contrast(token('--color-canvas'), token('--color-paper'))).toBeGreaterThanOrEqual(7);
   });
 });
 

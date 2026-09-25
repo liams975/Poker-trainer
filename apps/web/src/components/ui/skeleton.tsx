@@ -8,12 +8,7 @@ import { cn } from '@/lib/utils';
  * that. Nothing to do per-instance.
  */
 function Skeleton({ className, ...props }: ComponentProps<'div'>) {
-  return (
-    <div
-      className={cn('animate-pulse rounded-[var(--radius)] bg-surface-raised', className)}
-      {...props}
-    />
-  );
+  return <div className={cn('animate-pulse bg-surface-raised', className)} {...props} />;
 }
 
 export { Skeleton };

@@ -22,10 +22,12 @@ export default async function PlayPage() {
   const chartSet = await fetchChartSet();
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-lg font-medium">Play</h1>
-        <p className="text-sm text-ink-muted">
+    <div className="flex flex-col gap-12">
+      <header className="flex flex-col gap-6">
+        <h1 className="font-display text-6xl tracking-[-0.02em]">
+          The <i>table</i>
+        </h1>
+        <p className="max-w-[44rem] text-lg text-ink-muted">
           Six-handed, 100bb, no time bank. Your preflop decisions are graded where a chart
           covers them; everything else is reported after the hand, never scored.
         </p>

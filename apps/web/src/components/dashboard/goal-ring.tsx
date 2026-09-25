@@ -3,29 +3,27 @@
 import { m } from 'motion/react';
 
 /**
- * The daily goal, as a ring.
+ * The daily goal, as a tally.
  *
- * docs/05-ui-ux.md puts a "daily goal ring" in the TODAY strip, and reserves
- * the accent colour for this strip and the rail — "never appears in a range
- * grid". This is one of the two places it is allowed.
+ * Phase 9 drew a ring; Phase 17 draws one mark per spot, the way you would
+ * keep count on paper. A ring says "about two thirds"; twenty marks with
+ * fourteen filled says fourteen, and says how many are left without the reader
+ * subtracting. The name and the test id stay `goal-ring`, because what the
+ * rest of the app depends on — the label, `data-met` — did not change.
  *
- * An SVG rather than a conic gradient, because the ring has to carry a label
- * for a screen reader and a gradient has nothing to attach one to. Colour is
- * not the only encoding either way: the fraction is written in the middle.
+ * The accent is allowed here: the daily goal is the game layer. Colour is not
+ * the only encoding — the count is written beside the marks, the label carries
+ * it for a screen reader, and a met goal adds a tick.
  */
 export function GoalRing({ done, target }: { done: number; target: number }) {
-  const size = 44;
-  const stroke = 4;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  // Capped at 1: somebody who drilled 60 spots has met the goal, not 300% of it.
-  const share = target === 0 ? 0 : Math.min(1, done / target);
   const met = done >= target && target > 0;
+  // One mark per spot of the target. Past the target the marks stay full and
+  // the tick says the rest; drawing 104 marks would say nothing more.
+  const marks = Math.max(target, 0);
 
   return (
     <span
-      className="relative inline-flex items-center justify-center"
+      className="inline-flex items-end gap-1.5"
       role="img"
       aria-label={
         met
@@ -35,40 +33,33 @@ export function GoalRing({ done, target }: { done: number; target: number }) {
       data-testid="goal-ring"
       data-met={met}
     >
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="var(--color-surface-raised)"
-          strokeWidth={stroke}
-        />
-        {/* Fills to today's share on mount rather than being drawn at it. One
-            line, and the largest change in felt quality per character anywhere
-            in the app — the dashboard's first frame now does something. */}
-        <m.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="var(--color-accent)"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: circumference * (1 - share) }}
-          transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          // Starts at twelve o'clock rather than three.
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </svg>
-
-      {/* A tick, not the fraction. The fraction is written beside the ring
-          already, and at 44px "104/20" overflows the circle it sits in. A glyph
-          also keeps the met state from being carried by colour alone. */}
+      <span className="flex h-6 items-end gap-[3px]" aria-hidden="true">
+        {Array.from({ length: marks }, (_, index) => {
+          const filled = index < done;
+          return (
+            <span key={index} className="relative h-6 w-1 bg-line-soft">
+              {filled ? (
+                // Each mark fills upward in turn on mount — the one moment of
+                // motion on the desk, and it is progress, which is the kind of
+                // thing docs/05 lets move. Covered by MotionConfig's
+                // reducedMotion="user", not by the CSS block.
+                <m.span
+                  className="absolute inset-x-0 bottom-0 block bg-accent"
+                  initial={{ height: '0%' }}
+                  animate={{ height: '100%' }}
+                  transition={{
+                    duration: 0.25,
+                    delay: 0.1 + index * 0.025,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                />
+              ) : null}
+            </span>
+          );
+        })}
+      </span>
       {met ? (
-        <span className="absolute text-accent" aria-hidden="true">
+        <span className="text-base leading-none text-accent" aria-hidden="true">
           ✓
         </span>
       ) : null}

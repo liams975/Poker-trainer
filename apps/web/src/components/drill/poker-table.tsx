@@ -51,7 +51,20 @@ const HERO_ANGLE = 90;
 const SEAT_RADIUS = { x: 41, y: 37 };
 
 /** Chips sit inside the felt, between their seat and the pot, on the same angle. */
-const CHIP_RADIUS = { x: 26, y: 20 };
+const CHIP_RADIUS = { x: 23, y: 20 };
+
+/**
+ * Which way a chip's label runs: toward the pot, never back under its own
+ * seat. A seat plate on the right of the ring is wide enough to cover a label
+ * that reads rightward from its chip — which is what the first Phase 17 comp
+ * did to the small blind's 0.5 — so the anchor flips with the side.
+ */
+function chipSide(ringIndex: number, count: number): 'left' | 'right' | 'mid' {
+  const cos = Math.cos(angleOf(ringIndex, count));
+  return cos > 0.2 ? 'right' : cos < -0.2 ? 'left' : 'mid';
+}
+
+const CHIP_BASE_X = { left: '0%', right: '-100%', mid: '-50%' } as const;
 
 function angleOf(ringIndex: number, count: number): number {
   return ((HERO_ANGLE + (ringIndex * 360) / count) * Math.PI) / 180;
@@ -165,19 +178,20 @@ function Seat({
     >
       <div
         className={cn(
-          'flex items-center gap-2 rounded-[var(--radius)] border px-2 py-1.5 @md:px-2.5',
+          // A square plate: seats are interface, and interface is square.
+          'flex items-center gap-2.5 border px-2.5 py-2 @md:gap-3 @md:px-3.5 @md:py-2.5',
           isHero ? 'border-ink bg-surface-raised' : 'border-line bg-surface',
-          // A seat still owed an action gets a brighter edge. Border only —
-          // the accent belongs to the streak and XP rail.
-          isToAct && !isHero && 'border-ink-muted',
-          // Folded seats recede **by colour, never opacity**. `opacity-40` over
-          // already-muted text lands near 2:1 against this surface, under the
-          // 4.5:1 floor — an axe violation Phase 10 found and fixed once
-          // already, and `e2e/a11y.spec.ts` would find it again.
-          folded && 'border-line/40',
+          // A seat still owed an action gets an ink edge. Border only — the
+          // accent never enters the table.
+          isToAct && !isHero && 'border-ink',
+          // Folded seats recede **by colour and a dashed edge, never opacity**.
+          // `opacity-40` over already-muted text lands near 2:1 against this
+          // surface, under the 4.5:1 floor — an axe violation Phase 10 found
+          // and fixed once already, and `e2e/a11y.spec.ts` would find it again.
+          folded && 'border-dashed bg-canvas',
           // A seat that just won. Weight, not hue: `docs/05` reserves saturated
           // colour for strategy data, and "you won this pot" is not strategy.
-          winner && 'border-ink',
+          winner && 'border-2 border-ink',
         )}
       >
         {/* Cards sit beside the label rather than under it. Stacked, the box
@@ -186,28 +200,26 @@ function Seat({
           <HoleCards
             hole={hole}
             {...(hand === undefined ? {} : { hand })}
-            size={isHero ? 'sm' : 'xs'}
+            size={isHero ? 'md' : 'xs'}
             {...(dealKey === undefined ? {} : { dealKey })}
             {...(isHero ? {} : { owner: seat.position })}
           />
         ) : null}
 
-        <div className="flex min-w-[3.75rem] flex-col items-start gap-0.5 @md:min-w-[4.5rem]">
-          <span className="flex items-baseline gap-1">
+        <div className="flex min-w-[3.75rem] flex-col items-start gap-1 @md:min-w-[5rem]">
+          <span className="flex items-center gap-1.5">
             <span
               className={cn(
-                'text-xs font-medium @md:text-sm',
+                'font-display text-lg leading-none @md:text-[1.375rem]',
                 folded ? 'text-ink-muted' : 'text-ink',
               )}
             >
               {seat.position}
             </span>
-            {isHero ? (
-              <span className="text-[0.5625rem] uppercase tracking-wider text-ink-muted">you</span>
-            ) : null}
+            {isHero ? <span className="label-caps text-2xs text-ink">you</span> : null}
             {seat.position === 'BTN' ? (
               <span
-                className="flex size-3.5 items-center justify-center rounded-full border border-ink-muted font-mono text-[0.5rem] leading-none text-ink-muted"
+                className="flex size-4 items-center justify-center rounded-full border border-ink-muted font-mono text-[0.5625rem] leading-none text-ink-muted"
                 // The dealer button restates the seat label beside it, so
                 // naming it again would have a screen reader read "BTN, D".
                 aria-hidden="true"
@@ -217,19 +229,24 @@ function Seat({
             ) : null}
           </span>
 
-          <span className="whitespace-nowrap font-mono text-[0.625rem] text-ink-muted @md:text-[0.6875rem]">
+          <span
+            className={cn(
+              'whitespace-nowrap font-mono text-2xs @md:text-xs',
+              isToAct || isHero ? 'text-ink' : 'text-ink-muted',
+            )}
+          >
             {seatActivity(view)}
           </span>
 
           {winner ? (
             <span
-              className="whitespace-nowrap font-mono text-[0.625rem] font-semibold text-ink"
+              className="whitespace-nowrap font-mono text-2xs text-ink underline decoration-ink underline-offset-2 @md:text-xs"
               data-testid="seat-won"
             >
               Won {won}bb
             </span>
           ) : showStack ? (
-            <span className="font-mono text-[0.5625rem] text-ink-muted">{seat.stack}bb</span>
+            <span className="font-mono text-2xs text-ink-muted">{seat.stack}bb</span>
           ) : null}
         </div>
       </div>
@@ -306,8 +323,11 @@ export function PokerTable({
     // drill page below 2xl, at roughly half that beside the feedback panel, and
     // narrower again inside a collapsed Session Review row — three different
     // widths at one viewport size, so the type has to scale to its own box.
-    <div className="@container w-full">
-      <div className="relative mx-auto aspect-[16/10] w-full max-w-2xl">
+    // The table sits on its own surface panel. The felt is the darkest thing
+    // on it, so without a lighter ground behind, the ellipse would vanish into
+    // the page canvas wherever the table is placed.
+    <div className="@container w-full border border-line bg-surface px-2 py-1">
+      <div className="relative mx-auto aspect-[16/10] w-full max-w-3xl">
         {/**
          * The felt: a filled ellipse the seats sit around.
          *
@@ -329,21 +349,28 @@ export function PokerTable({
         />
         <div
           aria-hidden="true"
-          className="absolute inset-x-[15%] inset-y-[24%] rounded-[50%] border border-line/50"
+          className="absolute inset-x-[18%] inset-y-[26%] rounded-[50%] border border-dashed border-line-soft"
         />
 
         {/* The middle: the board, then the pot the chips are heading into. */}
-        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5">
+        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
           <BoardCards
             board={board}
             {...(boardShown === undefined ? {} : { shown: boardShown })}
             {...(dealKey === undefined ? {} : { dealKey })}
           />
 
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[0.5625rem] uppercase tracking-wider text-ink-muted">Pot</span>
-            <span className="font-mono text-sm text-ink @md:text-base" data-testid="pot">
-              {pot}bb
+          <div className="flex flex-col items-center gap-1">
+            <span className="label-caps text-2xs text-ink-muted">Pot</span>
+            {/* The pot in the display serif: the one figure on the table
+                everything else is measured against. No whitespace between the
+                number and the unit — the text still reads "4bb". */}
+            <span
+              className="font-display text-2xl leading-none text-ink @md:text-4xl"
+              data-testid="pot"
+            >
+              {pot}
+              <i className="ml-1 text-base text-ink-muted @md:text-xl">bb</i>
             </span>
           </div>
         </div>
@@ -357,25 +384,35 @@ export function PokerTable({
             .filter((view) => view.seat.committed > 0)
             .map((view) => {
               const from = chipOrigin(view.ringIndex, count);
+              const side = chipSide(view.ringIndex, count);
+              const baseX = CHIP_BASE_X[side];
 
               return (
                 <m.span
                   // Keyed on the spot as well as the seat, so a new hand deals
                   // rather than the previous hand's chips staying put.
                   key={`${dealKey}-${view.position}`}
-                  className="absolute flex items-center gap-1 rounded-full border border-line bg-canvas px-1.5 py-px font-mono text-[0.5625rem] text-ink-muted"
+                  className={cn(
+                    'absolute flex items-center gap-1.5 font-mono text-2xs text-ink @md:text-xs',
+                    side === 'right' && 'flex-row-reverse',
+                  )}
                   style={polar(view.ringIndex, count, CHIP_RADIUS)}
                   initial={
                     dealKey === undefined
                       ? false
-                      : { opacity: 0, x: `calc(-50% + ${from.x}px)`, y: `calc(-50% + ${from.y}px)` }
+                      : {
+                          opacity: 0,
+                          x: `calc(${baseX} + ${from.x}px)`,
+                          y: `calc(-50% + ${from.y}px)`,
+                        }
                   }
-                  animate={{ opacity: 1, x: '-50%', y: '-50%' }}
+                  animate={{ opacity: 1, x: baseX, y: '-50%' }}
                   transition={{ duration: 0.34, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                   data-testid="seat-chips"
                   data-position={view.position}
                 >
-                  <span className="size-1.5 rounded-full bg-ink-muted" />
+                  {/* A chip, drawn as one: round, because it is an object. */}
+                  <span className="size-3 rounded-full border-[1.5px] border-ink shadow-[inset_0_0_0_2px_var(--color-canvas),inset_0_0_0_4px_var(--color-ink-muted)]" />
                   {view.seat.committed}
                 </m.span>
               );

@@ -34,13 +34,17 @@ function lengthLabel(length: number | null): string {
   return length === null ? 'Endless' : `${length} spots`;
 }
 
-/** Shared chip styling — active state is border and weight, never hue. */
+/**
+ * Shared option styling — active state is an inverted key, never a hue. The
+ * options are keys on the same keypad as the answers: square, and pressed
+ * when chosen.
+ */
 function chipClass(active: boolean): string {
   return cn(
-    'rounded-[var(--radius)] border px-3 py-1.5 text-sm transition-colors',
+    'h-11 border px-4 text-base transition-colors',
     active
-      ? 'border-ink bg-surface-raised text-ink'
-      : 'border-line bg-surface text-ink-muted hover:border-ink-muted hover:text-ink',
+      ? 'border-ink bg-ink text-canvas'
+      : 'border-line bg-surface-raised text-ink hover:border-ink',
   );
 }
 
@@ -75,12 +79,12 @@ export function SessionConfigForm({
   }
 
   return (
-    <div className="flex flex-col gap-6 rounded-[var(--radius)] border border-line bg-surface p-6">
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-xs font-medium text-ink">Mode</legend>
+    <div className="flex max-w-[52rem] flex-col border-t-2 border-ink">
+      <fieldset className="grid grid-cols-1 gap-x-10 gap-y-3 border-b border-line py-7 md:grid-cols-[10rem_minmax(0,1fr)]">
+        <legend className="label-caps float-left pt-3 text-ink">Mode</legend>
         {/* docs/05's Study/Drill toggle is a pedagogy switch, not a difficulty
             setting, so the description says what actually changes. */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 md:col-start-2">
           <button
             type="button"
             aria-pressed={!studyMode}
@@ -98,16 +102,16 @@ export function SessionConfigForm({
             Study
           </button>
         </div>
-        <p className="text-xs text-ink-muted">
+        <p className="text-sm text-ink-muted md:col-start-2">
           {studyMode
             ? 'The chart is on screen before you answer, the reasoning is shown in full, and nothing counts towards your stats.'
             : 'The chart stays hidden until you answer. Attempts are recorded.'}
         </p>
       </fieldset>
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-xs font-medium text-ink">Length</legend>
-        <div className="flex flex-wrap gap-2">
+      <fieldset className="grid grid-cols-1 gap-x-10 gap-y-3 border-b border-line py-7 md:grid-cols-[10rem_minmax(0,1fr)]">
+        <legend className="label-caps float-left pt-3 text-ink">Length</legend>
+        <div className="flex flex-wrap gap-1.5 md:col-start-2">
           {LENGTHS.map((option) => (
             <button
               key={String(option)}
@@ -125,9 +129,9 @@ export function SessionConfigForm({
       {/* Study Mode is untimed by definition (docs/05), so the control only
           exists where it can mean something. */}
       {studyMode ? null : (
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-xs font-medium text-ink">Timer</legend>
-          <div className="flex flex-wrap gap-2">
+        <fieldset className="grid grid-cols-1 gap-x-10 gap-y-3 border-b border-line py-7 md:grid-cols-[10rem_minmax(0,1fr)]">
+          <legend className="label-caps float-left pt-3 text-ink">Timer</legend>
+          <div className="flex flex-wrap gap-1.5 md:col-start-2">
             <button
               type="button"
               aria-pressed={!timed}
@@ -145,16 +149,16 @@ export function SessionConfigForm({
               Show elapsed
             </button>
           </div>
-          <p className="text-xs text-ink-muted">
+          <p className="text-sm text-ink-muted md:col-start-2">
             Counts up, and never cuts you off — response time is recorded either way.
           </p>
         </fieldset>
       )}
 
       {allowFilters ? (
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-xs font-medium text-ink">Spots</legend>
-          <div className="flex flex-wrap gap-2">
+        <fieldset className="grid grid-cols-1 gap-x-10 gap-y-3 border-b border-line py-7 md:grid-cols-[10rem_minmax(0,1fr)]">
+          <legend className="label-caps float-left pt-3 text-ink">Spots</legend>
+          <div className="flex flex-wrap gap-1.5 md:col-start-2">
             {templates.map((template) => (
               <button
                 key={template.slug}
@@ -168,20 +172,23 @@ export function SessionConfigForm({
             ))}
           </div>
           {selected.length === 0 ? (
-            <p className="text-xs text-ink-muted">Pick at least one to drill.</p>
+            <p className="text-sm text-ink-muted md:col-start-2">Pick at least one to drill.</p>
           ) : null}
         </fieldset>
       ) : null}
 
-      <div>
+      <div className="pt-8">
+        {/* The screen's yellow key. */}
         <Button
           type="button"
+          className="h-13 w-60 justify-between px-5"
           disabled={!canStart}
           onClick={() =>
             onStart({ studyMode, length, timed: studyMode ? false : timed, templateSlugs: chosen })
           }
         >
-          {busy ? 'Starting…' : 'Start'}
+          <span>{busy ? 'Starting…' : 'Start'}</span>
+          <span aria-hidden="true">→</span>
         </Button>
       </div>
     </div>

@@ -23,12 +23,12 @@ export function BadgeGallery({
 }) {
   return (
     <section aria-labelledby="badges-heading" className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="badges-heading" className="font-display text-2xl">
-          Achievements
+      <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4">
+        <h2 id="badges-heading" className="font-display text-4xl">
+          Badges
         </h2>
         <p className="font-mono text-xs text-ink-muted">
-          {unlockedCount} / {badges.length}
+          {unlockedCount} of {badges.length} earned
         </p>
       </header>
 
@@ -37,26 +37,28 @@ export function BadgeGallery({
         shape of is not a goal.
       </p>
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-px bg-line sm:grid-cols-2">
         {badges.map(({ achievement, unlocked, progress }) => (
           <li
             key={achievement.id}
             className={cn(
-              'flex flex-col gap-2 rounded-[var(--radius)] border p-4',
-              unlocked ? 'border-accent/40 bg-surface' : 'border-line',
+              'flex flex-col gap-3 p-6',
+              // An earned badge is the one place here the accent may sit: a
+              // milestone, which is exactly what the game layer marks.
+              unlocked ? 'bg-surface shadow-[inset_0_2px_0_var(--color-accent)]' : 'bg-canvas',
             )}
           >
             <div className="flex items-baseline justify-between gap-3">
-              <h3 className={cn('text-sm', unlocked ? 'text-accent-hi' : 'text-ink')}>
+              <h3 className={cn('font-display text-2xl', unlocked ? 'text-accent' : 'text-ink')}>
                 {achievement.title}
               </h3>
               {/* The word, not just the tint — colour is never the only signal. */}
-              <span className="shrink-0 font-mono text-[0.625rem] uppercase tracking-wider text-ink-muted">
+              <span className="shrink-0 label-caps text-2xs text-ink-muted">
                 {unlocked ? 'earned' : `${progress.current} / ${progress.target}`}
               </span>
             </div>
 
-            <p className="text-xs text-ink-muted">{achievement.description}</p>
+            <p className="text-sm text-ink-muted">{achievement.description}</p>
 
             {unlocked ? null : (
               <div
@@ -65,7 +67,7 @@ export function BadgeGallery({
                 aria-valuemin={0}
                 aria-valuemax={progress.target}
                 aria-label={`${achievement.title} progress`}
-                className="h-1 w-full overflow-hidden rounded-full bg-line"
+                className="h-1 w-full overflow-hidden bg-line-soft"
               >
                 {/* Flat. The deck is explicit that a bar is data, so it gets no
                     gradient, no glow and no shimmer. */}

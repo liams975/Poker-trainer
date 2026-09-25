@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { EmptyState } from '@/components/ui/empty-state';
+import { cn } from '@/lib/utils';
 import type { RecentSession } from '@/lib/progress/queries';
 
 /**
@@ -16,15 +17,26 @@ import type { RecentSession } from '@/lib/progress/queries';
  *
  * Phase 8 filled Progress. Phase 9 fills Weak Spots and Recent.
  */
-function RailSection({ title, children }: { title: string; children: ReactNode }) {
+function RailSection({
+  title,
+  caption,
+  children,
+}: {
+  title: string;
+  caption?: string | undefined;
+  children: ReactNode;
+}) {
   const headingId = `rail-${title.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-2">
-      <h2 id={headingId} className="text-xs uppercase tracking-wider text-ink-muted">
-        {title}
-      </h2>
-      {children}
+    <section aria-labelledby={headingId} className="flex flex-col">
+      <div className="flex items-baseline justify-between border-b border-line pb-3">
+        <h2 id={headingId} className="label-caps text-ink">
+          {title}
+        </h2>
+        {caption ? <span className="label-caps text-ink-muted">{caption}</span> : null}
+      </div>
+      <div className="pt-4">{children}</div>
     </section>
   );
 }
@@ -55,40 +67,47 @@ export interface ProgressRailProps {
 
 export function ProgressRail({ track, progress }: ProgressRailProps) {
   return (
-    <aside className="flex flex-col gap-8 rounded-[var(--radius)] border border-line bg-surface p-6">
-      <RailSection title="Progress">
+    <aside className="flex flex-col gap-11">
+      <RailSection
+        title="Progress"
+        caption={track ? `${track.summary.completed} of ${track.summary.total}` : undefined}
+      >
         {track === undefined ? (
           <EmptyState>The track is not available right now.</EmptyState>
         ) : (
-          <div className="flex flex-col gap-2" data-testid="rail-progress">
-            <p className="text-sm text-ink">{track.title}</p>
+          <div className="flex flex-col gap-4" data-testid="rail-progress">
+            <p className="font-display text-2xl">{track.title}</p>
 
-            {/* A count and a bar. The accent is allowed here and in the TODAY
-                strip, and nowhere else — docs/05 reserves it for exactly this. */}
-            <p className="font-mono text-xs text-ink-muted">
-              {track.summary.completed} of {track.summary.total} lessons
-            </p>
+            {/* One mark per lesson: done ones filled, the next one outlined. The
+                accent is the game layer's — progress — and the count is
+                written beside it, so the marks are never the only encoding. */}
             <span
-              className="h-1.5 w-full overflow-hidden rounded-full bg-surface-raised"
+              className="flex gap-[3px]"
               role="img"
               aria-label={`${track.summary.completed} of ${track.summary.total} lessons complete`}
             >
-              <span
-                className="block h-full bg-accent"
-                style={{
-                  width: `${
-                    track.summary.total === 0
-                      ? 0
-                      : (track.summary.completed / track.summary.total) * 100
-                  }%`,
-                }}
-              />
+              {Array.from({ length: track.summary.total }, (_, index) => (
+                <span
+                  key={index}
+                  className={cn(
+                    'h-2.5 flex-1',
+                    index < track.summary.completed ? 'bg-accent' : 'bg-line-soft',
+                    index === track.summary.completed &&
+                      track.summary.next &&
+                      'outline outline-1 -outline-offset-1 outline-accent',
+                  )}
+                />
+              ))}
             </span>
+
+            <p className="font-mono text-xs text-ink-muted">
+              {track.summary.completed} of {track.summary.total} lessons
+            </p>
 
             {track.summary.next ? (
               <Link
                 href={`/learn/${track.summary.next.slug}`}
-                className="text-sm text-ink underline underline-offset-4 hover:text-ink-muted"
+                className="text-base text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
               >
                 {track.summary.completed === 0 ? 'Start' : 'Continue'}:{' '}
                 {track.summary.next.title}
@@ -100,7 +119,7 @@ export function ProgressRail({ track, progress }: ProgressRailProps) {
         )}
       </RailSection>
 
-      <RailSection title="Weak spots">
+      <RailSection title="Weak spots" caption="recent accuracy">
         {progress === undefined ? (
           <EmptyState>Your stats are not available right now.</EmptyState>
         ) : progress.weakSpots.length === 0 ? (
@@ -113,16 +132,19 @@ export function ProgressRail({ track, progress }: ProgressRailProps) {
             be judged.
           </EmptyState>
         ) : (
-          <ul className="flex flex-col gap-1.5" data-testid="rail-weak-spots">
+          <ul className="flex flex-col" data-testid="rail-weak-spots">
             {progress.weakSpots.map((spot) => (
               <li key={spot.skillTag}>
                 <Link
                   href={`/drill/weak-spots?tag=${encodeURIComponent(spot.skillTag)}`}
-                  className="flex items-baseline justify-between gap-2 text-sm text-ink underline underline-offset-4 hover:text-ink-muted"
+                  className="flex items-baseline gap-3 py-2 text-base text-ink hover:text-ink-muted"
                   data-tag={spot.skillTag}
                 >
-                  <span>{progress.labels[spot.skillTag] ?? spot.skillTag}</span>
-                  <span className="font-mono text-xs text-ink-muted">
+                  <span className="underline decoration-line underline-offset-4">
+                    {progress.labels[spot.skillTag] ?? spot.skillTag}
+                  </span>
+                  <span className="leader" aria-hidden="true" />
+                  <span className="font-mono text-sm text-ink">
                     {Math.round(spot.ewmaAccuracy * 100)}%
                   </span>
                 </Link>
@@ -138,14 +160,14 @@ export function ProgressRail({ track, progress }: ProgressRailProps) {
         ) : progress.recent.length === 0 ? (
           <EmptyState>No sessions yet. Your last five will show up here.</EmptyState>
         ) : (
-          <ul className="flex flex-col gap-1.5" data-testid="rail-recent">
+          <ul className="flex flex-col" data-testid="rail-recent">
             {progress.recent.map((session) => (
               <li
                 key={session.id}
-                className="flex items-baseline justify-between gap-2 text-sm text-ink-muted"
+                className="flex items-baseline justify-between gap-2 border-b border-line-soft py-2.5 text-ink-muted"
               >
-                <span className="text-ink">{MODE_LABELS[session.mode] ?? session.mode}</span>
-                <span className="font-mono text-xs">
+                <span className="text-base text-ink">{MODE_LABELS[session.mode] ?? session.mode}</span>
+                <span className="font-mono text-sm">
                   {session.spots} {session.spots === 1 ? 'spot' : 'spots'}
                 </span>
               </li>

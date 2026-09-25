@@ -59,6 +59,19 @@ export function FrequencyCell({
   const segments = orderedMix(frequencies);
   // `undefined` means not comparing at all, which must not dim anything.
   const unchanged = diffDistance !== undefined && diffDistance === 0;
+  /**
+   * The corner figure: the share of the right-hand segment, printed only when
+   * the hand mixes. A pure cell needs no number — its colour already says
+   * "always" — so the figures that do appear are exactly the hands the app
+   * exists to teach, and a mixed region reads as a mixed region in type as
+   * well as in colour.
+   *
+   * Always the right-hand segment, because the order is fixed passive → aggres-
+   * sive in every cell: "50" in a raise/fold cell and "55" in a raise/call cell
+   * both mean the aggressive share, read the same way everywhere.
+   */
+  const mixFigure =
+    segments.length > 1 ? Math.round((segments[segments.length - 1]?.freq ?? 0) * 100) : null;
 
   return (
     <button
@@ -77,9 +90,12 @@ export function FrequencyCell({
       onFocus={() => onFocus(hand)}
       onKeyDown={onKeyDown}
       className={cn(
-        'relative isolate flex items-center justify-center overflow-hidden rounded-[2px]',
+        // A size container, so the type inside scales with the cell rather
+        // than the viewport: the same component draws at 25px beside a
+        // solution and at 44px in the explorer.
+        '@container relative isolate block overflow-hidden',
         'aspect-square w-full min-w-0 select-none',
-        'font-mono text-[0.625rem] leading-none',
+        'font-mono leading-none tracking-[-0.02em]',
         // The label sits above the bar and must stay readable over every hue in
         // the palette, so it carries its own shadow rather than relying on the
         // segment beneath it being dark.
@@ -88,7 +104,7 @@ export function FrequencyCell({
         // and XP rail and says it must "never appear in a range grid" — an
         // amber wash across 73 changed cells reads as a sixth action and makes
         // the Okabe-Ito palette stop meaning what it means.
-        selected && 'ring-2 ring-ink ring-offset-1 ring-offset-surface',
+        selected && 'z-10 ring-2 ring-ink ring-offset-1 ring-offset-canvas',
         // Compare mode inverts the usual highlight: rather than painting what
         // changed, it fades what did not, so the eye lands on the difference
         // without a single new hue entering the grid.
@@ -107,7 +123,20 @@ export function FrequencyCell({
         ))}
       </span>
 
-      <span className="relative">{hand}</span>
+      {/* Top-left, like an element in a periodic table: the grid is a
+          specimen chart, and the corner is where the eye looks for a name. */}
+      <span className="absolute left-[9%] top-[8%] text-[clamp(0.5rem,26cqw,0.75rem)]">{hand}</span>
+
+      {mixFigure !== null ? (
+        // aria-hidden: the accessible name above already spells the whole mix
+        // out. Hidden in cells too small to carry two labels legibly.
+        <span
+          aria-hidden="true"
+          className="absolute bottom-[8%] right-[8%] text-[clamp(0.5rem,22cqw,0.6875rem)] @max-[2.1rem]:hidden"
+        >
+          {mixFigure}
+        </span>
+      ) : null}
     </button>
   );
 }

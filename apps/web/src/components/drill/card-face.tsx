@@ -7,6 +7,11 @@ import { cn } from '@/lib/utils';
 /**
  * One playing card, face up or face down.
  *
+ * Phase 17: a card is an object on the table, not a piece of interface, so it
+ * is the one light surface in the app — paper, with a 4px corner, because only
+ * physical things are round here. Rank in the display serif, as on a printed
+ * deck.
+ *
  * Extracted in 12b, when the table stopped showing only hero's two cards: a
  * board has five, opponents hold two each face-down while a hand is live, and a
  * showdown turns some of them over. Four places drawing a card is four places to
@@ -16,17 +21,22 @@ import { cn } from '@/lib/utils';
  * in `docs/05-ui-ux.md`: "saturated color is reserved exclusively for strategy
  * data". The traditional red/black suit colouring would spend hue on something
  * that is not strategy, on the same screen as a grid where hue *means* action.
- * The pips are distinguishable by shape alone, so nothing is lost, and the
- * display stays readable under any colour vision deficiency without a second
- * encoding.
+ * The pips are distinguishable by shape alone, and the red/black split that
+ * players read suitedness from survives as **fill**: hearts and diamonds are
+ * drawn in outline, spades and clubs solid. Two tones, no hue.
  */
 
 const SUIT_PIPS: Readonly<Record<string, string>> = {
   s: '♠',
-  h: '♥',
-  d: '♦',
+  h: '♡',
+  d: '♢',
   c: '♣',
 };
+
+/** A printed deck says 10, not T. Notation elsewhere keeps T. */
+function rankFace(rank: string): string {
+  return rank === 'T' ? '10' : rank;
+}
 
 const SUIT_NAMES: Readonly<Record<string, string>> = {
   s: 'spades',
@@ -51,17 +61,20 @@ export function describeCard(card: string): string {
 }
 
 /**
- * Three sizes, each earned by a place it is used.
+ * Five sizes, each earned by a place it is used.
  *
- * `lg` is the standalone display. `sm` is what sits at hero's seat, where the
- * card has to read at a glance without swamping the seat it belongs to. `xs` is
- * an opponent's face-down pair, which only has to say "this seat is still in".
+ * `lg` is the standalone display. `md` and `sm` sit at hero's seat, where the
+ * card has to read at a glance without swamping the seat it belongs to.
+ * `board` is the middle of the table — the cards a hand turns on, so they are
+ * not the smallest thing on it. `xs` is an opponent's face-down pair, which only
+ * has to say "this seat is still in".
  */
 export const CARD_SIZES = {
-  lg: { card: 'h-24 w-16', rank: 'text-2xl', hand: 'text-sm' },
-  md: { card: 'h-14 w-10 @lg:h-16 @lg:w-11', rank: 'text-xl @lg:text-2xl', hand: 'text-sm' },
-  sm: { card: 'h-11 w-8 @lg:h-14 @lg:w-10', rank: 'text-base @lg:text-xl', hand: 'text-xs' },
-  xs: { card: 'h-6 w-[1.125rem] @lg:h-7 @lg:w-5', rank: 'text-[0.625rem] @lg:text-xs', hand: 'text-[0.625rem]' },
+  lg: { card: 'h-[5.5rem] w-16', rank: 'text-3xl', pip: 'text-2xl', hand: 'text-sm' },
+  md: { card: 'h-16 w-[2.875rem] @lg:h-[4.5rem] @lg:w-[3.25rem]', rank: 'text-2xl @lg:text-[1.75rem]', pip: 'text-lg @lg:text-xl', hand: 'text-sm' },
+  sm: { card: 'h-14 w-10 @lg:h-16 @lg:w-[2.875rem]', rank: 'text-xl @lg:text-2xl', pip: 'text-base @lg:text-lg', hand: 'text-xs' },
+  board: { card: 'h-12 w-[2.125rem] @md:h-14 @md:w-10', rank: 'text-lg @md:text-xl', pip: 'text-sm @md:text-base', hand: 'text-xs' },
+  xs: { card: 'h-7 w-5', rank: 'text-xs', pip: 'text-2xs', hand: 'text-2xs' },
 } as const;
 
 export type CardSize = keyof typeof CARD_SIZES;
@@ -112,14 +125,15 @@ export function CardFace({
     <m.span
       key={dealKey === undefined ? card : `${dealKey}-${card}`}
       className={cn(
-        'flex flex-col items-center justify-center rounded-[var(--radius)] border border-line bg-surface-raised font-mono text-ink',
+        'flex shrink-0 flex-col items-center justify-center gap-px rounded-[4px] bg-paper text-canvas',
+        'shadow-[0_1px_0_rgba(0,0,0,0.5),0_10px_18px_-10px_rgba(0,0,0,0.85)]',
         scale.card,
         className,
       )}
       {...(dealKey === undefined ? {} : dealMotion(index, dealFrom))}
     >
-      <span className={`${scale.rank} leading-none`}>{card[0]}</span>
-      <span className={`${scale.rank} leading-none`} aria-hidden="true">
+      <span className={`font-display ${scale.rank} leading-none`}>{rankFace(card[0] ?? '')}</span>
+      <span className={`font-sans ${scale.pip} leading-none`} aria-hidden="true">
         {SUIT_PIPS[card[1] ?? ''] ?? card[1]}
       </span>
     </m.span>
@@ -129,9 +143,10 @@ export function CardFace({
 /**
  * A card somebody is holding that you cannot see.
  *
- * Drawn as a surface rather than a patterned back — a casino card back is
- * exactly the kind of ornament `docs/05` rules out, and the only job here is to
- * say "this seat is still in the hand". Always `aria-hidden`: the seat's own
+ * Hatched rather than patterned — a casino card back is exactly the kind of
+ * ornament `docs/05` rules out. Hatching is the app's one mark for *unknown*:
+ * the same lines stand in a chart for a day with no data. The only job here is
+ * to say "this seat is still in the hand, and you do not know with what". Always `aria-hidden`: the seat's own
  * text already reports its status, and "face-down card, face-down card" at every
  * seat is noise rather than information.
  */
@@ -151,7 +166,7 @@ export function CardBack({
       key={dealKey === undefined ? `back-${index}` : `${dealKey}-back-${index}`}
       aria-hidden="true"
       className={cn(
-        'block rounded-[var(--radius)] border border-line bg-surface',
+        'hatch block shrink-0 rounded-[3px] border border-line bg-canvas',
         CARD_SIZES[size].card,
       )}
       {...(dealKey === undefined ? {} : dealMotion(index, dealFrom))}

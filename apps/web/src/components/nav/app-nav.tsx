@@ -1,7 +1,9 @@
 import Link from 'next/link';
 
-import { Button } from '@/components/ui/button';
+import { Wordmark } from '@/components/brand/wordmark';
 import { signOut } from '@/lib/auth/actions';
+
+import { NavLinks } from './nav-links';
 
 /**
  * The signed-in chrome. Monochrome by rule — docs/05 reserves saturated colour
@@ -13,43 +15,34 @@ import { signOut } from '@/lib/auth/actions';
  */
 export function AppNav({ email }: { email: string }) {
   return (
-    <header className="border-b border-line bg-surface">
-      <nav
-        aria-label="Main"
-        className="mx-auto flex h-14 max-w-[1180px] items-center justify-between gap-6 px-6"
-      >
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-base tracking-tight">
-            Poker Trainer
-          </Link>
+    <header className="border-b border-line bg-canvas">
+      <nav aria-label="Main" className="mx-auto flex h-16 max-w-[1440px] items-stretch gap-12 px-14">
+        <Link href="/dashboard" className="flex items-center">
+          <Wordmark />
+        </Link>
 
-          {/* Mastery is a whole surface, and ⌘K only finds what you already
-              know is there. Monochrome like the rest of the chrome — the accent
-              belongs to the game layer, not to navigation. */}
-          <Link
-            href="/mastery"
-            className="text-sm text-ink-muted transition-colors hover:text-ink"
-          >
-            Mastery
-          </Link>
-        </div>
+        <NavLinks />
 
-        <div className="flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-6">
           {/* Discoverability, for the same reason the drill has a "Shortcuts (?)"
               button: a keyboard interface nobody knows about is one nobody
-              uses. Not a button — pressing it is the thing to learn. */}
-          <span className="hidden items-center gap-1 text-xs text-ink-muted lg:flex">
-            <kbd className="rounded border border-line px-1.5 py-0.5 font-mono">⌘K</kbd>
-            <span>to jump</span>
+              uses. Not a button — pressing it is the thing to learn. The
+              palette is the book's index, so that is what it is called. */}
+          <span className="hidden items-center gap-2 font-mono text-xs text-ink-muted lg:flex">
+            <kbd className="border border-line px-1.5 py-0.5 font-mono text-2xs">⌘K</kbd>
+            <span>Index</span>
           </span>
 
-          <span className="hidden text-sm text-ink-muted sm:inline" title={email}>
+          <span className="hidden max-w-48 truncate text-sm text-ink-muted xl:inline" title={email}>
             {email}
           </span>
-          <form action={signOut}>
-            <Button type="submit" variant="ghost" size="sm">
+          <form action={signOut} className="flex items-center">
+            <button
+              type="submit"
+              className="text-sm text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
+            >
               Sign out
-            </Button>
+            </button>
           </form>
         </div>
       </nav>

@@ -3,6 +3,7 @@ import { loadChartRegistry } from '@poker/content';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { Wordmark } from '@/components/brand/wordmark';
 import { HeroGrid } from '@/components/landing/hero-grid';
 import { RankLadder } from '@/components/mastery/rank-ladder';
 import { chartLabel } from '@/lib/charts/map';
@@ -15,8 +16,9 @@ export const metadata = {
 };
 
 /**
- * The landing page — frame 2a. One argument, shown working, with the climb
- * visible.
+ * The landing page. One argument, shown working, with the climb visible —
+ * set as the opening pages of a short book: a statement, a figure, three
+ * numbered sections.
  *
  * Also the router for everyone who already has an account. `isPublicPath`
  * treats `/` as public so the proxy lets it through and this decides — signed
@@ -42,109 +44,75 @@ export default async function RootPage() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-[1180px]">
-      {/* 60px bar with a hairline under it, per the frame. */}
-      <header className="flex h-[60px] items-center justify-between border-b border-line px-10">
-        <span className="text-base font-semibold tracking-tight">Poker Trainer</span>
+    <div className="mx-auto w-full max-w-[1440px] px-8 sm:px-14">
+      <header className="flex h-16 items-center justify-between border-b border-line">
+        <Link href="/" className="flex items-center">
+          <Wordmark />
+        </Link>
 
-        <nav aria-label="Landing" className="flex items-center gap-5 text-sm">
-          <a href="#grades" className="text-ink-muted transition-colors hover:text-ink">
+        <nav aria-label="Landing" className="flex items-center gap-7">
+          <a href="#grades" className="label-caps text-ink-muted transition-colors hover:text-ink">
             How it grades
           </a>
-          <a href="#course" className="text-ink-muted transition-colors hover:text-ink">
+          <a href="#course" className="label-caps text-ink-muted transition-colors hover:text-ink">
             The course
           </a>
-          {/* Outlined, never filled. Nocturne: "primary actions are accent
-              outlines", and the deck follows it on every screen. */}
           <Link
             href="/sign-in"
-            className="inline-flex h-8 items-center rounded-[var(--radius)] border border-accent px-3.5 text-accent-hi transition-colors hover:bg-accent/10"
+            className="inline-flex h-9 items-center border border-line px-4 text-sm text-ink transition-colors hover:border-ink"
           >
             Sign in
           </Link>
         </nav>
       </header>
 
-      <div className="grid grid-cols-1 items-start gap-12 px-10 pt-14 pb-14 lg:grid-cols-[minmax(0,1fr)_500px]">
-        <div className="flex flex-col gap-5">
-          <span className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
-            6-max cash · 100bb · preflop
-          </span>
+      <section className="grid grid-cols-1 gap-x-16 gap-y-12 pt-20 pb-24 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+        <div className="flex flex-col">
+          <span className="label-caps text-ink-muted">6-max cash · 100bb · preflop</span>
 
-          {/*
-            The statement. Instrument Serif at 54px, weight 400 — the face ships
-            no other weight, and the deck uses it only at sizes like this.
-          */}
-          <h1 className="max-w-[540px] font-display text-6xl tracking-[-0.015em]">
-            A range is a frequency. Train it like one.
+          <h1 className="mt-8 font-display text-6xl tracking-[-0.02em]">
+            A range is a <i>frequency.</i> Train it like one.
           </h1>
 
-          <p className="max-w-[470px] text-base text-ink-muted">
-            <span className="font-mono text-ink">AJo</span> opens 64% of the time on the button.
-            Most trainers call that a raise and mark you wrong for folding. This one grades the
-            mix on four tiers, scores you by EV lost, and tracks which of ten skills is actually
+          <p className="mt-8 max-w-[34rem] text-lg text-ink-muted">
+            <span className="font-mono text-ink">A5o</span> opens exactly half the time on the
+            button. Most trainers call that a raise and mark you wrong for folding. This one grades
+            the mix on four tiers, scores you by EV lost, and tracks which of ten skills is actually
             leaking.
           </p>
 
-          <div className="mt-1 flex flex-wrap items-center gap-3.5">
+          <div className="mt-10 flex flex-wrap items-center gap-6">
+            {/* The yellow key: the one thing on this page to press. */}
             <Link
               href="/sign-up"
-              className="inline-flex h-9 items-center rounded-[var(--radius)] border border-accent px-4 text-sm text-accent-hi transition-colors hover:bg-accent/10 active:bg-accent/20"
+              className="inline-flex h-13 items-center gap-5 bg-accent px-6 text-base font-semibold text-accent-ink transition-colors hover:bg-accent/90"
             >
               Start free — 24-spot placement
             </Link>
             <span className="text-sm text-ink-muted">No card. Desktop, keyboard-first.</span>
           </div>
-
-          <hr className="rule-fade my-3" />
-
-          {/*
-            The same ladder `/mastery` renders, with no reader to place on it.
-            One component rather than a lookalike: a climb the landing page drew
-            differently from the real one would be a promise the product does not
-            keep.
-          */}
-          <RankLadder
-            rank={undefined}
-            heading="The climb"
-            headingClassName="text-xs font-medium uppercase tracking-[0.12em] text-ink-muted"
-            caption="Ranks come from EV lost per spot across your last 200 answers — not from time served. They move down as well as up."
-          />
         </div>
 
         {chart ? (
-          <section
-            id="grades"
-            aria-labelledby="grid-heading"
-            className="flex flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5"
-          >
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 id="grid-heading" className="text-sm font-medium">
-                {chartLabel(chart)}
-              </h2>
-              <span className="font-mono text-xs text-ink-muted">
-                169 hands · click any of them
-              </span>
-            </div>
-
+          <div id="grades" className="scroll-mt-8">
             <HeroGrid chart={chart} label={chartLabel(chart)} />
-          </section>
+          </div>
         ) : null}
-      </div>
+      </section>
 
       <section
         id="course"
         aria-labelledby="what-heading"
-        className="flex flex-col gap-6 border-t border-line px-10 py-12"
+        className="scroll-mt-8 border-t border-line pt-6 pb-24"
       >
-        <h2
-          id="what-heading"
-          className="text-xs font-medium uppercase tracking-[0.12em] text-ink-muted"
-        >
-          Three things it does
-        </h2>
+        <div className="flex items-baseline gap-5">
+          <span className="font-mono text-sm text-ink-muted">§1</span>
+          <h2 id="what-heading" className="font-display text-4xl">
+            Three things it <i>does</i>
+          </h2>
+        </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-3">
           {[
             {
               title: 'A short course',
@@ -158,32 +126,56 @@ export default async function RootPage() {
               title: 'Your weak spots',
               body: 'Every answer is recorded. The app works out which spots you are least sharp on from recent performance, and can drill only those.',
             },
-          ].map((card) => (
-            <div key={card.title} className="flex flex-col gap-2">
-              <h3 className="text-sm font-medium">{card.title}</h3>
-              <p className="text-sm text-ink-muted">{card.body}</p>
+          ].map((card, index) => (
+            <div key={card.title} className="flex flex-col gap-4 border-t-2 border-ink pt-5">
+              <span className="font-display text-2xl italic text-ink-muted">{index + 1}</span>
+              <h3 className="font-display text-3xl">{card.title}</h3>
+              <p className="text-base text-ink-muted">{card.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 border-t border-line px-10 py-12">
-        <h2 className="text-sm font-medium">What it is not</h2>
-        <p className="max-w-[640px] text-sm text-ink-muted">
+      <section className="border-t border-line pt-6 pb-24">
+        {/*
+          The same ladder `/mastery` renders, with no reader to place on it.
+          One component rather than a lookalike: a climb the landing page drew
+          differently from the real one would be a promise the product does not
+          keep.
+        */}
+        <RankLadder
+          rank={undefined}
+          n={2}
+          heading="The climb"
+          headingClassName="font-display text-4xl"
+          caption="Ranks come from EV lost per spot across your last 200 answers — not from time served. They move down as well as up."
+        />
+      </section>
+
+      <section className="grid grid-cols-1 gap-10 border-t border-line pt-6 pb-24 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div className="flex items-baseline gap-5">
+          <span className="font-mono text-sm text-ink-muted">§3</span>
+          <h2 className="font-display text-4xl">
+            What it is <i>not</i>
+          </h2>
+        </div>
+        <p className="max-w-[40rem] text-lg text-ink-muted">
           Not a solver. Strategy comes from preflop charts and postflop heuristics, and the app
           covers 6-max cash at 100bb — no tournaments, no ICM, no postflop tree. It runs on a
           laptop, not a phone. If you want a solver, buy a solver.
         </p>
       </section>
 
-      <footer className="flex flex-wrap items-center gap-4 border-t border-line px-10 py-8 text-xs text-ink-muted">
-        <span>Poker Trainer</span>
-        <Link href="/privacy" className="underline underline-offset-4 hover:text-ink">
-          Privacy
-        </Link>
-        <Link href="/sign-in" className="underline underline-offset-4 hover:text-ink">
-          Sign in
-        </Link>
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-8">
+        <span className="label-caps text-ink-muted">Poker Trainer · 6-max cash · 100bb</span>
+        <div className="flex gap-6">
+          <Link href="/privacy" className="label-caps text-ink-muted hover:text-ink">
+            Privacy
+          </Link>
+          <Link href="/sign-in" className="label-caps text-ink-muted hover:text-ink">
+            Sign in
+          </Link>
+        </div>
       </footer>
     </div>
   );

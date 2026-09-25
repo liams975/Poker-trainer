@@ -109,7 +109,10 @@ test.describe('keyboard focus', () => {
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/\/dashboard$/);
 
-    const stops = await tabThrough(page, 6);
+    // Enough stops to cross the header: the wordmark, seven section links since
+    // Phase 17, then Sign out. The claim is that Sign out is reachable by
+    // keyboard, not that it is within six presses.
+    const stops = await tabThrough(page, 12);
 
     expect(stops.length).toBeGreaterThan(0);
     for (const stop of stops) {

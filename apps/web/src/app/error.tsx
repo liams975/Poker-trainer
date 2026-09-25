@@ -28,9 +28,9 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-      <h1 className="text-lg font-medium">This page did not load.</h1>
-      <p className="max-w-sm text-sm text-ink-muted">
+    <div className="flex min-h-[50vh] flex-col items-start justify-center gap-6">
+      <h1 className="font-display text-5xl">This page did not load.</h1>
+      <p className="max-w-md text-base text-ink-muted">
         Something broke on our side. Try again — if it keeps happening, the reference below will
         help us find it.
       </p>

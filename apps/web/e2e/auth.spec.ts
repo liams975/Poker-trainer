@@ -76,16 +76,23 @@ test.describe('the exit criterion', () => {
      *
      * Counted from `MODES` rather than typed, because typing it is what broke
      * this test when Phase 12b added Play as a seventh entry point — a change
-     * with nothing to do with signing up. On an empty dashboard the mode cards
-     * are the only list items: the weak-spot rail renders prose until there is
-     * something in it.
+     * with nothing to do with signing up.
+     *
+     * Counted inside the Practice section, not across the page. Until Phase 17
+     * the mode cards were the only list on an empty dashboard, so every list
+     * item on the page happened to be a mode; the section nav, the lesson bar
+     * and the skill list are lists too now, and the proxy stopped holding.
      */
-    await expect(page.getByRole('listitem')).toHaveCount(MODES.length);
+    await expect(
+      page.getByRole('region', { name: 'Practice' }).getByRole('listitem'),
+    ).toHaveCount(MODES.length);
     // The number in this copy is derived from WEAK_SPOT_MIN_ATTEMPTS rather
     // than typed, since Phase 9: twenty mixed hands spread across ten skills
     // produce no weak spot at all, so the old invitation was a false one.
     await expect(page.getByText(/No weak spots yet/)).toBeVisible();
-    await expect(page.getByText('0 days')).toBeVisible();
+    // Scoped to the streak it is about: "0 days" is also the tail of "last 30
+    // days", the caption Phase 17 put on the record.
+    await expect(page.getByTestId('today-strip').getByText('0 days')).toBeVisible();
 
     // The signed-in chrome knows who it is.
     await expect(page.getByText(email)).toBeVisible();

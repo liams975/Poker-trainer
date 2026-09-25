@@ -92,14 +92,14 @@ export function RangeGrid({ chart, selected, onSelect, diff, label }: RangeGridP
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium">{label}</h3>
+      <h3 className="label-caps text-ink">{label}</h3>
 
       <div
         role="grid"
         aria-label={`${label}, 13 by 13 starting hand matrix`}
         aria-rowcount={SIDE}
         aria-colcount={SIDE}
-        className="grid w-full grid-cols-13 gap-px rounded-[var(--radius)] border border-line bg-line p-px"
+        className="grid w-full grid-cols-13 gap-px bg-canvas p-px"
       >
         {/*
           Rows are required, not decorative.

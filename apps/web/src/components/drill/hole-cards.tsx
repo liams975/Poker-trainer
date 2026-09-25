@@ -63,7 +63,7 @@ export function HoleCards({
       )}
 
       {hand === undefined ? null : (
-        <p className={`font-mono ${scale.hand} text-ink-muted`}>{hand}</p>
+        <p className={`font-mono ${scale.hand} tracking-[0.04em] text-ink-muted`}>{hand}</p>
       )}
     </div>
   );

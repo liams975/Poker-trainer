@@ -86,17 +86,20 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
 
   if (stage === 'intro') {
     return (
-      <div className="flex max-w-2xl flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-6">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-lg font-medium">Let&rsquo;s find your level</h1>
-          <p className="text-sm text-ink-muted">
+      <div className="flex max-w-[48rem] flex-col gap-10">
+        <header className="flex flex-col gap-6">
+          <span className="label-caps text-ink-muted">Placement · before the first lesson</span>
+          <h1 className="font-display text-6xl tracking-[-0.02em]">
+            Let&rsquo;s find your <i>level</i>
+          </h1>
+          <p className="text-lg text-ink-muted">
             {DIAGNOSTIC_SPOTS} preflop spots, a couple of minutes. Nothing here counts against
             you — it only decides which lesson you start on, and you can read any lesson you
             unlock in any order afterwards.
           </p>
         </header>
 
-        <ul className="flex flex-col gap-2 border-l-2 border-line pl-4 text-sm text-ink">
+        <ul className="flex flex-col gap-3 border-y border-line py-6 text-base text-ink">
           <li>Answer with the keyboard: F to fold, C to call, R to raise.</li>
           <li>Mixed spots have more than one right answer, and both count.</li>
           <li>If you are new to 6-max, skip this and start at the beginning.</li>
@@ -104,7 +107,7 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
 
         {error ? <p className="text-sm text-ink">{error}</p> : null}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-4">
           <Button type="button" onClick={() => setStage('drilling')} disabled={busy}>
             Start the diagnostic
           </Button>
@@ -141,15 +144,17 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
 
   return (
     <div
-      className="flex max-w-[780px] flex-col gap-5 rounded-[var(--radius)] border border-line bg-surface p-6"
+      className="flex max-w-[52rem] flex-col gap-8 border-t-2 border-ink pt-6"
       data-testid="placement-result"
     >
       <header className="flex flex-col gap-2">
-        <p className="font-mono text-xs uppercase tracking-[0.12em] text-ink-muted">Placed</p>
+        <p className="label-caps text-ink-muted">Placed</p>
         {/* Frame 2j gives the result a serif statement, the same treatment 2f
             gives a milestone. Finishing the placement is one. */}
-        <h1 className="font-display text-3xl">You&rsquo;re set</h1>
-        <p className="text-sm text-ink-muted" data-placement={outcome?.skillTag ?? 'none'}>
+        <h1 className="font-display text-6xl tracking-[-0.02em]">
+          You&rsquo;re <i>set</i>
+        </h1>
+        <p className="text-lg text-ink-muted" data-placement={outcome?.skillTag ?? 'none'}>
           {outcome?.skillTag === null
             ? 'You answered everything the diagnostic covers, so the whole track is open. Start anywhere.'
             : 'Everything up to your starting lesson is unlocked, so you can go back over anything you want to revisit.'}
@@ -158,7 +163,7 @@ export function PlacementFlow({ chartSet, templates }: PlacementFlowProps) {
 
       {outcome && outcome.byTag.length > 0 ? (
         <ul
-          className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2"
+          className="grid grid-cols-1 gap-x-10 gap-y-2 text-base sm:grid-cols-2"
           data-testid="placement-evidence"
         >
           {outcome.byTag.map((entry) => (

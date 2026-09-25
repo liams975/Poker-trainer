@@ -37,8 +37,8 @@ export default async function MasteryPage() {
   if (snapshot === null) {
     return (
       <div className="flex flex-col gap-6">
-        <h1 className="font-display text-3xl">Mastery</h1>
-        <p className="text-sm text-ink-muted">
+        <h1 className="font-display text-6xl tracking-[-0.02em]">Mastery</h1>
+        <p className="max-w-[40rem] text-lg text-ink-muted">
           Your progress could not be loaded just now. Nothing has been lost — these figures are
           derived from your answers every time this page opens, so a reload is all it takes.
         </p>
@@ -47,10 +47,17 @@ export default async function MasteryPage() {
   }
 
   return (
-    <div className="flex flex-col gap-12">
-      <h1 className="sr-only">Mastery</h1>
+    <div className="flex flex-col gap-20">
+      <header className="flex flex-col gap-6">
+        <span className="label-caps text-ink-muted">Rank · skills · the weekly board</span>
+        <h1 className="font-display text-6xl tracking-[-0.02em]">Mastery</h1>
+        <p className="max-w-[40rem] text-lg text-ink-muted">
+          Measured in EV lost per spot, never in time served — so every figure here can go down as
+          well as up.
+        </p>
+      </header>
 
-      <RankLadder rank={snapshot.rank} />
+      <RankLadder rank={snapshot.rank} n={1} heading="Rank" />
 
       <MasteryMap
         skills={snapshot.skills}
@@ -58,7 +65,7 @@ export default async function MasteryPage() {
         levelsAvailable={snapshot.levelsAvailable}
       />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         <WeeklyBoard rows={snapshot.board} optedIn={snapshot.participation.optedIn} />
         <HandleOptIn
           handle={snapshot.participation.handle}

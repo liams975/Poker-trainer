@@ -147,6 +147,31 @@ describe('the action palette survives colour vision deficiency', () => {
   });
 });
 
+describe('the accent cannot be mistaken for an action', () => {
+  /**
+   * The governing rule — the game layer owns the accent, strategy owns five
+   * hues — only holds if the accent is actually distinguishable from all five,
+   * for everyone. Phase 14's blurple was not, measurably: 28 from call under
+   * both protanopia and deuteranopia, a lighter blue beside a blue. Phase 17's
+   * is Okabe–Ito's unused yellow, and its nearest action under any dichromacy
+   * is 66 away.
+   *
+   * 40 sits between the two, so this fails on the accent this test replaced
+   * and on any future accent that drifts toward a strategy hue.
+   */
+  const accent = token('--color-accent');
+
+  it.each([...Object.keys(CVD_MATRICES), 'normal vision'])('stays clear of every action under %s', (kind) => {
+    const project = (hex: string): RGB =>
+      kind === 'normal vision' ? toLinear(hexToRgb(hex)) : simulate(hexToRgb(hex), CVD_MATRICES[kind]!);
+
+    for (const hex of STRATEGY_HEXES) {
+      const d = distance(project(accent), project(hex));
+      expect(d, `accent ${accent} sits ${d.toFixed(1)} from ${hex} under ${kind}`).toBeGreaterThan(40);
+    }
+  });
+});
+
 describe('colour is never the only encoding', () => {
   it('gives every action a glyph and a label', () => {
     for (const action of ACTIONS) {

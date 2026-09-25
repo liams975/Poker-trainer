@@ -47,14 +47,16 @@ export function GoogleButton({ next }: { next: string }) {
       <Button
         type="button"
         variant="outline"
-        className="w-full"
+        className="h-13 w-full"
         onClick={() => void signInWithGoogle()}
         disabled={pending}
       >
         {pending ? 'Redirecting…' : 'Continue with Google'}
       </Button>
       {error ? (
-        <p role="alert" className="text-xs text-action-raise">
+        // Ink, not the raise hue: an error is chrome, and an action colour on
+        // chrome is the one crossing docs/05's rule forbids.
+        <p role="alert" className="font-mono text-xs text-ink">
           {error}
         </p>
       ) : null}

@@ -21,13 +21,17 @@ export function SpotPips({ done, total }: { done: number; total: number }) {
   if (total <= 0) return null;
 
   return (
-    <span aria-hidden className="flex items-center gap-[2px]" data-testid="spot-pips">
+    <span aria-hidden className="flex items-center gap-[3px]" data-testid="spot-pips">
       {Array.from({ length: total }, (_, index) => (
         <span
           key={index}
           className={cn(
-            'h-1 w-1.5 rounded-[1px]',
-            index < done ? 'bg-accent' : 'bg-line',
+            // Wider pips for short sessions, narrower for long ones, so a
+            // fifty-spot run still fits the header.
+            total > 30 ? 'h-1.5 w-1.5' : 'h-1.5 w-3',
+            index < done ? 'bg-accent' : 'bg-line-soft',
+            // The spot on the table now: outlined, not yet filled.
+            index === done && 'outline outline-1 outline-accent',
           )}
         />
       ))}

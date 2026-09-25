@@ -42,8 +42,12 @@ export default async function Page({ params }: { params: Promise<{ lesson: strin
   if (status === 'locked') notFound();
 
   return (
-    <div className="grid grid-cols-1 gap-10 xl:grid-cols-[16rem_1fr]">
-      <aside className="xl:sticky xl:top-8 xl:self-start">
+    <div className="grid grid-cols-1 gap-16 xl:grid-cols-[17rem_minmax(0,1fr)]">
+      <aside className="flex flex-col gap-6 xl:sticky xl:top-8 xl:max-h-[calc(100dvh-4rem)] xl:self-start xl:overflow-y-auto">
+        <p className="flex flex-col gap-2">
+          <span className="label-caps text-ink">Contents</span>
+          <span className="font-display text-2xl">{track.title}</span>
+        </p>
         <TrackNav track={track} states={states} activeSlug={lessonSlug} />
       </aside>
 

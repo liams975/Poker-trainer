@@ -16,22 +16,19 @@ export const metadata = { title: 'Privacy · Poker Trainer' };
  */
 export default function PrivacyPage() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 py-16">
-      <header className="flex flex-col gap-2">
-        <Link
-          href="/"
-          className="text-xs text-ink-muted underline underline-offset-4 hover:text-ink"
-        >
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-10 px-6 py-16">
+      <header className="flex flex-col gap-5">
+        <Link href="/" className="label-caps text-ink-muted hover:text-ink">
           ← Poker Trainer
         </Link>
-        <h1 className="font-display text-2xl">Privacy</h1>
-        <p className="text-sm text-ink-muted">
+        <h1 className="font-display text-6xl">Privacy</h1>
+        <p className="text-lg text-ink-muted">
           Short, because there is not much to say.
         </p>
       </header>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium">What the app stores about you</h2>
+        <h2 className="font-display text-2xl">What the app stores about you</h2>
         <ul className="flex list-disc flex-col gap-2 pl-5 text-sm text-ink-muted">
           <li>
             Your email address and, if you sign in with Google, whatever name Google supplies.
@@ -54,7 +51,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium">Third parties</h2>
+        <h2 className="font-display text-2xl">Third parties</h2>
         <ul className="flex list-disc flex-col gap-2 pl-5 text-sm text-ink-muted">
           <li>
             <strong className="text-ink">PostHog</strong> — product analytics. It records which
@@ -75,7 +72,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium">What it does not do</h2>
+        <h2 className="font-display text-2xl">What it does not do</h2>
         <p className="text-sm text-ink-muted">
           No advertising, no third-party ad or marketing trackers, and nothing is sold or shared
           with anyone beyond the services listed above. There is no payment of any kind, so no
@@ -84,7 +81,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium">Deleting your account</h2>
+        <h2 className="font-display text-2xl">Deleting your account</h2>
         <p className="text-sm text-ink-muted">
           Ask, and it goes. Deleting the account removes every row above with it — the database
           cascades from your user record, so nothing is left behind under a different key.

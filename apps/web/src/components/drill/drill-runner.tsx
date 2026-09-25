@@ -518,8 +518,27 @@ export function DrillRunner({
 
   if (phase === 'configuring') {
     return (
-      <div className="flex flex-col gap-4">
-        {error ? <p className="text-sm text-ink">{error}</p> : null}
+      <div className="flex flex-col gap-12">
+        <header className="flex flex-col gap-5">
+          <span className="label-caps text-ink-muted">Drill · set up the session</span>
+          <h1 className="font-display text-6xl tracking-[-0.02em]">
+            {mode === 'focused' ? (
+              <>
+                Focused <i>drill</i>
+              </>
+            ) : (
+              <>
+                Quick <i>drill</i>
+              </>
+            )}
+          </h1>
+          <p className="max-w-[40rem] text-lg text-ink-muted">
+            {mode === 'focused'
+              ? 'Pick the spots to work on. Deliberate practice, one family of charts at a time.'
+              : 'Mixed spots from everything unlocked. Choose a length and go.'}
+          </p>
+        </header>
+        {error ? <p className="font-mono text-sm text-ink">{error}</p> : null}
         <SessionConfigForm
           templates={templates.map((entry) => entry.template)}
           allowFilters={mode === 'focused'}
@@ -574,15 +593,17 @@ export function DrillRunner({
   const planned = config?.length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <ShortcutsOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
 
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-medium">
+      {/* The session's instrument bar: where you are, how much is left, what
+          it has cost so far. */}
+      <header className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-b border-line pb-5">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <h1 className="label-caps text-ink">
             {studyMode ? 'Study' : 'Drill'}
           </h1>
-          <span className="font-mono text-xs text-ink-muted" data-testid="progress">
+          <span className="font-mono text-sm text-ink" data-testid="progress">
             {planned == null
               ? `Spot ${results.length + (reveal ? 0 : 1)}`
               : `Spot ${index + 1} of ${planned}`}
@@ -598,7 +619,7 @@ export function DrillRunner({
             the one number on screen that contradicts the grading model.
           */}
           {results.length > 0 ? (
-            <span className="font-mono text-xs text-ink-muted" data-testid="running-ev">
+            <span className="font-mono text-sm text-ink-muted" data-testid="running-ev">
               {(results.reduce((sum, r) => sum + r.evLoss, 0) / results.length).toFixed(2)}bb lost
               / spot
             </span>
@@ -619,14 +640,12 @@ export function DrillRunner({
       </header>
 
       {error ? (
-        <p className="rounded-[var(--radius)] border border-line bg-surface px-3 py-2 text-sm text-ink">
-          {error}
-        </p>
+        <p className="border border-ink bg-surface px-4 py-3 font-mono text-sm text-ink">{error}</p>
       ) : null}
 
       {/* Side by side, per docs/05's first desktop advantage: the spot stays on
           screen while the feedback appears beside it. Never a modal. */}
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_520px]">
+      <div className="grid grid-cols-1 items-start gap-12 xl:grid-cols-[minmax(0,1fr)_36rem]">
         <SpotView spot={current.spot} deal>
           <DecisionControls
             state={current.spot.state}
@@ -634,11 +653,20 @@ export function DrillRunner({
             choices={choices}
             onAnswer={(choice) => void answer(choice)}
             disabled={reveal !== null}
+            chosen={reveal?.answer}
           />
 
           {reveal !== null ? (
-            <Button type="button" onClick={advance}>
-              Next spot (Space)
+            // The screen's yellow key once the spot is answered. Space does
+            // the same, and the key says so.
+            <Button type="button" onClick={advance} className="h-13 justify-between self-start px-5">
+              <span>Next spot</span>
+              <kbd
+                aria-hidden="true"
+                className="border border-accent-ink/40 px-1.5 py-0.5 font-mono text-2xs font-normal leading-none"
+              >
+                Space
+              </kbd>
             </Button>
           ) : null}
         </SpotView>
@@ -655,8 +683,12 @@ export function DrillRunner({
             verbose={studyMode}
           />
         ) : (
-          <div className="flex items-center justify-center rounded-[var(--radius)] border border-dashed border-line p-8 text-center text-sm text-ink-muted">
-            The chart appears once you answer. Switch to Study mode to see it first.
+          // Hatched, because hatching is the app's mark for *unknown* — the
+          // chart exists, you just cannot see it yet.
+          <div className="hatch flex min-h-96 items-center justify-center border border-line p-8">
+            <p className="max-w-64 bg-canvas px-4 py-3 text-center text-sm text-ink-muted">
+              The chart appears once you answer. Switch to Study mode to see it first.
+            </p>
           </div>
         )}
       </div>

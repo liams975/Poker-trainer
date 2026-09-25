@@ -35,21 +35,18 @@ export default async function SessionPage({
   const { session, attempts, digest } = detail;
 
   return (
-    <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <Link
-          href="/review"
-          className="text-xs text-ink-muted underline underline-offset-4 hover:text-ink"
-        >
+    <div className="flex flex-col gap-14">
+      <header className="flex flex-col gap-5">
+        <Link href="/review" className="label-caps text-ink-muted hover:text-ink">
           ← All sessions
         </Link>
-        <h1 className="text-lg font-medium">
-          {session.mode.replace(/_/g, ' ')} session
+        <h1 className="font-display text-6xl capitalize tracking-[-0.02em]">
+          {session.mode.replace(/_/g, ' ')} <i className="lowercase">session</i>
         </h1>
         {/* Deliberately no single accuracy percentage — docs/03: "Score by EV
             loss, not accuracy percentage." The same rule the live summary
             follows, so a session cannot read one way there and another here. */}
-        <p className="text-sm text-ink-muted">
+        <p className="text-lg text-ink-muted">
           {digest.spots} {digest.spots === 1 ? 'spot' : 'spots'} ·{' '}
           <span className="font-mono">{digest.totalEvLoss}bb</span> total EV lost ·{' '}
           <span className="font-mono">{digest.avgEvLoss}bb</span> per spot
@@ -58,7 +55,7 @@ export default async function SessionPage({
       </header>
 
       <section aria-labelledby="tiers-heading" className="flex flex-col gap-2">
-        <h2 id="tiers-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+        <h2 id="tiers-heading" className="label-caps text-ink-muted">
           How the answers landed
         </h2>
         <ul className="flex flex-wrap gap-4" data-testid="session-tiers">
@@ -76,14 +73,14 @@ export default async function SessionPage({
 
       {digest.byTag.length > 0 ? (
         <section aria-labelledby="tags-heading" className="flex flex-col gap-2">
-          <h2 id="tags-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+          <h2 id="tags-heading" className="label-caps text-ink-muted">
             By skill — weakest first
           </h2>
           <ul className="flex flex-col gap-1.5" data-testid="session-by-tag">
             {digest.byTag.map((tag) => (
               <li key={tag.skillTag} className="flex items-center gap-3 text-sm">
                 <span className="w-48 shrink-0">{skillLabel(tag.skillTag, registry)}</span>
-                <span className="h-2 w-40 overflow-hidden rounded-full bg-surface-raised">
+                <span className="h-2 w-40 overflow-hidden bg-line-soft">
                   <span
                     className="block h-full bg-ink-muted"
                     style={{ width: `${tag.accuracy * 100}%` }}
@@ -99,7 +96,7 @@ export default async function SessionPage({
       ) : null}
 
       <section aria-labelledby="answers-heading" className="flex flex-col gap-3">
-        <h2 id="answers-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+        <h2 id="answers-heading" className="label-caps text-ink-muted">
           Every answer, in order
         </h2>
         <MistakeLog

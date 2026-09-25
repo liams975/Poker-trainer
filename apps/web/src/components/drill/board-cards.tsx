@@ -32,7 +32,7 @@ export function BoardCards({
 
   return (
     <div
-      className="flex items-center gap-1"
+      className="flex items-center gap-1.5"
       role="img"
       aria-label={`Board: ${visible.map(describeCard).join(', ')}`}
       data-testid="board"
@@ -41,13 +41,12 @@ export function BoardCards({
         <CardFace
           key={card}
           card={card}
-          size="xs"
+          size="board"
           index={index}
           dealKey={dealKey}
           // Board cards arrive from the middle of the table outward rather than
           // falling in from above: they are already at the dealer's position.
           dealFrom={0}
-          className="@md:h-9 @md:w-[1.625rem]"
         />
       ))}
     </div>

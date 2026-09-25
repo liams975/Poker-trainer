@@ -403,7 +403,7 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
   }, [sessionId]);
 
   if (hand === null) {
-    return <p className="text-sm text-ink-muted">Dealing…</p>;
+    return <p className="font-mono text-sm text-ink-muted">Dealing…</p>;
   }
 
   const state = hand.open.progress.state;
@@ -413,25 +413,41 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
     phase === 'hero' ? buildChoices(legalActions(state), potBetSizes(state)) : [];
 
   return (
-    // Frame 2e: the table, and a 300px rail of what has happened so far.
-    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-      <div className="flex flex-1 flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5">
-        <header className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-sm font-medium">
-            You are {hand.heroPosition} · {heroSeat.stack}bb
+    // The table, and a rail beside it: the keys while it is your turn, the
+    // hand's report when it is over, and the sitting so far.
+    <div className="grid grid-cols-1 items-start gap-12 xl:grid-cols-[minmax(0,1fr)_28rem]">
+      <div className="flex flex-1 flex-col gap-5">
+        <header className="flex flex-wrap items-end justify-between gap-6">
+          <h2 className="flex items-baseline gap-4">
+            <span className="font-display text-4xl">
+              You are <i>{hand.heroPosition}</i>
+            </span>
+            <span className="label-caps text-ink-muted">{heroSeat.stack}bb</span>
           </h2>
-          <span className="flex items-baseline gap-3 font-mono text-xs text-ink-muted">
+          <span className="flex items-end gap-10">
             {/*
               The sitting's result, which the stack used to carry.
               Every seat now starts each hand at 100bb — that is what keeps the
               spot the one the charts describe, and it is why the stack above no
               longer says anything about how you are running. This does.
             */}
-            <span data-testid="session-net">
-              Session {heroNet >= 0 ? '+' : '−'}
-              {Math.abs(heroNet).toFixed(1)}bb
+            <span
+              data-testid="session-net"
+              className="flex flex-col gap-1.5 border-t-2 border-ink pt-2"
+            >
+              <span className="label-caps text-ink-muted">Session</span>{' '}
+              {/* No whitespace between the figure and its unit, so the text
+                  still reads "+0.0bb". */}
+              <span className="font-display text-3xl leading-none">
+                {heroNet >= 0 ? '+' : '−'}
+                {Math.abs(heroNet).toFixed(1)}
+                <i className="text-lg text-ink-muted">bb</i>
+              </span>
             </span>
-            <span data-testid="hand-count">Hand {handNo + 1}</span>
+            <span data-testid="hand-count" className="flex flex-col gap-1.5 border-t-2 border-ink pt-2">
+              <span className="label-caps text-ink-muted">Hand</span>{' '}
+              <span className="font-display text-3xl leading-none">{handNo + 1}</span>
+            </span>
           </span>
         </header>
 
@@ -449,11 +465,14 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
           faceDownOpponents
           {...(result === null ? {} : { result })}
         />
+        <p className="text-sm italic text-ink-muted">
+          Every seat squares back to 100bb between hands. Your net carries the sitting.
+        </p>
       </div>
 
-      <aside className="flex w-full flex-col gap-4 2xl:w-[26rem]">
+      <aside className="flex w-full flex-col gap-10 xl:pt-20">
         {phase === 'hero' ? (
-          <div className="rounded-[var(--radius)] border border-line bg-surface p-5">
+          <div>
             <DecisionControls
               state={state}
               hero={hand.heroPosition}
@@ -464,7 +483,7 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
         ) : null}
 
         {phase === 'complete' && result !== null ? (
-          <div className="flex flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5">
+          <div className="flex flex-col gap-6">
             <HandSummary
               result={result}
               hero={hand.heroPosition}
@@ -472,11 +491,12 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
               recordingError={recordingError}
             />
 
-            <div className="flex gap-2">
-              <Button type="button" onClick={nextHand} data-testid="next-hand">
-                Next hand
+            <div className="flex flex-wrap gap-3">
+              {/* The yellow key once a hand is over. */}
+              <Button type="button" className="h-13 px-6" onClick={nextHand} data-testid="next-hand">
+                Next hand →
               </Button>
-              <Button asChild variant="outline">
+              <Button asChild variant="outline" className="h-13 px-6">
                 <Link href="/dashboard" onClick={leave}>
                   Leave table
                 </Link>
@@ -486,7 +506,7 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
         ) : null}
 
         {phase === 'running' ? (
-          <p className="text-xs text-ink-muted" data-testid="waiting">
+          <p className="font-mono text-sm text-ink-muted" data-testid="waiting">
             Waiting on the other seats…
           </p>
         ) : null}
@@ -502,25 +522,25 @@ export function BotTableRunner({ chartSet }: { chartSet: ChartSet }) {
         {played.length > 0 ? (
           <section
             aria-labelledby="played-heading"
-            className="flex flex-col gap-2 rounded-[var(--radius)] border border-line bg-surface p-4"
+            className="flex flex-col gap-3"
             data-testid="previous-hands"
           >
-            <h3
-              id="played-heading"
-              className="text-xs font-medium uppercase tracking-[0.12em] text-ink-muted"
-            >
-              Previous hands
-            </h3>
+            <div className="flex items-baseline justify-between border-b border-line pb-3">
+              <h3 id="played-heading" className="label-caps text-ink">
+                Previous hands
+              </h3>
+              <span className="label-caps text-ink-muted">chips, not a score</span>
+            </div>
 
             <ul className="flex flex-col">
               {played.slice(0, 8).map((row) => (
                 <li
                   key={row.no}
-                  className="flex items-baseline justify-between gap-3 border-b border-line py-1.5 text-sm last:border-b-0"
+                  className="grid grid-cols-[3.5rem_1fr_auto] items-baseline border-b border-line-soft py-2 font-mono text-sm last:border-b-0"
                 >
-                  <span className="font-mono text-xs text-ink-muted">#{row.no}</span>
-                  <span className="font-mono">{row.hand}</span>
-                  <span className="font-mono text-xs text-ink-muted">
+                  <span className="text-ink-muted">№ {row.no}</span>
+                  <span className="text-ink">{row.hand}</span>
+                  <span className="text-ink">
                     {row.net >= 0 ? '+' : '−'}
                     {Math.abs(row.net).toFixed(1)}bb
                   </span>

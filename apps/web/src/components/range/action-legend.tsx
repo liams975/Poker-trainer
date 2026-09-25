@@ -21,13 +21,13 @@ export function ActionLegend({ actions }: { actions: readonly Action[] }) {
       {present.map((action) => {
         const style = actionStyle(action);
         return (
-          <li key={action} className="flex items-center gap-1.5 text-xs text-ink-muted">
+          <li key={action} className="flex items-center gap-2 text-sm text-ink">
             <span
               aria-hidden="true"
-              className="inline-block size-3 rounded-[2px]"
+              className="inline-block size-3"
               style={{ backgroundColor: style.hex }}
             />
-            <span aria-hidden="true" className="font-mono">
+            <span aria-hidden="true" className="w-3 font-mono text-ink-muted">
               {style.glyph}
             </span>
             <span>{style.label}</span>

@@ -30,22 +30,23 @@ true.
 This is why the app looks unlike a generic dashboard: everywhere else teams
 spend color on branding, here it is spent on meaning.
 
-Ground, as of Phase 14 (v1's cool near-black in brackets):
+Ground, as of Phase 17 (Phase 14's navy in brackets):
 
 ```
-Canvas          #161826   (was #0B0F14)
-Surface         #1D2030   (was #141A21)
-Surface raised  #232532   (was #1C242D)
-Border          #3F424D   (was #2A3540)
-Text primary    #E9E9ED   (was #E6EDF3)
-Text secondary  #909199   (was #8B9AA8)
+Canvas          #12110F   (was #161826)   warm instrument-black
+Surface         #1A1815   (was #1D2030)
+Surface raised  #23201C   (was #232532)
+Border          #3A3630   (was #3F424D)
+Line, soft      #2A2723   (new)           rules, tracks, hatching — never text
+Text primary    #EEEAE1   (was #E9E9ED)   13.51 : 1 worst
+Text secondary  #A39E94   (was #999AA1)    6.08 : 1 worst
+Paper           #E8E1D1   (new)           playing-card faces only
 ```
 
-`Text secondary` is **not** the deck's literal `rgba(233,233,237,.55)`. That
-composites to `#8A8B93` and measures 4.48:1 against `Surface raised` — under AA
-by 0.02, on the token carrying 170 of the app's body-text usages. It is lifted
-to the 58% step. `apps/web/tests/contrast.test.ts` holds every ratio on this
-page, so none of them can drift back.
+Phase 14 had to flatten four greys to one because only one cleared AA on the
+navy by 0.02. This ground is darker, so the one secondary step has margin.
+`apps/web/tests/contrast.test.ts` holds every ratio on this page, so none of
+them can drift back.
 
 Action colors are the **Okabe–Ito** palette, which is designed to be
 distinguishable under all common forms of color vision deficiency. Given a
@@ -61,13 +62,15 @@ Fold            #55606B   desaturated gray — folding is the absence of action
 ```
 
 ```
-Accent (game)   #9184D9   blurple — streak, XP, rank, mastery.
-                          Never appears in a range grid.  (was #E8B04B amber)
-Accent high     #D2CEFD   the emphasis step, for figures that come forward.
+Accent (game)   #F0E442   Okabe–Ito yellow — streak, XP, rank, mastery, spot
+                          pips, focus, and the one yellow key per screen.
+                          Never a range grid, never the table.
+                          (was #9184D9 blurple, #E8B04B amber before that)
+Accent ink      #12110F   text on the accent: 14.3 : 1
 ```
 
-The action hues above are **unchanged by Phase 14**, deliberately. The ground
-moved and they did not, because the hue is what survives colour-vision
+The action hues above are **unchanged by Phases 14 and 17**, deliberately. The
+ground moved and they did not, because the hue is what survives colour-vision
 deficiency — a hex changed to win a contrast ratio against a new background
 would trade the real property for the measurable one.
 
@@ -77,15 +80,19 @@ axis: optimal reads as confident, blunder as alarming, without implying that
 
 ### Type
 
-- **Display:** Instrument Sans (or General Sans) — a tight grotesque with
-  some character, used with restraint for headings and mode cards.
-- **Body:** Inter, with `font-feature-settings: 'tnum'` enabled globally.
-- **Data:** JetBrains Mono for all frequencies, percentages, EV figures, and
-  the range grid.
+As of Phase 17 (see "What Phase 17 decided"):
+
+- **Display:** Old Standard TT, 400 and italic — the Modern face of
+  19th-century scientific books. Statements and big figures, 24px and up.
+- **Body:** Schibsted Grotesk — interface and prose.
+- **Data:** Fragment Mono — every frequency, percentage, EV figure, hand,
+  label and log line, and the range grid.
 
 **Tabular numerals are non-negotiable.** Frequency columns must align
 vertically or the grid becomes unreadable. This is a functional typographic
-constraint, not a stylistic one.
+constraint, not a stylistic one. Since Phase 17 it is met by the face — every
+figure is in a monospace — rather than by a `tnum` flag on body, which spaced
+out the sans's punctuation.
 
 ### Grid
 
@@ -965,3 +972,130 @@ who never opts in is absent from the board and unreadable through it.
 `supabase/tests/database/05_handles_and_board.sql` proves the negative cases,
 and was checked by mutation — removing the opt-in join makes three named
 assertions fail.
+
+## What Phase 17 decided
+
+The problem book. The app is now styled as a mathematical text for a card game
+— a warm instrument-black page, statements in a 19th-century scientific serif,
+every figure in mono, § numbers and numbered figures, notes in the margin — and
+its one accent is the yellow key of a Braun ET66. Designed first as a canvas of
+six artboards built from the real chart JSON
+(`https://claude.ai/artifact/NF3jMR9CEzoNq8DeFM3d1S`), then built into every
+route.
+
+The thesis at the top of this document stands: a lab, not a casino. What moved
+is the vernacular — from trading terminal to scientific text, which is what a
+student of a solved-ish game actually reads.
+
+### The ground moved again, and every action hue gained
+
+CLAUDE.md: "If a ratio is wrong, move the ground." Worst case across the three
+surfaces, against Phase 14's navy:
+
+| | Phase 14 | Phase 17 | 3:1 |
+|---|---|---|---|
+| Raise `#D55E00` | 3.93 | 4.19 | pass |
+| Call `#0072B2` | **2.93** | **3.13** | pass, for the first time |
+| Check `#009E73` | 4.44 | 4.74 | pass |
+| All-in `#CC79A7` | 4.96 | 5.30 | pass |
+| Fold `#55606B` | 2.37 | 2.53 | fail — grey is the absence of action |
+
+No Okabe–Ito hex changed.
+
+### The accent is the one Okabe–Ito hue no action uses
+
+Yellow `#F0E442` is in the same set the five action hues come from, so it is
+distinct from all of them by the construction that makes them distinct from
+each other. Measured with the same dichromat matrices `action-colors.test.ts`
+already used, its nearest action under any colour vision deficiency is **66**
+apart. Phase 14's blurple was **28** from call — a lighter blue beside a blue —
+under both protanopia and deuteranopia.
+
+The test now holds that at 40. With the blurple put back it fails at 28.5, so
+the assertion is not vacuous.
+
+`accent-hi` is gone: yellow measures 12.26:1 and needs no brighter emphasis
+step. Text on the accent is `accent-ink`, measured at 14.3:1.
+
+**One yellow key per screen**, after the ET66's equals key: the control you
+press next. The default Button variant is that key; everything else is outline
+or ghost. Disabled, the key goes unlit rather than half-transparent — yellow at
+50% over this ground is an olive nobody chose.
+
+### The typography of Phases 14–16 never rendered
+
+next/font put its variable classes on `<body>`. Tailwind emits the theme at
+`:root`, where `--font-display: var(--font-instrument-serif), …` is resolved —
+and a custom property resolves where it is declared, not where it is used. At
+`:root` the next/font variable did not exist yet, so every theme font stack
+computed to nothing and fell through to the system face. Instrument Serif and
+Instrument Sans shipped with every page for three phases and were drawn on none
+of them — the user's own screenshots of that period show the system sans. Every suite was green, because nothing asked which face was on
+the screen.
+
+The variables now sit on `<html>`. `e2e/smoke.spec.ts` reads the rendered
+family back for display, body and mono, and checks the files actually loaded.
+
+### Tabular numerals came off body
+
+Schibsted Grotesk's `tnum` set includes tabular punctuation: with it on, a
+comma measures 2.4× its natural width, and every comma and full stop in the
+prose had a gap in front of it. The requirement was never "a flag on body", it
+was "frequency columns align", and every figure is now set in Fragment Mono,
+which aligns by construction. The smoke test measures that — `1111.11` and
+`8888.88` take the same width — rather than reading a CSS property.
+
+### Only objects are round; hatching means unknown
+
+Interface is square (`--radius: 0`). Cards (4px), chips and the dealer button
+are round, because they are things on a table. Cards are the one light
+surface — paper, with a serif rank — and stay monochrome: hearts and diamonds
+are drawn in outline (♡ ♢), so suits keep their two tones without a hue.
+
+Hatching is the app's single mark for *unknown*: a face-down card, a day with
+no practice on the record, the chart you cannot see until you answer. It never
+stands in for a zero.
+
+### The frequency cell names its mix
+
+The hand moved to the cell's corner, and a figure appears in the opposite
+corner **only when the hand mixes** — the share of the right-hand segment,
+which the fixed passive→aggressive order makes readable the same way in every
+cell. The figures that appear on a chart are exactly the hands the app exists
+to teach. The accessible name is unchanged.
+
+### Numbers in the margin are derived, never authored
+
+A lesson's range figure carries a margin note — its key, "43.4% of hands
+played, 576 of 1,326 combinations", how many hands mix — computed from the
+chart with `toWeights` and `comboCount`. Figures and exercises are numbered
+from the track's own order ("Fig. 2.2a", "Exercise 2.2"), so the numbering
+cannot disagree with the contents list. No content or schema changed.
+
+### What was found rather than built
+
+- **Two guards that could not fail.** `range-explorer.spec.ts` searched grids
+  for v1's amber; the accent had been blurple since Phase 14. It now resolves
+  `--color-accent` in the page, and was mutation-checked by putting the accent
+  on the selected cell's ring (it reported `BUTTON boxShadow`). And the
+  landing's "genuinely mixed hand" test passed on the text "AJo", which every
+  grid prints in its own cell; it now counts the opening hand's mix.
+- **Copy that was false.** The landing said AJo opens 64% on the button — the
+  chart has it as a pure raise; the opening hand is now A5o, which the chart
+  plays 50/50. The quick drill was described as 20 spots; it offers 10, 25 or
+  50. The Desk printed a Space shortcut on Resume that the page never bound.
+- **Action hues on chrome.** The per-skill "where the chips went" bar was
+  raise-vermilion; the shadcn `destructive` variant, invalid inputs and the
+  Google sign-in error borrowed it too. All ink now. A mix, conversely, now
+  wears the action hues everywhere it appears — the hand summary and the
+  stored-mix replay had drawn it in grey.
+
+### Still open
+
+- **Fold is still under 3:1** (2.53). Inherited from v1 and recorded, as ever.
+- **The table's hand history is preflop-only.** `ActionHistory` filters to
+  preflop, which is right for a drill spot and why `/play` does not show it.
+- **Session Review's answer rows print the raw sequence key** (`vs_hj_open`)
+  rather than a chart label. Pre-existing.
+- **Chart labels scale with the SVG.** The record's axis text is set in
+  viewBox units, so it grows with the page width.

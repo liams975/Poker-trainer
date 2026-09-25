@@ -37,19 +37,87 @@ test('the tab carries a real icon', async ({ page }) => {
 test('the design tokens reach the page', async ({ page }) => {
   await page.goto('/sign-in');
 
-  const applied = await page.evaluate(() => {
-    const style = getComputedStyle(document.body);
+  const applied = await page.evaluate(async () => {
+    await document.fonts.ready;
+
+    /**
+     * docs/05: tabular numerals are "non-negotiable", because frequency
+     * columns must align or the grid is unreadable. Measured rather than read
+     * off a property: Phase 17 gets alignment from a monospaced face, not from
+     * a `tnum` flag on body (which spaced out the sans's punctuation), so the
+     * claim worth testing is that a narrow figure and a wide one take the
+     * same room where figures are set.
+     */
+    const width = (text: string) => {
+      const probe = document.createElement('span');
+      probe.className = 'font-mono';
+      probe.style.cssText = 'position:absolute;font-size:40px;white-space:pre';
+      probe.textContent = text;
+      document.body.appendChild(probe);
+      const measured = probe.getBoundingClientRect().width;
+      probe.remove();
+      return measured;
+    };
+
     return {
-      background: style.backgroundColor,
-      // docs/05: tabular numerals are "non-negotiable" and set globally,
-      // because frequency columns must align or the grid is unreadable.
-      numeric: style.fontVariantNumeric,
+      background: getComputedStyle(document.body).backgroundColor,
+      ones: width('1111.11'),
+      eights: width('8888.88'),
     };
   });
 
-  // #161826 — the canvas. If Tailwind failed to build, this is white.
-  expect(applied.background).toBe('rgb(22, 24, 38)');
-  expect(applied.numeric).toContain('tabular-nums');
+  // #12110f — the canvas. If Tailwind failed to build, this is white.
+  expect(applied.background).toBe('rgb(18, 17, 15)');
+  expect(applied.ones, 'figures do not align in the data face').toBeCloseTo(applied.eights, 1);
+});
+
+test('the three faces are the ones actually drawn', async ({ page }) => {
+  /**
+   * Phases 14 to 16 loaded Instrument Serif and Instrument Sans and never drew
+   * either. next/font put its variables on <body>; Tailwind resolves
+   * `--font-display: var(--font-…)` at `:root`, where that variable did not yet
+   * exist, so the theme's font stacks computed to nothing and every heading
+   * fell through to the system face. Every test was green, because nothing
+   * asked which face was on the screen.
+   *
+   * So this asks, three times, and waits for the files: a family name in the
+   * computed stack is not proof the face loaded, and a loaded face nobody's
+   * stack names is not proof it is drawn.
+   */
+  await page.goto('/');
+
+  const faces = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const family = (selector: string) =>
+      getComputedStyle(document.querySelector(selector)!)
+        .fontFamily.split(',')[0]!
+        .replace(/"/g, '');
+    const loaded = new Set(
+      [...document.fonts]
+        .filter((face) => face.status === 'loaded')
+        .map((face) => face.family.replace(/"/g, '')),
+    );
+    return {
+      display: family('h1'),
+      body: family('body'),
+      mono: (() => {
+        const probe = document.createElement('span');
+        probe.className = 'font-mono';
+        document.body.appendChild(probe);
+        const value = getComputedStyle(probe).fontFamily.split(',')[0]!.replace(/"/g, '');
+        probe.remove();
+        return value;
+      })(),
+      loaded: [...loaded],
+    };
+  });
+
+  expect(faces.display).toBe('Old Standard TT');
+  expect(faces.body).toBe('Schibsted Grotesk');
+  expect(faces.mono).toBe('Fragment Mono');
+  for (const face of ['Old Standard TT', 'Schibsted Grotesk']) {
+    expect(faces.loaded, `${face} is named but its file never loaded`).toContain(face);
+  }
 });
 
 test('no design token shadows a built-in Tailwind size utility', async ({ page }) => {

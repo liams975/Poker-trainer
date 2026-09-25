@@ -29,7 +29,7 @@ export function ShortcutsOverlay({ open, onClose }: { open: boolean; onClose: ()
       aria-modal="true"
       aria-label="Keyboard shortcuts"
     >
-      <div className="flex w-full max-w-md flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-6">
+      <div className="flex w-full max-w-md flex-col gap-4 border border-line bg-surface p-6">
         <h2 className="text-base font-medium">Keyboard shortcuts</h2>
 
         <dl className="flex flex-col gap-2">
@@ -39,7 +39,7 @@ export function ShortcutsOverlay({ open, onClose }: { open: boolean; onClose: ()
                 {shortcut.keys.map((key) => (
                   <kbd
                     key={key}
-                    className="rounded border border-line bg-surface-raised px-1.5 py-0.5 font-mono text-xs text-ink"
+                    className="border border-line bg-surface-raised px-1.5 py-0.5 font-mono text-xs text-ink"
                   >
                     {key}
                   </kbd>
@@ -54,7 +54,7 @@ export function ShortcutsOverlay({ open, onClose }: { open: boolean; onClose: ()
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="self-start rounded-[var(--radius)] border border-line px-3 py-1.5 text-sm text-ink hover:bg-surface-raised"
+          className="self-start border border-line px-3 py-1.5 text-sm text-ink hover:bg-surface-raised"
         >
           Close
         </button>

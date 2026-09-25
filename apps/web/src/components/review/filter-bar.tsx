@@ -45,10 +45,10 @@ function Chip({
     <Link
       href={href}
       aria-current={active ? 'true' : undefined}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
+      className={`inline-flex h-9 items-center gap-2 border px-3.5 text-sm transition-colors ${
         active
-          ? 'border-ink bg-surface-raised text-ink'
-          : 'border-line text-ink-muted hover:text-ink'
+          ? 'border-ink bg-ink text-canvas'
+          : 'border-line bg-surface-raised text-ink hover:border-ink'
       }`}
     >
       {swatch ? (
@@ -80,7 +80,7 @@ export function FilterBar() {
   return (
     <div className="flex flex-col gap-3" data-testid="filter-bar">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs uppercase tracking-wider text-ink-muted">Mode</span>
+        <span className="label-caps text-ink-muted">Mode</span>
         {REVIEW_MODES.map((mode) => (
           <Chip key={mode} href={toggle('mode', mode)} active={params.get('mode') === mode}>
             {MODE_LABELS[mode] ?? mode}
@@ -89,7 +89,7 @@ export function FilterBar() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs uppercase tracking-wider text-ink-muted">Grade</span>
+        <span className="label-caps text-ink-muted">Grade</span>
         {GRADE_TIERS.map((tier) => (
           <Chip
             key={tier}
@@ -106,7 +106,7 @@ export function FilterBar() {
         <div>
           <Link
             href={pathname}
-            className="text-xs text-ink-muted underline underline-offset-4 hover:text-ink"
+            className="text-sm text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
           >
             Clear filters
           </Link>

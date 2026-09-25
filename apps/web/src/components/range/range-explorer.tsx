@@ -97,19 +97,23 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
   }, [primary]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-lg font-medium">Range Explorer</h1>
-          <p className="text-sm text-ink-muted">
-            Every cell shows the full mix, not one action. Chart set {chartSet.version}.
+    <div className="flex flex-col gap-10">
+      <header className="flex flex-wrap items-end justify-between gap-6">
+        <div className="flex flex-col gap-5">
+          <span className="label-caps text-ink-muted">
+            Chart set {chartSet.version} · no grading
+          </span>
+          <h1 className="font-display text-6xl tracking-[-0.02em]">
+            Range <i>Explorer</i>
+          </h1>
+          <p className="max-w-[40rem] text-lg text-ink-muted">
+            Every cell shows the full mix, not one action. Pick a hand to deal it into the seat.
           </p>
         </div>
 
         <Button
           type="button"
           variant={comparing ? 'secondary' : 'outline'}
-          size="sm"
           aria-pressed={comparing}
           onClick={() => setComparing((on) => !on)}
         >
@@ -117,7 +121,7 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
         </Button>
       </header>
 
-      <div className="flex flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-4">
+      <div className="flex flex-col gap-6 border-y border-line py-6">
         <ChartSelector
           charts={charts}
           selectedId={primaryId}
@@ -148,7 +152,7 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
         </p>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_20rem]">
+      <div className="grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div
           className={
             comparing ? 'grid grid-cols-1 gap-6 2xl:grid-cols-2' : 'max-w-[46rem]'
@@ -190,6 +194,7 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
           ) : null}
         </div>
 
+        <div className="xl:sticky xl:top-8 xl:self-start">
         <HandDetail
           hand={selectedHand}
           frequencies={frequencies}
@@ -201,6 +206,7 @@ export function RangeExplorer({ chartSet }: { chartSet: ChartSet }) {
           }
           comparisonLabel={comparing ? chartLabel(comparison) : undefined}
         />
+        </div>
       </div>
     </div>
   );

@@ -65,7 +65,7 @@ export function HandleOptIn({
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-[var(--radius)] border border-line p-4"
+      className="flex flex-col gap-3 border border-line p-4"
       onSubmit={(event) => {
         event.preventDefault();
         void save({ handle });

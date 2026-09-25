@@ -34,26 +34,32 @@ export function TagCosts({
   const worst = costs[0]!.totalEvLoss;
 
   return (
-    <section aria-labelledby="tag-costs-heading" className="flex flex-col gap-3">
-      <h2 id="tag-costs-heading" className="text-lg">
+    <section aria-labelledby="tag-costs-heading" className="flex max-w-[48rem] flex-col gap-4">
+      <h3 id="tag-costs-heading" className="label-caps border-b border-line pb-3 text-ink">
         Where the chips went
-      </h2>
+      </h3>
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-3">
         {costs.map((cost) => (
           <li key={cost.skillTag} className="flex flex-col gap-1">
-            <div className="flex items-baseline justify-between gap-3 text-sm">
+            <div className="flex items-baseline justify-between gap-3 text-base">
               <span className="truncate">{skillLabel(cost.skillTag, registry)}</span>
-              <span className="shrink-0 font-mono text-xs text-ink-muted">
+              <span className="shrink-0 font-mono text-sm text-ink-muted">
                 −{cost.totalEvLoss.toFixed(2)}bb
                 <span className="ml-2">{cost.attempts} spots</span>
               </span>
             </div>
             {/* Flat, and proportional to the worst skill rather than to a fixed
-                scale — the comparison between skills is the information. */}
-            <div className="h-1 w-full overflow-hidden rounded-full bg-line">
+                scale — the comparison between skills is the information.
+
+                Ink, not the raise hue it used to be. Chips lost on a skill are
+                not an action, and vermilion means "raise" everywhere else on
+                this screen — the grid, the stored mix, the filters. An action
+                colour on a non-action measure is the one crossing docs/05's
+                rule forbids. */}
+            <div className="h-1.5 w-full overflow-hidden bg-line-soft">
               <span
-                className="block h-full bg-action-raise"
+                className="block h-full bg-ink"
                 style={{ width: `${worst === 0 ? 0 : (cost.totalEvLoss / worst) * 100}%` }}
               />
             </div>

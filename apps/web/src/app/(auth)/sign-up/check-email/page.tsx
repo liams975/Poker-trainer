@@ -1,7 +1,6 @@
 import Link from 'next/link';
 
 import { TrackEvent } from '@/components/analytics/track-event';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata = { title: 'Confirm your email · Poker Trainer' };
 
@@ -24,24 +23,27 @@ export default async function CheckEmailPage({
           completed sign-up can be counted. */}
       <TrackEvent event="signed_up" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Confirm your email</CardTitle>
-          <CardDescription>
-            {email
-              ? `We sent a link to ${email}. Open it and you are in.`
-              : 'We sent you a link. Open it and you are in.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4 text-sm text-ink-muted">
-          <p>The link expires in an hour. If it does, sign in and we will send another.</p>
-          <p>
-            <Link href="/sign-in" className="text-ink underline underline-offset-4">
-              Back to sign in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col gap-6">
+        <h1 className="font-display text-5xl">
+          Confirm your <i>email</i>
+        </h1>
+        <p className="text-lg text-ink">
+          {email
+            ? `We sent a link to ${email}. Open it and you are in.`
+            : 'We sent you a link. Open it and you are in.'}
+        </p>
+        <p className="text-sm text-ink-muted">
+          The link expires in an hour. If it does, sign in and we will send another.
+        </p>
+        <p className="text-sm">
+          <Link
+            href="/sign-in"
+            className="text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
+          >
+            Back to sign in
+          </Link>
+        </p>
+      </div>
     </>
   );
 }

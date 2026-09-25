@@ -41,13 +41,16 @@ export function SpotView({
   const dealKey = `${hero}-${scenario.actionSequence}-${scenario.hole.join('')}`;
 
   return (
-    <div className="flex flex-col gap-4 rounded-[var(--radius)] border border-line bg-surface p-5">
+    <div className="flex flex-col gap-7">
       {/* The hand notation is NOT repeated here. It sits under hero's cards on
           the table, and a second copy in the corner of the header read as a
           timer — `54s` is a suited five-four, and looked exactly like fifty-four
           seconds next to a drill that has an optional clock. */}
-      <h2 className="text-sm font-medium">
-        You are {hero} · {scenario.stackDepth}bb
+      <h2 className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+        <span className="font-display text-4xl">
+          You are <i>{hero}</i>
+        </span>
+        <span className="label-caps text-ink-muted">{scenario.stackDepth}bb · 6-max</span>
       </h2>
 
       <PokerTable
@@ -68,9 +71,10 @@ export function SpotView({
         `seats` and the list read from `history`; two readings of one fact from
         two different sources is how a screen ends up disagreeing with itself.
       */}
-      <ActionHistory state={state} />
-
-      {children}
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <ActionHistory state={state} />
+        {children ? <div className="flex flex-col gap-5">{children}</div> : null}
+      </div>
     </div>
   );
 }

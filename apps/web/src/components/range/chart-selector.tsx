@@ -30,18 +30,20 @@ export function ChartSelector({ charts, selectedId, onSelect, label }: ChartSele
   }));
 
   return (
-    <div className="flex flex-col gap-3" role="group" aria-label={label}>
+    <div
+      className="grid grid-cols-1 gap-x-10 gap-y-4 md:grid-cols-[8rem_minmax(0,1fr)]"
+      role="group"
+      aria-label={label}
+    >
       {/* Visible, not just an aria-label: in compare mode two identical-looking
           selector blocks sit above each other, and which one drives which grid
           is not guessable from position alone. */}
-      <p className="text-xs font-medium text-ink">{label}</p>
+      <p className="label-caps pt-1 text-ink md:row-span-3">{label}</p>
       {families
         .filter((group) => group.charts.length > 0)
         .map((group) => (
-          <div key={group.family} className="flex flex-col gap-1.5">
-            <p className="text-xs uppercase tracking-wider text-ink-muted">
-              {FAMILY_TITLES[group.family]}
-            </p>
+          <div key={group.family} className="flex flex-col gap-2 md:col-start-2">
+            <p className="label-caps text-ink-muted">{FAMILY_TITLES[group.family]}</p>
             <div className="flex flex-wrap gap-1.5">
               {group.charts.map((chart) => {
                 const id = chartId(chart);
@@ -57,14 +59,14 @@ export function ChartSelector({ charts, selectedId, onSelect, label }: ChartSele
                     aria-pressed={active}
                     onClick={() => onSelect(id)}
                     className={cn(
-                      'rounded-[var(--radius)] border px-2.5 py-1 text-xs transition-colors',
+                      'h-9 border px-3.5 text-sm transition-colors',
                       // Monochrome. docs/05 keeps amber for the streak and XP
                       // rail; the selector sits directly above the grid and
                       // borrowing it here would leak the one colour the grid
                       // must never show.
                       active
-                        ? 'border-ink bg-surface-raised text-ink'
-                        : 'border-line bg-surface text-ink-muted hover:border-ink-muted hover:text-ink',
+                        ? 'border-ink bg-ink text-canvas'
+                        : 'border-line bg-surface-raised text-ink hover:border-ink',
                     )}
                   >
                     {chartLabel(chart)}

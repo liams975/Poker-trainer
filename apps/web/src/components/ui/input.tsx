@@ -7,12 +7,14 @@ function Input({ className, type, ...props }: ComponentProps<'input'>) {
     <input
       type={type}
       className={cn(
-        'flex h-9 w-full rounded-[var(--radius)] border border-line bg-surface px-3 py-1 text-sm text-ink shadow-sm transition-colors',
-        'placeholder:text-ink-muted',
+        'flex h-12 w-full border border-line bg-canvas px-4 text-base text-ink transition-colors',
+        'placeholder:text-ink-muted hover:border-ink-muted',
         // aria-invalid rather than a prop: the field is marked invalid for
         // assistive tech and styled from the same signal, so the two cannot
-        // disagree.
-        'aria-invalid:border-action-raise',
+        // disagree. Ink and dashed, not the raise hue — an action colour on a
+        // form field would be chrome borrowing strategy's meaning. The error
+        // text beside it is what actually says what is wrong.
+        'aria-invalid:border-dashed aria-invalid:border-ink',
         'disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}

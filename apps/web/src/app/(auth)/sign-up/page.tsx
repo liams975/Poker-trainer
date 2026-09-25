@@ -2,7 +2,6 @@ import Link from 'next/link';
 
 import { AuthForm } from '@/components/auth/auth-form';
 import { GoogleButton } from '@/components/auth/google-button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { signUp } from '@/lib/auth/actions';
 import { safeNext } from '@/lib/auth/redirect';
 
@@ -17,30 +16,36 @@ export default async function SignUpPage({
   const next = safeNext(params.next);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create an account</CardTitle>
-        <CardDescription>6-max cash fundamentals, drilled properly.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <AuthForm action={signUp} mode="sign-up" next={next} serverError={params.error} />
-
-        <div className="flex items-center gap-3">
-          <span className="h-px flex-1 bg-line" />
-          <span className="text-xs uppercase tracking-wider text-ink-muted">or</span>
-          <span className="h-px flex-1 bg-line" />
-        </div>
-
-        <GoogleButton next={next} />
-
-        <p className="text-sm text-ink-muted">
-          Already have an account?{' '}
-          <Link href="/sign-in" className="text-ink underline underline-offset-4">
-            Sign in
-          </Link>
-          .
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-3">
+        <h1 className="font-display text-5xl">
+          Create an <i>account</i>
+        </h1>
+        <p className="text-base text-ink-muted">
+          Begins with a 24-spot placement, so the course starts where you are.
         </p>
-      </CardContent>
-    </Card>
+      </div>
+
+      <AuthForm action={signUp} mode="sign-up" next={next} serverError={params.error} />
+
+      <div className="flex items-center gap-4">
+        <span className="h-px flex-1 bg-line" />
+        <span className="label-caps text-2xs text-ink-muted">or</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <GoogleButton next={next} />
+
+      <p className="text-sm text-ink-muted">
+        Already have an account?{' '}
+        <Link
+          href="/sign-in"
+          className="text-ink underline decoration-line underline-offset-4 hover:decoration-ink"
+        >
+          Sign in
+        </Link>
+        .
+      </p>
+    </div>
   );
 }

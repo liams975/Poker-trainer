@@ -19,10 +19,10 @@ export function LevelPips({ level }: { level: number }) {
         <span
           key={index}
           className={cn(
-            'h-1.5 w-5 rounded-full',
+            'h-2 w-3.5',
             // Flat fills. The deck is explicit that progress is data and gets
             // no gradient, no glow and no shimmer.
-            index < level ? 'bg-accent' : 'bg-line',
+            index < level ? 'bg-accent' : 'bg-line-soft',
           )}
         />
       ))}

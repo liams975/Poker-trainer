@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 
 import { actionLabel, actionStyle } from './action-colors';
+import { orderedMix } from './mix-format';
 import { RationaleChips } from './rationale-chips';
 
 /**
@@ -50,12 +51,12 @@ export function HandDetail({
   const combos = comboCountOf(hand);
 
   return (
-    <Card>
+    <Card className="border-t-2 border-t-ink">
       <CardHeader>
-        <CardTitle>
-          <span className="font-mono">{hand}</span>
+        <CardTitle className="font-mono text-5xl tracking-[-0.02em]">
+          <span>{hand}</span>
         </CardTitle>
-        <p className="text-sm text-ink-muted">
+        <p className="font-mono text-sm text-ink-muted">
           {combos} {combos === 1 ? 'combo' : 'combos'} · {((combos / 1326) * 100).toFixed(1)}% of
           all hands
         </p>
@@ -63,26 +64,34 @@ export function HandDetail({
 
       <CardContent className="flex flex-col gap-6">
         <section aria-labelledby="mix-heading" className="flex flex-col gap-2">
-          <h4 id="mix-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+          <h4 id="mix-heading" className="label-caps text-ink-muted">
             Strategy
           </h4>
+          {/* The cell, at the size of a figure: the same stacked bar in the same
+              order, then each segment named. */}
+          <span className="flex h-3 w-full" aria-hidden="true">
+            {orderedMix(frequencies).map((entry) => (
+              <span
+                key={`${entry.action}-${entry.size ?? ''}`}
+                style={{
+                  width: `${entry.freq * 100}%`,
+                  backgroundColor: actionStyle(entry.action).hex,
+                }}
+              />
+            ))}
+          </span>
           <ul className="flex flex-col gap-1.5">
             {frequencies.map((entry) => (
               <li
                 key={`${entry.action}-${entry.size ?? ''}`}
-                className="flex items-center justify-between gap-3 text-sm"
+                className="flex items-baseline gap-2.5 text-base"
               >
-                <span className="flex items-center gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="inline-block size-3 rounded-[2px]"
-                    style={{ backgroundColor: actionStyle(entry.action).hex }}
-                  />
-                  <span>{actionLabel(entry.action, entry.size)}</span>
+                <span aria-hidden="true" className="w-3 font-mono text-ink-muted">
+                  {actionStyle(entry.action).glyph}
                 </span>
-                <span className="font-mono text-ink-muted">
-                  {(entry.freq * 100).toFixed(1)}%
-                </span>
+                <span>{actionLabel(entry.action, entry.size)}</span>
+                <span className="leader" aria-hidden="true" />
+                <span className="font-mono text-ink">{(entry.freq * 100).toFixed(1)}%</span>
               </li>
             ))}
           </ul>
@@ -90,7 +99,7 @@ export function HandDetail({
 
         {diff && diff.distance > 0 ? (
           <section aria-labelledby="diff-heading" className="flex flex-col gap-2">
-            <h4 id="diff-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+            <h4 id="diff-heading" className="label-caps text-ink-muted">
               Change{comparisonLabel ? ` vs ${comparisonLabel}` : ''}
             </h4>
             <ul className="flex flex-col gap-1.5">
@@ -115,7 +124,7 @@ export function HandDetail({
 
         {rationale && rationale.factors.length > 0 ? (
           <section aria-labelledby="why-heading" className="flex flex-col gap-2">
-            <h4 id="why-heading" className="text-xs uppercase tracking-wider text-ink-muted">
+            <h4 id="why-heading" className="label-caps text-ink-muted">
               Why
             </h4>
             {/* Factor chips, not prose. Shared with the drill's feedback panel
